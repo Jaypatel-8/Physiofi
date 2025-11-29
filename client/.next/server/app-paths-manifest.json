@@ -1,0 +1,8 @@
+{
+  "/not-found": "app/not-found.js",
+  "/career/page": "app/career/page.js",
+  "/conditions/low-back-pain/page": "app/conditions/low-back-pain/page.js",
+  "/conditions/neck-pain/page": "app/conditions/neck-pain/page.js",
+  "/conditions/shoulder-pain/page": "app/conditions/shoulder-pain/page.js",
+  "/conditions/knee-pain/page": "app/conditions/knee-pain/page.js"
+}
