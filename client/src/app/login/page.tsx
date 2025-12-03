@@ -66,7 +66,6 @@ const LoginPage = () => {
           role: 'patient' as const
         }
         login(userData, response.data.data.token)
-        // Redirect immediately to dashboard
         router.push('/patient/dashboard')
         router.refresh()
       }
@@ -93,7 +92,6 @@ const LoginPage = () => {
           role: 'doctor' as const
         }
         login(userData, response.data.data.token)
-        // Redirect immediately to dashboard
         router.push('/doctor/dashboard')
         router.refresh()
       }
@@ -120,7 +118,6 @@ const LoginPage = () => {
           role: 'admin' as const
         }
         login(userData, response.data.data.token)
-        // Redirect immediately to dashboard
         router.push('/admin/dashboard')
         router.refresh()
       }
@@ -140,186 +137,155 @@ const LoginPage = () => {
     }
   }
 
-  // Show loading state while checking auth
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="loading-dots mx-auto mb-4">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
   }
 
-  // Don't render login form if already logged in (redirect will happen)
-  if (user) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
       <Header />
-      <div className="pt-32"></div>
-      
-      <div className="max-w-md mx-auto py-16 px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-xl p-8"
-        >
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-            <p className="text-gray-600">Sign in to your PhysioFi account</p>
-          </div>
+      <main className="pt-24 pb-16">
+        <div className="container-custom max-w-md mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-xl p-8"
+          >
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+              <p className="text-gray-600">Sign in to your account</p>
+            </div>
 
-          {/* Success State - This should rarely show now since we redirect immediately */}
-          {step === 'success' && (
-            <div className="text-center py-8">
-              <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Successful!</h2>
-              <p className="text-gray-600 mb-6">Redirecting to your dashboard...</p>
+            {/* Login Type Selector */}
+            <div className="flex gap-2 mb-6 p-1 bg-gray-100 rounded-lg">
               <button
-                onClick={() => {
-                  const dashboardPath = loginType === 'patient' 
-                    ? '/patient/dashboard' 
-                    : loginType === 'doctor' 
-                    ? '/doctor/dashboard' 
-                    : '/admin/dashboard'
-                  router.push(dashboardPath)
-                  router.refresh()
-                }}
-                className="w-full bg-primary-500 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-600 transition-colors duration-300"
+                type="button"
+                onClick={() => setLoginType('patient')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
+                  loginType === 'patient'
+                    ? 'bg-primary-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
-                Go to Dashboard
+                Patient
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginType('doctor')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
+                  loginType === 'doctor'
+                    ? 'bg-primary-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Doctor
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginType('admin')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
+                  loginType === 'admin'
+                    ? 'bg-primary-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Admin
               </button>
             </div>
-          )}
 
-          {/* Login Form */}
-          {step === 'login' && (
-            <>
-              {/* Login Type Selector */}
-              <div className="mb-6">
-                <div className="grid grid-cols-3 gap-2 p-1 bg-gray-100 rounded-lg">
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12"
+                    placeholder="Enter your password"
+                  />
                   <button
-                    onClick={() => setLoginType('patient')}
-                    className={`py-2 px-4 rounded-md text-sm font-medium transition-colors duration-200 ${
-                      loginType === 'patient'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
-                    Patient
-                  </button>
-                  <button
-                    onClick={() => setLoginType('doctor')}
-                    className={`py-2 px-4 rounded-md text-sm font-medium transition-colors duration-200 ${
-                      loginType === 'doctor'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    Doctor
-                  </button>
-                  <button
-                    onClick={() => setLoginType('admin')}
-                    className={`py-2 px-4 rounded-md text-sm font-medium transition-colors duration-200 ${
-                      loginType === 'admin'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    Admin
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder={`${loginType}@physiofi.com`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Enter your password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Forgot Password Link */}
-                <div className="flex justify-end">
-                  <Link
-                    href={`/forgot-password?type=${loginType}`}
-                    className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-
-                {error && (
-                  <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">{error}</div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-primary-500 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-600 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              <div className="flex items-center justify-between">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
                 >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                </button>
+                  Forgot password?
+                </Link>
+              </div>
 
-                <div className="text-center">
-                  <p className="text-gray-600 text-sm">
-                    Don't have an account?{' '}
-                    <Link
-                      href="/register"
-                      className="text-primary-600 hover:text-primary-700 font-medium"
-                    >
-                      Register here
-                    </Link>
-                  </p>
-                </div>
-              </form>
-            </>
-          )}
-        </motion.div>
-      </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-primary-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
 
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/register" className="text-primary-600 hover:text-primary-700 font-semibold">
+                  Sign up
+                </Link>
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </main>
       <Footer />
     </div>
   )

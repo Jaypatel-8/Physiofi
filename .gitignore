@@ -22,7 +22,9 @@ pnpm-lock.yaml
 .env.production.local
 
 # Next.js
+.next/
 client/.next/
+**/.next/
 client/out/
 client/.vercel
 

@@ -31,14 +31,3 @@ export interface OTPResponse {
   mobile?: string
 }
 
-
-
-
-
-
-
-
-
-
-
-

@@ -63,7 +63,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      {children}
+      <NotificationProvider>
+        {children}
+        <NotificationContainer />
+      </NotificationProvider>
     </AuthProvider>
   )
 }
