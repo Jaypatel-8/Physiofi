@@ -1,11 +1,9 @@
 {
   "/page": "app/page.js",
   "/not-found": "app/not-found.js",
+  "/about/page": "app/about/page.js",
+  "/contact/page": "app/contact/page.js",
   "/doctor/dashboard/page": "app/doctor/dashboard/page.js",
-  "/doctor/appointments/page": "app/doctor/appointments/page.js",
-  "/doctor/profile/page": "app/doctor/profile/page.js",
-  "/doctor/availability/page": "app/doctor/availability/page.js",
-  "/doctor/analytics/page": "app/doctor/analytics/page.js",
   "/doctor/patients/page": "app/doctor/patients/page.js",
-  "/doctor/patients/[patientId]/page": "app/doctor/patients/[patientId]/page.js"
+  "/services/home-visit/page": "app/services/home-visit/page.js"
 }

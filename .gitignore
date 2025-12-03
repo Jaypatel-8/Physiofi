@@ -1,11 +1,18 @@
 # Dependencies
+# Ignore all node_modules directories at any level
 node_modules/
 **/node_modules/
+node_modules
 client/node_modules/
+server/node_modules/
+**/*/node_modules/
 package-lock.json
+**/package-lock.json
 client/package-lock.json
 yarn.lock
+**/yarn.lock
 pnpm-lock.yaml
+**/pnpm-lock.yaml
 
 # Environment variables
 .env

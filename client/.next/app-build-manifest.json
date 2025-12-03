@@ -14,13 +14,6 @@
       "static/chunks/commons.js",
       "static/chunks/app/not-found.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/page.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/ecc9e497.js",
@@ -28,6 +21,13 @@
       "static/chunks/commons.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/ecc9e497.js",
+      "static/chunks/main-app.js",
+      "static/chunks/commons.js",
+      "static/chunks/app/page.js"
     ],
     "/about/page": [
       "static/chunks/webpack.js",
@@ -37,6 +37,12 @@
       "static/css/vendors-node_modules_aos_dist_aos_css.css",
       "static/chunks/app/about/page.js"
     ],
+    "/services/home-visit/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/ecc9e497.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/services/home-visit/layout.js"
+    ],
     "/services/home-visit/page": [
       "static/chunks/webpack.js",
       "static/chunks/ecc9e497.js",
@@ -44,89 +50,12 @@
       "static/chunks/commons.js",
       "static/chunks/app/services/home-visit/page.js"
     ],
-    "/services/home-visit/layout": [
+    "/contact/page": [
       "static/chunks/webpack.js",
       "static/chunks/ecc9e497.js",
       "static/chunks/main-app.js",
       "static/chunks/commons.js",
-      "static/chunks/app/services/home-visit/layout.js"
-    ],
-    "/services/tele-consultation/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/services/tele-consultation/page.js"
-    ],
-    "/services/tele-consultation/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/services/tele-consultation/layout.js"
-    ],
-    "/services/advanced-therapies/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/services/advanced-therapies/page.js"
-    ],
-    "/conditions/low-back-pain/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/conditions/low-back-pain/page.js"
-    ],
-    "/conditions/low-back-pain/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/conditions/low-back-pain/layout.js"
-    ],
-    "/conditions/neck-pain/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/conditions/neck-pain/page.js"
-    ],
-    "/conditions/neck-pain/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/conditions/neck-pain/layout.js"
-    ],
-    "/conditions/shoulder-pain/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/conditions/shoulder-pain/page.js"
-    ],
-    "/conditions/shoulder-pain/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/conditions/shoulder-pain/layout.js"
-    ],
-    "/conditions/knee-pain/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/conditions/knee-pain/page.js"
-    ],
-    "/conditions/knee-pain/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/conditions/knee-pain/layout.js"
+      "static/chunks/app/contact/page.js"
     ],
     "/doctor/dashboard/page": [
       "static/chunks/webpack.js",
@@ -136,47 +65,12 @@
       "static/chunks/commons.js",
       "static/chunks/app/doctor/dashboard/page.js"
     ],
-    "/doctor/appointments/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/doctor/appointments/page.js"
-    ],
-    "/doctor/profile/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/doctor/profile/page.js"
-    ],
-    "/doctor/availability/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/doctor/availability/page.js"
-    ],
-    "/doctor/analytics/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/doctor/analytics/page.js"
-    ],
     "/doctor/patients/page": [
       "static/chunks/webpack.js",
       "static/chunks/ecc9e497.js",
       "static/chunks/main-app.js",
       "static/chunks/commons.js",
       "static/chunks/app/doctor/patients/page.js"
-    ],
-    "/doctor/patients/[patientId]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/ecc9e497.js",
-      "static/chunks/main-app.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/doctor/patients/[patientId]/page.js"
     ]
   }
 }
