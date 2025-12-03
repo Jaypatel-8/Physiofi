@@ -108,7 +108,7 @@ export default function HomeVisitPage() {
             className="text-center mb-12"
           >
             <h2 className="text-4xl font-black text-gray-900 mb-4 font-display">
-              How It Works
+              How It <span className="text-primary-500">Works</span>
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light">
               Our simple 6-step process ensures you receive the best care at home
@@ -207,7 +207,7 @@ export default function HomeVisitPage() {
             className="max-w-4xl mx-auto"
           >
             <h2 className="text-4xl font-black text-gray-900 mb-8 font-display text-center">
-              Related Conditions We Treat
+              Related Conditions We <span className="text-primary-500">Treat</span>
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {relatedConditions.map((condition, index) => (

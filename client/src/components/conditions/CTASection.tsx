@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRightIcon } from '@heroicons/react/24/outline'
 
@@ -33,7 +34,18 @@ const CTASection = ({
           className="max-w-3xl mx-auto"
         >
           <h2 className="text-4xl lg:text-5xl font-black text-white mb-6 font-display">
-            {title}
+            {title.split(' ').map((word, index) => {
+              const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Journey', 'Start']
+              const cleanWord = word.replace(/[.,!?;:]/g, '')
+              const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
+              return isFocusWord ? (
+                <span key={index} className="text-yellow-200">
+                  {word}{index < title.split(' ').length - 1 ? ' ' : ''}
+                </span>
+              ) : (
+                <React.Fragment key={index}>{word}{index < title.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
+              )
+            })}
           </h2>
           <p className="text-xl text-white/95 mb-10 font-light">
             {description}

@@ -1,7 +1,9 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const Appointment = require('../models/Appointment');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
+const Notification = require('../models/Notification');
 const router = express.Router();
 
 // Middleware to verify JWT token
@@ -67,15 +69,22 @@ router.post('/', verifyToken, async (req, res) => {
       });
     }
 
-    // Check doctor availability for the requested time
+    // Check doctor availability for the requested time (skip if method doesn't exist)
     const appointmentDateObj = new Date(appointmentDate);
-    const dayName = appointmentDateObj.toLocaleDateString('en-US', { weekday: 'lowercase' });
-    
-    if (!doctor.isAvailable(dayName, appointmentTime, type)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Doctor is not available at the requested time'
-      });
+    try {
+      if (doctor.isAvailable && typeof doctor.isAvailable === 'function') {
+        const dayName = appointmentDateObj.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        const isAvailable = doctor.isAvailable(dayName, appointmentTime, type);
+        if (isAvailable === false) {
+          return res.status(400).json({
+            success: false,
+            message: 'Doctor is not available at the requested time'
+          });
+        }
+      }
+    } catch (availabilityError) {
+      console.warn('Availability check skipped:', availabilityError.message);
+      // Continue without availability check if method doesn't exist
     }
 
     // Check for conflicting appointments
@@ -111,8 +120,66 @@ router.post('/', verifyToken, async (req, res) => {
     await appointment.save();
 
     // Populate the appointment with patient and doctor details
-    await appointment.populate('patient', 'name email phone');
+    await appointment.populate('patient', 'name email phone age gender address');
     await appointment.populate('doctor', 'name specialization');
+
+    // Create notification for doctor with all patient details
+    try {
+      const patient = await Patient.findById(req.user.userId);
+      if (patient && Notification && Notification.createAppointmentNotification) {
+        const patientData = {
+          name: patient.name || 'Patient',
+          age: patient.age || null,
+          phone: patient.phone || '',
+          email: patient.email || '',
+          gender: patient.gender || '',
+          address: patient.address || {}
+        };
+
+        const appointmentData = {
+          appointmentDate: appointment.appointmentDate,
+          appointmentTime: appointment.appointmentTime || '',
+          type: appointment.type || 'Home Visit',
+          status: appointment.status || 'Pending',
+          symptoms: Array.isArray(appointment.symptoms) ? appointment.symptoms : [],
+          address: appointment.address || {},
+          medicalHistory: appointment.medicalHistory || '',
+          currentMedications: Array.isArray(appointment.currentMedications) ? appointment.currentMedications : [],
+          allergies: Array.isArray(appointment.allergies) ? appointment.allergies : []
+        };
+
+        // Notify doctor
+        try {
+          await Notification.createAppointmentNotification(
+            doctorId,
+            'Doctor',
+            appointment._id,
+            patientData,
+            appointmentData,
+            appointment.status || 'Pending'
+          );
+        } catch (doctorNotifError) {
+          console.error('Error creating doctor notification:', doctorNotifError);
+        }
+        
+        // Also notify patient
+        try {
+          await Notification.createAppointmentNotification(
+            req.user.userId,
+            'Patient',
+            appointment._id,
+            patientData,
+            appointmentData,
+            appointment.status || 'Pending'
+          );
+        } catch (patientNotifError) {
+          console.error('Error creating patient notification:', patientNotifError);
+        }
+      }
+    } catch (notificationError) {
+      console.error('Error in notification creation process:', notificationError);
+      // Don't fail the appointment creation if notification fails
+    }
 
     res.status(201).json({
       success: true,
@@ -253,6 +320,8 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
       });
     }
 
+    const oldStatus = appointment.status;
+    
     // Update status
     appointment.status = status;
     if (notes) {
@@ -266,6 +335,58 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
     }
 
     await appointment.save();
+    
+    // Populate for notifications
+    await appointment.populate('patient', 'name email phone age gender address');
+    await appointment.populate('doctor', 'name specialization');
+
+    // Create notifications for status change
+    if (oldStatus !== status) {
+      try {
+        const patientData = {
+          name: appointment.patient.name,
+          age: appointment.patient.age,
+          phone: appointment.patient.phone,
+          email: appointment.patient.email,
+          gender: appointment.patient.gender,
+          address: appointment.patient.address || {}
+        };
+
+        const appointmentData = {
+          appointmentDate: appointment.appointmentDate,
+          appointmentTime: appointment.appointmentTime,
+          type: appointment.type,
+          status: appointment.status,
+          symptoms: appointment.symptoms || [],
+          address: appointment.address || {},
+          medicalHistory: appointment.medicalHistory,
+          currentMedications: appointment.currentMedications || [],
+          allergies: appointment.allergies || []
+        };
+
+        // Notify patient
+        await Notification.createAppointmentNotification(
+          appointment.patient._id,
+          'Patient',
+          appointment._id,
+          patientData,
+          appointmentData,
+          status
+        );
+
+        // Notify doctor
+        await Notification.createAppointmentNotification(
+          appointment.doctor._id,
+          'Doctor',
+          appointment._id,
+          patientData,
+          appointmentData,
+          status
+        );
+      } catch (notificationError) {
+        console.error('Error creating status change notification:', notificationError);
+      }
+    }
 
     res.json({
       success: true,
@@ -347,6 +468,55 @@ router.patch('/:id/reschedule', verifyToken, async (req, res) => {
 
     // Reschedule appointment
     await appointment.reschedule(newDate, newTime, reason, req.user.role);
+    
+    // Populate for notifications
+    await appointment.populate('patient', 'name email phone age gender address');
+    await appointment.populate('doctor', 'name specialization');
+
+    // Create notifications for reschedule
+    try {
+      const patientData = {
+        name: appointment.patient.name,
+        age: appointment.patient.age,
+        phone: appointment.patient.phone,
+        email: appointment.patient.email,
+        gender: appointment.patient.gender,
+        address: appointment.patient.address || {}
+      };
+
+      const appointmentData = {
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        type: appointment.type,
+        status: appointment.status,
+        symptoms: appointment.symptoms || [],
+        address: appointment.address || {},
+        medicalHistory: appointment.medicalHistory,
+        currentMedications: appointment.currentMedications || [],
+        allergies: appointment.allergies || []
+      };
+
+      // Notify both patient and doctor
+      await Notification.createAppointmentNotification(
+        appointment.patient._id,
+        'Patient',
+        appointment._id,
+        patientData,
+        appointmentData,
+        'Rescheduled'
+      );
+
+      await Notification.createAppointmentNotification(
+        appointment.doctor._id,
+        'Doctor',
+        appointment._id,
+        patientData,
+        appointmentData,
+        'Rescheduled'
+      );
+    } catch (notificationError) {
+      console.error('Error creating reschedule notification:', notificationError);
+    }
 
     res.json({
       success: true,
@@ -400,6 +570,55 @@ router.patch('/:id/cancel', verifyToken, async (req, res) => {
 
     // Cancel appointment
     await appointment.cancel(reason, req.user.role);
+    
+    // Populate for notifications
+    await appointment.populate('patient', 'name email phone age gender address');
+    await appointment.populate('doctor', 'name specialization');
+
+    // Create notifications for cancellation
+    try {
+      const patientData = {
+        name: appointment.patient.name,
+        age: appointment.patient.age,
+        phone: appointment.patient.phone,
+        email: appointment.patient.email,
+        gender: appointment.patient.gender,
+        address: appointment.patient.address || {}
+      };
+
+      const appointmentData = {
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        type: appointment.type,
+        status: appointment.status,
+        symptoms: appointment.symptoms || [],
+        address: appointment.address || {},
+        medicalHistory: appointment.medicalHistory,
+        currentMedications: appointment.currentMedications || [],
+        allergies: appointment.allergies || []
+      };
+
+      // Notify both patient and doctor
+      await Notification.createAppointmentNotification(
+        appointment.patient._id,
+        'Patient',
+        appointment._id,
+        patientData,
+        appointmentData,
+        'Cancelled'
+      );
+
+      await Notification.createAppointmentNotification(
+        appointment.doctor._id,
+        'Doctor',
+        appointment._id,
+        patientData,
+        appointmentData,
+        'Cancelled'
+      );
+    } catch (notificationError) {
+      console.error('Error creating cancellation notification:', notificationError);
+    }
 
     res.json({
       success: true,
@@ -454,6 +673,46 @@ router.patch('/:id/complete', verifyToken, async (req, res) => {
     }
 
     await appointment.save();
+    
+    // Populate for notifications
+    await appointment.populate('patient', 'name email phone age gender address');
+    await appointment.populate('doctor', 'name specialization');
+
+    // Create notifications for completion
+    try {
+      const patientData = {
+        name: appointment.patient.name,
+        age: appointment.patient.age,
+        phone: appointment.patient.phone,
+        email: appointment.patient.email,
+        gender: appointment.patient.gender,
+        address: appointment.patient.address || {}
+      };
+
+      const appointmentData = {
+        appointmentDate: appointment.appointmentDate,
+        appointmentTime: appointment.appointmentTime,
+        type: appointment.type,
+        status: appointment.status,
+        symptoms: appointment.symptoms || [],
+        address: appointment.address || {},
+        medicalHistory: appointment.medicalHistory,
+        currentMedications: appointment.currentMedications || [],
+        allergies: appointment.allergies || []
+      };
+
+      // Notify patient
+      await Notification.createAppointmentNotification(
+        appointment.patient._id,
+        'Patient',
+        appointment._id,
+        patientData,
+        appointmentData,
+        'Completed'
+      );
+    } catch (notificationError) {
+      console.error('Error creating completion notification:', notificationError);
+    }
 
     res.json({
       success: true,
@@ -494,6 +753,84 @@ router.get('/today', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Get today appointments error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Get appointments by type (Home Visit or Online Consultation)
+router.get('/type/:type', verifyToken, async (req, res) => {
+  try {
+    const { type } = req.params;
+    const { status, startDate, endDate, page = 1, limit = 50 } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Validate type
+    const validTypes = ['Home Visit', 'Online Consultation', 'Clinic Visit'];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid appointment type. Must be: Home Visit, Online Consultation, or Clinic Visit'
+      });
+    }
+
+    let query = { type };
+
+    // Filter based on user role
+    if (req.user.role === 'patient') {
+      query.patient = req.user.userId;
+    } else if (req.user.role === 'doctor') {
+      query.doctor = req.user.userId;
+    }
+    // Admin can see all appointments
+
+    // Apply additional filters
+    if (status) query.status = status;
+    if (startDate && endDate) {
+      query.appointmentDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const appointments = await Appointment.find(query)
+      .populate('patient', 'name email phone')
+      .populate('doctor', 'name specialization')
+      .sort({ appointmentDate: -1, appointmentTime: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Appointment.countDocuments(query);
+
+    // Separate upcoming and past appointments
+    const now = new Date();
+    const upcoming = appointments.filter(apt => {
+      const aptDate = new Date(apt.appointmentDate);
+      return aptDate >= now && apt.status !== 'Cancelled';
+    });
+    const past = appointments.filter(apt => {
+      const aptDate = new Date(apt.appointmentDate);
+      return aptDate < now || apt.status === 'Completed' || apt.status === 'Cancelled';
+    });
+
+    res.json({
+      success: true,
+      data: {
+        appointments,
+        upcoming: upcoming.length,
+        past: past.length,
+        total,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limit),
+          total
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get appointments by type error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'

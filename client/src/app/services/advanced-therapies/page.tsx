@@ -123,8 +123,8 @@ export default function AdvancedTherapiesPage() {
               transition={{ delay: 0.1 }}
               className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
             >
-              Advanced Therapy
-              <span className="block text-primary-400">Treatments</span>
+              <span className="text-primary-500">Advanced</span> <span className="text-primary-500">Therapies</span>
+              <span className="block">Treatments</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -297,7 +297,7 @@ export default function AdvancedTherapiesPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6 font-display">
-              How Advanced Therapies Work
+              How Advanced Therapies <span className="text-primary-500">Work</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto font-light">
               Our advanced therapy treatments are integrated into your personalized physiotherapy plan

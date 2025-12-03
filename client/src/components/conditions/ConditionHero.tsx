@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
@@ -35,9 +36,33 @@ const ConditionHero = ({ title, subtitle, description, imageAlt = "Physiotherapy
             </motion.div>
             
             <h1 className="text-5xl lg:text-6xl font-black text-gray-900 font-display leading-tight">
-              {title}
+              {title.split(' ').map((word, index) => {
+                const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Home', 'Visit', 'Pain', 'Rehabilitation']
+                const cleanWord = word.replace(/[.,!?;:]/g, '')
+                const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
+                return isFocusWord ? (
+                  <span key={index} className="text-primary-500">
+                    {word}{index < title.split(' ').length - 1 ? ' ' : ''}
+                  </span>
+                ) : (
+                  <React.Fragment key={index}>{word}{index < title.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
+                )
+              })}
               {subtitle && (
-                <span className="block text-primary-400">{subtitle}</span>
+                <span className="block">
+                  {subtitle.split(' ').map((word, index) => {
+                    const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Home', 'Visit', 'Pain', 'Rehabilitation']
+                    const cleanWord = word.replace(/[.,!?;:]/g, '')
+                    const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
+                    return isFocusWord ? (
+                      <span key={index} className="text-primary-500">
+                        {word}{index < subtitle.split(' ').length - 1 ? ' ' : ''}
+                      </span>
+                    ) : (
+                      <React.Fragment key={index}>{word}{index < subtitle.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
+                    )
+                  })}
+                </span>
               )}
             </h1>
             

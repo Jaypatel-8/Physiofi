@@ -112,7 +112,7 @@ const ServicesPage = () => {
         <div className="container-custom relative z-10">
           <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 max-w-6xl mx-auto">
             <h1 className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-tight">
-              SERVICES<br />TAILORED<br />TO YOU
+              SERVICES<br /><span className="text-primary-500">TAILORED</span><br />TO <span className="text-primary-500">YOU</span>
             </h1>
             <div className="lg:ml-auto lg:max-w-md">
               <p className="text-xl text-gray-600 font-medium leading-relaxed">
@@ -254,7 +254,7 @@ const ServicesPage = () => {
       <section className="py-20 bg-secondary-500">
         <div className="container-custom text-center">
           <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display">
-            Ready to Start Your Recovery?
+            Ready to Start Your <span className="text-yellow-200">Recovery</span>?
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
             Book your consultation today and take the first step towards better health and wellness.

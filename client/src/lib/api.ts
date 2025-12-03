@@ -41,22 +41,40 @@ api.interceptors.response.use(
 // Auth API
 export const authAPI = {
   // Patient auth
-  sendPatientOTP: (mobile: string) => 
-    api.post('/auth/patient/send-otp', { mobile }),
+  patientRegister: (data: any) => 
+    api.post('/auth/patient/register', data),
   
-  verifyPatientOTP: (mobile: string, otp: string) => 
-    api.post('/auth/patient/verify-otp', { mobile, otp }),
+  patientLogin: (email: string, password: string) => 
+    api.post('/auth/patient/login', { email, password }),
+  
+  patientForgotPassword: (email: string) => 
+    api.post('/auth/patient/forgot-password', { email }),
+  
+  patientResetPassword: (token: string, password: string) => 
+    api.post('/auth/patient/reset-password', { token, password }),
   
   // Doctor auth
-  sendDoctorOTP: (mobile: string) => 
-    api.post('/auth/doctor/send-otp', { mobile }),
+  doctorRegister: (data: any) => 
+    api.post('/auth/doctor/register', data),
   
-  verifyDoctorOTP: (mobile: string, otp: string) => 
-    api.post('/auth/doctor/verify-otp', { mobile, otp }),
+  doctorLogin: (email: string, password: string) => 
+    api.post('/auth/doctor/login', { email, password }),
+  
+  doctorForgotPassword: (email: string) => 
+    api.post('/auth/doctor/forgot-password', { email }),
+  
+  doctorResetPassword: (token: string, password: string) => 
+    api.post('/auth/doctor/reset-password', { token, password }),
   
   // Admin auth
-  adminLogin: (username: string, password: string) => 
-    api.post('/auth/admin/login', { username, password }),
+  adminLogin: (email: string, password: string) => 
+    api.post('/auth/admin/login', { email, password }),
+  
+  adminForgotPassword: (email: string) => 
+    api.post('/auth/admin/forgot-password', { email }),
+  
+  adminResetPassword: (token: string, password: string) => 
+    api.post('/auth/admin/reset-password', { token, password }),
   
   // Get current user
   getCurrentUser: () => 
@@ -78,6 +96,9 @@ export const patientAPI = {
   getAppointments: (params?: any) => 
     api.get('/patients/appointments', { params }),
   
+  getAppointmentsByType: (type: 'Home Visit' | 'Online Consultation' | 'Clinic Visit', params?: any) => 
+    api.get(`/appointments/type/${type}`, { params }),
+  
   getAppointment: (id: string) => 
     api.get(`/patients/appointments/${id}`),
   
@@ -89,6 +110,21 @@ export const patientAPI = {
   
   getStats: () => 
     api.get('/patients/stats'),
+  
+  getNotifications: (params?: any) => 
+    api.get('/notifications', { params }),
+  
+  getUnreadCount: () => 
+    api.get('/notifications/unread-count'),
+  
+  markAsRead: (id: string) => 
+    api.patch(`/notifications/${id}/read`),
+  
+  markAllAsRead: () => 
+    api.patch('/notifications/read-all'),
+  
+  deleteNotification: (id: string) => 
+    api.delete(`/notifications/${id}`),
 }
 
 // Doctor API
@@ -104,6 +140,9 @@ export const doctorAPI = {
   
   getAppointments: (params?: any) => 
     api.get('/doctors/appointments', { params }),
+  
+  getAppointmentsByType: (type: 'Home Visit' | 'Online Consultation' | 'Clinic Visit', params?: any) => 
+    api.get(`/appointments/type/${type}`, { params }),
   
   getAppointment: (id: string) => 
     api.get(`/doctors/appointments/${id}`),
@@ -122,12 +161,45 @@ export const doctorAPI = {
   
   getAllDoctors: (params?: any) => 
     api.get('/doctors', { params }),
+  
+  getNotifications: (params?: any) => 
+    api.get('/notifications', { params }),
+  
+  getUnreadCount: () => 
+    api.get('/notifications/unread-count'),
+  
+  markAsRead: (id: string) => 
+    api.patch(`/notifications/${id}/read`),
+  
+  markAllAsRead: () => 
+    api.patch('/notifications/read-all'),
+  
+  deleteNotification: (id: string) => 
+    api.delete(`/notifications/${id}`),
+  
+  // Patients
+  getPatients: (params?: any) => 
+    api.get('/doctors/patients', { params }),
+  
+  getPatient: (patientId: string) => 
+    api.get(`/doctors/patients/${patientId}`),
+  
+  // Availability
+  updateAvailability: (data: any) => 
+    api.patch('/doctors/availability', data),
+  
+  // Analytics
+  getAnalytics: (period?: string) => 
+    api.get('/doctors/analytics', { params: { period } }),
 }
 
 // Appointment API
 export const appointmentAPI = {
+  create: (data: any) => 
+    api.post('/appointments', data),
+  
   book: (data: any) => 
-    api.post('/appointments/book', data),
+    api.post('/appointments', data),
   
   getAvailableSlots: (doctorId: string, date: string) => 
     api.get(`/appointments/available-slots/${doctorId}`, { params: { date } }),

@@ -72,13 +72,15 @@ const patientSchema = new mongoose.Schema({
     enum: ['Active', 'Inactive', 'Suspended'],
     default: 'Active'
   },
-  otp: {
-    code: String,
-    expiresAt: Date
+  password: {
+    type: String,
+    required: true
   },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
   isVerified: {
     type: Boolean,
-    default: false
+    default: true
   },
   lastLogin: Date,
   totalAppointments: {
@@ -111,27 +113,10 @@ patientSchema.virtual('fullAddress').get(function() {
   return parts.join(', ');
 });
 
-// Method to generate OTP
-patientSchema.methods.generateOTP = function() {
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  this.otp = {
-    code: otp,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
-  };
-  return otp;
-};
-
-// Method to verify OTP
-patientSchema.methods.verifyOTP = function(otp) {
-  if (!this.otp || !this.otp.code || !this.otp.expiresAt) {
-    return false;
-  }
-  
-  if (this.otp.expiresAt < new Date()) {
-    return false;
-  }
-  
-  return this.otp.code === otp;
+// Method to compare password
+patientSchema.methods.comparePassword = async function(candidatePassword) {
+  const bcrypt = require('bcryptjs');
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 // Method to update recovery progress
@@ -139,5 +124,15 @@ patientSchema.methods.updateProgress = function(progress) {
   this.recoveryProgress = Math.min(100, Math.max(0, progress));
   return this.save();
 };
+
+// Pre-save middleware to hash password
+patientSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  const bcrypt = require('bcryptjs');
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
 
 module.exports = mongoose.model('Patient', patientSchema);

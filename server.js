@@ -12,6 +12,8 @@ const authRoutes = require('./routes/auth');
 const appointmentRoutes = require('./routes/appointments');
 const patientRoutes = require('./routes/patients');
 const doctorRoutes = require('./routes/doctors');
+const adminRoutes = require('./routes/admin');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,18 +26,53 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/physiofi', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('✅ Connected to MongoDB');
-})
-.catch((error) => {
-  console.error('❌ MongoDB connection error:', error);
-  process.exit(1);
-});
+// Database connection with improved error handling
+const connectDB = async () => {
+  try {
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/physiofi';
+    
+    console.log('🔌 Connecting to MongoDB...');
+    console.log('📍 Database:', mongoURI.replace(/:[^:@]+@/, ':****@')); // Hide password in logs
+    
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000, // 10 seconds timeout
+      socketTimeoutMS: 45000, // 45 seconds socket timeout
+    });
+    
+    console.log('✅ Connected to MongoDB successfully!');
+    console.log('   Host:', mongoose.connection.host);
+    console.log('   Database:', mongoose.connection.name);
+    
+    // Connection event listeners
+    mongoose.connection.on('error', (err) => {
+      console.error('❌ MongoDB connection error:', err);
+    });
+    
+    mongoose.connection.on('disconnected', () => {
+      console.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+    });
+    
+    mongoose.connection.on('reconnected', () => {
+      console.log('✅ MongoDB reconnected successfully!');
+    });
+    
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error.message);
+    console.error('');
+    console.error('💡 Troubleshooting tips:');
+    console.error('   1. Check your MONGODB_URI in .env file');
+    console.error('   2. For MongoDB Atlas: Verify IP whitelist (0.0.0.0/0)');
+    console.error('   3. For local MongoDB: Ensure MongoDB service is running');
+    console.error('   4. Run: node test-mongodb-connection.js to test connection');
+    console.error('');
+    process.exit(1);
+  }
+};
+
+// Connect to database
+connectDB();
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -52,6 +89,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Serve static files from the React app build directory
 if (process.env.NODE_ENV === 'production') {

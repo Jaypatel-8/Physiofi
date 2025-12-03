@@ -99,7 +99,7 @@ export default function TeleConsultationPage() {
             className="text-center mb-12"
           >
             <h2 className="text-4xl font-black text-gray-900 mb-4 font-display">
-              Tele-Consultation Process
+              <span className="text-primary-500">Tele-Consultation</span> <span className="text-primary-500">Process</span>
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light">
               Our simple 5-step process for online physiotherapy sessions
@@ -157,7 +157,7 @@ export default function TeleConsultationPage() {
             className="max-w-4xl mx-auto"
           >
             <h2 className="text-4xl font-black text-gray-900 mb-8 font-display text-center">
-              What You'll Need
+              What You'll <span className="text-primary-500">Need</span>
             </h2>
             <div className="grid md:grid-cols-2 gap-4">
               {requirements.map((requirement, index) => (

@@ -47,6 +47,8 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
   profileImage: String,
   address: {
     street: String,
@@ -190,12 +192,19 @@ adminSchema.statics.findByRole = function(role) {
   return this.find({ role: role, status: 'Active' });
 };
 
+// Method to compare password
+adminSchema.methods.comparePassword = async function(candidatePassword) {
+  const bcrypt = require('bcryptjs');
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
 // Pre-save middleware to hash password
-adminSchema.pre('save', function(next) {
+adminSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
-  // In a real application, you would hash the password here
-  // For now, we'll just continue
+  const bcrypt = require('bcryptjs');
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 

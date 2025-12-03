@@ -1,4 +1,6 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const Patient = require('../models/Patient');
 const Appointment = require('../models/Appointment');
 const router = express.Router();
@@ -170,7 +172,7 @@ router.get('/stats', verifyToken, async (req, res) => {
     const patientId = req.user.userId;
 
     const stats = await Appointment.aggregate([
-      { $match: { patient: patientId } },
+      { $match: { patient: new mongoose.Types.ObjectId(patientId) } },
       {
         $group: {
           _id: null,
@@ -195,9 +197,8 @@ router.get('/stats', verifyToken, async (req, res) => {
       success: true,
       data: {
         totalAppointments: stats[0]?.totalAppointments || 0,
-        completedAppointments: stats[0]?.completedAppointments || 0,
-        pendingAppointments: stats[0]?.pendingAppointments || 0,
-        confirmedAppointments: stats[0]?.confirmedAppointments || 0,
+        completedSessions: stats[0]?.completedAppointments || 0,
+        upcomingSessions: stats[0]?.confirmedAppointments || 0,
         recoveryProgress: patient?.recoveryProgress || 0,
         averageRating: stats[0]?.averageRating || 0
       }

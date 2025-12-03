@@ -142,7 +142,7 @@ const Services = () => {
         >
           <div className="text-center mb-10">
             <h3 className="text-4xl font-black text-gray-900 mb-4 font-display">
-              Advanced Therapies
+              <span className="text-primary-500">Advanced</span> Therapies
             </h3>
             <p className="text-lg text-gray-600 font-light">
               Evidence-based advanced treatments for comprehensive recovery
@@ -180,7 +180,7 @@ const Services = () => {
         <div className="bg-gradient-to-br from-primary-50 via-pastel-mint-50 to-pastel-sky-50 rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl p-10 shadow-xl">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-black text-gray-900 mb-4 font-display">
-              How It Works
+              How It <span className="text-primary-500">Works</span>
             </h3>
             <p className="text-lg text-gray-600 font-light">
               Our simple 4-step process ensures you get the best personalized care
@@ -266,7 +266,7 @@ const Services = () => {
         >
           <div className="bg-gradient-to-r from-secondary-300 via-pastel-blue-300 to-tertiary-300 rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl p-12 text-white shadow-2xl">
             <h3 className="text-4xl font-black mb-4 font-display">
-              Ready to Start Your Recovery Journey?
+              Ready to Start Your <span className="text-white">Recovery</span> <span className="text-white">Journey</span>?
             </h3>
             <p className="text-lg mb-8 opacity-95 max-w-xl mx-auto font-light">
               Book your consultation today and take the first step towards better health.

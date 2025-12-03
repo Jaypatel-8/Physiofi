@@ -177,7 +177,7 @@ const Home = memo(function Home() {
               transition={{ delay: 0.1 }}
               className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
             >
-              Why Choose PhysioFi?
+              Why Choose <span className="text-primary-500">PhysioFi</span>?
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -246,8 +246,8 @@ const Home = memo(function Home() {
               transition={{ delay: 0.1 }}
               className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
             >
-              Expert Treatment For
-              <span className="block text-accent-400">Various Conditions</span>
+              <span className="text-primary-500">Expert</span> <span className="text-primary-500">Treatment</span> For
+              <span className="block">Various Conditions</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -343,7 +343,7 @@ const Home = memo(function Home() {
             className="text-5xl lg:text-6xl font-black text-white mb-6 font-display leading-tight"
           >
             Ready to Start Your
-            <span className="block">Recovery Journey?</span>
+            <span className="block"><span className="text-white">Recovery</span> <span className="text-white">Journey</span>?</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}

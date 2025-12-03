@@ -157,14 +157,14 @@ const Header = () => {
           >
             <Link href="/" className="flex items-center space-x-3 group">
               <div className="relative">
-                <Image
-                  src="/Physiofi Logo(1).png"
-                  alt="PhysioFi Logo"
-                  width={175}
-                  height={150}
-                  className="group-hover:scale-110 transition-transform duration-300"
-                  priority
-                />
+              <Image
+                src="/Physiofi Logo(1).png"
+                alt="PhysioFi Logo"
+                width={120}
+                height={50}
+                className="group-hover:scale-105 transition-transform duration-300 object-contain"
+                priority
+              />
               </div>
               
             </Link>

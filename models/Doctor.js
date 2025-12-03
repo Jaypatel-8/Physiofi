@@ -158,6 +158,12 @@ const doctorSchema = new mongoose.Schema({
     bankName: String,
     accountHolderName: String
   },
+  password: {
+    type: String,
+    required: true
+  },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
   isVerified: {
     type: Boolean,
     default: false
@@ -222,5 +228,21 @@ doctorSchema.methods.incrementSessionCount = function() {
   this.totalSessions += 1;
   return this.save();
 };
+
+// Method to compare password
+doctorSchema.methods.comparePassword = async function(candidatePassword) {
+  const bcrypt = require('bcryptjs');
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Pre-save middleware to hash password
+doctorSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  const bcrypt = require('bcryptjs');
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
 
 module.exports = mongoose.model('Doctor', doctorSchema);

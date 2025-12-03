@@ -1,10 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const Admin = require('../models/Admin');
-const OTPService = require('../services/otpService');
 const router = express.Router();
 
 // Generate JWT token
@@ -14,22 +14,18 @@ const generateToken = (userId, role) => {
   });
 };
 
-// Send OTP using the OTP Service
-const sendOTP = async (phone, email, otp, name = 'User') => {
-  // Check if we're in development mode (no Twilio/Email configured)
-  const isDevMode = !process.env.TWILIO_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID === 'your_account_sid';
-  
-  if (isDevMode) {
-    return await OTPService.sendOTPDev(phone, email, otp, name);
-  } else {
-    return await OTPService.sendOTP(phone, email, otp, name);
-  }
-};
-
 // Patient Registration
 router.post('/patient/register', async (req, res) => {
   try {
-    const { name, email, phone, age, gender, address } = req.body;
+    const { name, email, phone, password, age, gender, address } = req.body;
+
+    // Validation
+    if (!name || !email || !phone || !password || !age || !gender) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields'
+      });
+    }
 
     // Check if patient already exists
     const existingPatient = await Patient.findOne({
@@ -48,67 +44,20 @@ router.post('/patient/register', async (req, res) => {
       name,
       email,
       phone,
+      password,
       age,
       gender,
       address
     });
 
-    // Generate OTP
-    const otp = patient.generateOTP();
-    await patient.save();
-
-    // Send OTP
-    await sendOTP(phone, email, otp, name);
-
-    res.status(201).json({
-      success: true,
-      message: 'Patient registered successfully. OTP sent to your phone.',
-      data: {
-        patientId: patient._id,
-        phone: patient.phone
-      }
-    });
-  } catch (error) {
-    console.error('Patient registration error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-});
-
-// Patient OTP Verification
-router.post('/patient/verify-otp', async (req, res) => {
-  try {
-    const { phone, otp } = req.body;
-
-    const patient = await Patient.findOne({ phone });
-    if (!patient) {
-      return res.status(404).json({
-        success: false,
-        message: 'Patient not found'
-      });
-    }
-
-    const isValidOTP = patient.verifyOTP(otp);
-    if (!isValidOTP) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired OTP'
-      });
-    }
-
-    // Mark as verified
-    patient.isVerified = true;
-    patient.otp = undefined;
     await patient.save();
 
     // Generate token
     const token = generateToken(patient._id, 'patient');
 
-    res.json({
+    res.status(201).json({
       success: true,
-      message: 'OTP verified successfully',
+      message: 'Patient registered successfully',
       data: {
         token,
         patient: {
@@ -120,7 +69,7 @@ router.post('/patient/verify-otp', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('OTP verification error:', error);
+    console.error('Patient registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -131,13 +80,20 @@ router.post('/patient/verify-otp', async (req, res) => {
 // Patient Login
 router.post('/patient/login', async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { email, password } = req.body;
 
-    const patient = await Patient.findOne({ phone });
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
+    }
+
+    const patient = await Patient.findOne({ email });
     if (!patient) {
       return res.status(404).json({
         success: false,
-        message: 'Patient not found'
+        message: 'Invalid email or password'
       });
     }
 
@@ -148,23 +104,132 @@ router.post('/patient/login', async (req, res) => {
       });
     }
 
-    // Generate OTP
-    const otp = patient.generateOTP();
+    // Verify password
+    const isPasswordValid = await patient.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Update last login
+    patient.lastLogin = new Date();
     await patient.save();
 
-    // Send OTP
-    await sendOTP(phone, email, otp, name);
+    // Generate token
+    const token = generateToken(patient._id, 'patient');
 
     res.json({
       success: true,
-      message: 'OTP sent to your phone',
+      message: 'Login successful',
       data: {
-        patientId: patient._id,
-        phone: patient.phone
+        token,
+        patient: {
+          id: patient._id,
+          name: patient.name,
+          email: patient.email,
+          phone: patient.phone
+        }
       }
     });
   } catch (error) {
     console.error('Patient login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Patient Forgot Password
+router.post('/patient/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    const patient = await Patient.findOne({ email });
+    if (!patient) {
+      // Don't reveal if email exists for security
+      return res.json({
+        success: true,
+        message: 'If that email exists, a password reset link has been sent'
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    patient.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    patient.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await patient.save();
+
+    // In production, send email with reset link
+    // For now, return token in development
+    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=patient`;
+
+    console.log('Password Reset Link:', resetUrl);
+    console.log('Reset Token:', resetToken);
+
+    res.json({
+      success: true,
+      message: 'Password reset link sent to your email',
+      // Only in development
+      ...(process.env.NODE_ENV === 'development' && { resetToken, resetUrl })
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Patient Reset Password
+router.post('/patient/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and password are required'
+      });
+    }
+
+    // Hash token to compare
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const patient = await Patient.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!patient) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    // Set new password
+    patient.password = password;
+    patient.resetPasswordToken = undefined;
+    patient.resetPasswordExpires = undefined;
+    await patient.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -179,6 +244,7 @@ router.post('/doctor/register', async (req, res) => {
       name,
       email,
       phone,
+      password,
       specialization,
       qualifications,
       experience,
@@ -186,6 +252,14 @@ router.post('/doctor/register', async (req, res) => {
       address,
       bio
     } = req.body;
+
+    // Validation
+    if (!name || !email || !phone || !password || !specialization || !license) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields'
+      });
+    }
 
     // Check if doctor already exists
     const existingDoctor = await Doctor.findOne({
@@ -204,6 +278,7 @@ router.post('/doctor/register', async (req, res) => {
       name,
       email,
       phone,
+      password,
       specialization,
       qualifications,
       experience,
@@ -237,11 +312,18 @@ router.post('/doctor/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
+    }
+
     const doctor = await Doctor.findOne({ email });
     if (!doctor) {
       return res.status(404).json({
         success: false,
-        message: 'Doctor not found'
+        message: 'Invalid email or password'
       });
     }
 
@@ -252,14 +334,18 @@ router.post('/doctor/login', async (req, res) => {
       });
     }
 
-    // In a real application, you would verify the password here
-    // For now, we'll just check if password is provided
-    if (!password) {
+    // Verify password
+    const isPasswordValid = await doctor.comparePassword(password);
+    if (!isPasswordValid) {
       return res.status(400).json({
         success: false,
-        message: 'Password is required'
+        message: 'Invalid email or password'
       });
     }
+
+    // Update last active
+    doctor.lastActive = new Date();
+    await doctor.save();
 
     // Generate token
     const token = generateToken(doctor._id, 'doctor');
@@ -273,6 +359,7 @@ router.post('/doctor/login', async (req, res) => {
           id: doctor._id,
           name: doctor.name,
           email: doctor.email,
+          phone: doctor.phone,
           specialization: doctor.specialization
         }
       }
@@ -286,16 +373,113 @@ router.post('/doctor/login', async (req, res) => {
   }
 });
 
+// Doctor Forgot Password
+router.post('/doctor/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    const doctor = await Doctor.findOne({ email });
+    if (!doctor) {
+      return res.json({
+        success: true,
+        message: 'If that email exists, a password reset link has been sent'
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    doctor.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    doctor.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await doctor.save();
+
+    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=doctor`;
+
+    console.log('Password Reset Link:', resetUrl);
+    console.log('Reset Token:', resetToken);
+
+    res.json({
+      success: true,
+      message: 'Password reset link sent to your email',
+      ...(process.env.NODE_ENV === 'development' && { resetToken, resetUrl })
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Doctor Reset Password
+router.post('/doctor/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and password are required'
+      });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const doctor = await Doctor.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!doctor) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    doctor.password = password;
+    doctor.resetPasswordToken = undefined;
+    doctor.resetPasswordExpires = undefined;
+    await doctor.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 // Admin Login
 router.post('/admin/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
+    }
+
     const admin = await Admin.findOne({ email });
     if (!admin) {
+      await Admin.findOneAndUpdate({ email }, { $inc: { loginAttempts: 1 } });
       return res.status(404).json({
         success: false,
-        message: 'Admin not found'
+        message: 'Invalid email or password'
       });
     }
 
@@ -314,13 +498,13 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // In a real application, you would verify the password here
-    // For now, we'll just check if password is provided
-    if (!password) {
+    // Verify password
+    const isPasswordValid = await admin.comparePassword(password);
+    if (!isPasswordValid) {
       await admin.incLoginAttempts();
       return res.status(400).json({
         success: false,
-        message: 'Password is required'
+        message: 'Invalid email or password'
       });
     }
 
@@ -340,6 +524,7 @@ router.post('/admin/login', async (req, res) => {
           id: admin._id,
           name: admin.name,
           email: admin.email,
+          phone: admin.phone,
           role: admin.role
         }
       }
@@ -353,32 +538,44 @@ router.post('/admin/login', async (req, res) => {
   }
 });
 
-// Resend OTP
-router.post('/patient/resend-otp', async (req, res) => {
+// Admin Forgot Password
+router.post('/admin/forgot-password', async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { email } = req.body;
 
-    const patient = await Patient.findOne({ phone });
-    if (!patient) {
-      return res.status(404).json({
+    if (!email) {
+      return res.status(400).json({
         success: false,
-        message: 'Patient not found'
+        message: 'Email is required'
       });
     }
 
-    // Generate new OTP
-    const otp = patient.generateOTP();
-    await patient.save();
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.json({
+        success: true,
+        message: 'If that email exists, a password reset link has been sent'
+      });
+    }
 
-    // Send OTP
-    await sendOTP(phone, patient.email, otp, patient.name);
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    admin.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    admin.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await admin.save();
+
+    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=admin`;
+
+    console.log('Password Reset Link:', resetUrl);
+    console.log('Reset Token:', resetToken);
 
     res.json({
       success: true,
-      message: 'OTP resent successfully'
+      message: 'Password reset link sent to your email',
+      ...(process.env.NODE_ENV === 'development' && { resetToken, resetUrl })
     });
   } catch (error) {
-    console.error('Resend OTP error:', error);
+    console.error('Forgot password error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -386,9 +583,52 @@ router.post('/patient/resend-otp', async (req, res) => {
   }
 });
 
-// Logout (optional - for token blacklisting)
+// Admin Reset Password
+router.post('/admin/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and password are required'
+      });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const admin = await Admin.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!admin) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    admin.password = password;
+    admin.resetPasswordToken = undefined;
+    admin.resetPasswordExpires = undefined;
+    await admin.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Logout
 router.post('/logout', (req, res) => {
-  // In a real application, you might want to blacklist the token
   res.json({
     success: true,
     message: 'Logged out successfully'

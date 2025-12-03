@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion } from 'framer-motion'
 import { 
   HeartIcon, 
@@ -87,7 +88,18 @@ const TreatmentList = ({ treatments, title = "How We Help", treatmentIcons }: Tr
           className="max-w-4xl mx-auto"
         >
           <h2 className="text-4xl font-black text-gray-900 mb-8 font-display text-center">
-            {title}
+            {title.split(' ').map((word, index) => {
+              const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Home', 'Visit', 'Pain', 'Rehabilitation']
+              const cleanWord = word.replace(/[.,!?;:]/g, '')
+              const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
+              return isFocusWord ? (
+                <span key={index} className="text-primary-500">
+                  {word}{index < title.split(' ').length - 1 ? ' ' : ''}
+                </span>
+              ) : (
+                <React.Fragment key={index}>{word}{index < title.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
+              )
+            })}
           </h2>
           
           <div className="grid md:grid-cols-2 gap-6">

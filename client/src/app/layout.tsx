@@ -7,6 +7,12 @@ import dynamic from 'next/dynamic'
 // Import Toaster normally - it's already lightweight
 import { Toaster } from 'react-hot-toast'
 
+// Import the loader wrapper component dynamically to avoid SSR issues
+const LoaderWrapper = dynamic(
+  () => import('@/components/ui/LoaderWrapper'),
+  { ssr: false }
+)
+
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
@@ -147,7 +153,9 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} overflow-x-hidden`}>
         <Providers>
-          {children}
+          <LoaderWrapper>
+            {children}
+          </LoaderWrapper>
           <Toaster
             position="top-right"
             toastOptions={{

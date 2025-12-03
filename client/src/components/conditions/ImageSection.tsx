@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
@@ -24,7 +25,18 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
               className="space-y-6"
             >
               <h2 className="text-4xl font-black text-gray-900 font-display">
-                {title}
+                {title.split(' ').map((word, index) => {
+                  const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Home', 'Visit', 'Pain', 'Rehabilitation', 'Doorstep', 'Anywhere']
+                  const cleanWord = word.replace(/[.,!?;:]/g, '')
+                  const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
+                  return isFocusWord ? (
+                    <span key={index} className="text-primary-500">
+                      {word}{index < title.split(' ').length - 1 ? ' ' : ''}
+                    </span>
+                  ) : (
+                    <React.Fragment key={index}>{word}{index < title.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
+                  )
+                })}
               </h2>
               <p className="text-lg text-gray-700 leading-relaxed font-light">
                 {description}

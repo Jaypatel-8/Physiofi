@@ -1,4 +1,6 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const Doctor = require('../models/Doctor');
 const Appointment = require('../models/Appointment');
 const router = express.Router();
@@ -25,6 +27,44 @@ const verifyToken = (req, res, next) => {
     });
   }
 };
+
+// Get all doctors (public route for booking)
+router.get('/', async (req, res) => {
+  try {
+    const { status = 'Active', limit = 50, page = 1 } = req.query;
+    const skip = (page - 1) * limit;
+
+    let query = {};
+    if (status) {
+      query.status = status;
+    }
+
+    const doctors = await Doctor.find(query)
+      .select('name email phone specialization experience license address')
+      .limit(parseInt(limit))
+      .skip(skip);
+
+    const total = await Doctor.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: {
+        doctors,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limit),
+          total
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get doctors error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
 
 // Get doctor profile
 router.get('/profile', verifyToken, async (req, res) => {
@@ -170,7 +210,7 @@ router.get('/stats', verifyToken, async (req, res) => {
     const doctorId = req.user.userId;
 
     const stats = await Appointment.aggregate([
-      { $match: { doctor: doctorId } },
+      { $match: { doctor: new mongoose.Types.ObjectId(doctorId) } },
       {
         $group: {
           _id: null,
@@ -195,17 +235,154 @@ router.get('/stats', verifyToken, async (req, res) => {
       success: true,
       data: {
         totalAppointments: stats[0]?.totalAppointments || 0,
-        completedAppointments: stats[0]?.completedAppointments || 0,
+        completedSessions: stats[0]?.completedAppointments || 0,
         pendingAppointments: stats[0]?.pendingAppointments || 0,
         confirmedAppointments: stats[0]?.confirmedAppointments || 0,
         totalPatients: doctor?.totalPatients || 0,
+        activePatients: doctor?.totalPatients || 0,
+        todayAppointments: 0, // Will be calculated separately
         totalSessions: doctor?.totalSessions || 0,
-        averageRating: stats[0]?.averageRating || 0,
+        averageRating: doctor?.rating?.average || stats[0]?.averageRating || 0,
         rating: doctor?.rating || { average: 0, count: 0 }
       }
     });
   } catch (error) {
     console.error('Get doctor stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Get all patients for doctor
+router.get('/patients', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    const doctorId = req.user.userId;
+    const { page = 1, limit = 20, search = '' } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Get all unique patient IDs from appointments
+    const appointments = await Appointment.find({ doctor: doctorId })
+      .select('patient')
+      .populate('patient', 'name email phone age gender address profileImage')
+      .lean();
+
+    const patientMap = new Map();
+    appointments.forEach(apt => {
+      if (apt.patient && apt.patient._id) {
+        const patientId = apt.patient._id.toString();
+        if (!patientMap.has(patientId)) {
+          patientMap.set(patientId, {
+            ...apt.patient,
+            appointmentCount: 0,
+            lastAppointment: null
+          });
+        }
+        const patient = patientMap.get(patientId);
+        patient.appointmentCount += 1;
+      }
+    });
+
+    let patients = Array.from(patientMap.values());
+
+    // Filter by search
+    if (search) {
+      const searchLower = search.toLowerCase();
+      patients = patients.filter(p => 
+        p.name?.toLowerCase().includes(searchLower) ||
+        p.email?.toLowerCase().includes(searchLower) ||
+        p.phone?.includes(search)
+      );
+    }
+
+    // Get appointment details for each patient
+    for (let patient of patients) {
+      const lastApt = await Appointment.findOne({ 
+        doctor: doctorId, 
+        patient: patient._id 
+      })
+      .sort({ appointmentDate: -1 })
+      .select('appointmentDate appointmentTime status type')
+      .lean();
+      
+      if (lastApt) {
+        patient.lastAppointment = lastApt;
+      }
+    }
+
+    const total = patients.length;
+    const paginatedPatients = patients.slice(skip, skip + parseInt(limit));
+
+    res.json({
+      success: true,
+      data: {
+        patients: paginatedPatients,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limit),
+          total
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get doctor patients error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Get patient details with full history
+router.get('/patients/:patientId', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    const Patient = require('../models/Patient');
+    const doctorId = req.user.userId;
+    const { patientId } = req.params;
+
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient not found'
+      });
+    }
+
+    // Get all appointments with this patient
+    const appointments = await Appointment.find({
+      doctor: doctorId,
+      patient: patientId
+    })
+    .sort({ appointmentDate: -1 })
+    .populate('patient', 'name email phone age gender address')
+    .lean();
+
+    res.json({
+      success: true,
+      data: {
+        patient,
+        appointments,
+        totalAppointments: appointments.length,
+        completedAppointments: appointments.filter(a => a.status === 'Completed').length
+      }
+    });
+  } catch (error) {
+    console.error('Get patient details error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -223,7 +400,7 @@ router.patch('/availability', verifyToken, async (req, res) => {
       });
     }
 
-    const { day, slots } = req.body;
+    const { availability } = req.body; // Full availability object or { day, slots }
 
     const doctor = await Doctor.findById(req.user.userId);
     if (!doctor) {
@@ -233,7 +410,14 @@ router.patch('/availability', verifyToken, async (req, res) => {
       });
     }
 
-    doctor.availability[day] = slots;
+    if (availability.day && availability.slots) {
+      // Update single day
+      doctor.availability[availability.day] = availability.slots;
+    } else if (typeof availability === 'object') {
+      // Update full availability
+      doctor.availability = { ...doctor.availability, ...availability };
+    }
+
     await doctor.save();
 
     res.json({
@@ -243,6 +427,136 @@ router.patch('/availability', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Update availability error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Get analytics for doctor
+router.get('/analytics', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    const doctorId = req.user.userId;
+    const { period = 'month' } = req.query; // month, week, year
+
+    let startDate = new Date();
+    if (period === 'week') {
+      startDate.setDate(startDate.getDate() - 7);
+    } else if (period === 'month') {
+      startDate.setMonth(startDate.getMonth() - 1);
+    } else if (period === 'year') {
+      startDate.setFullYear(startDate.getFullYear() - 1);
+    }
+
+    // Appointment statistics
+    const appointmentStats = await Appointment.aggregate([
+      {
+        $match: {
+          doctor: new mongoose.Types.ObjectId(doctorId),
+          appointmentDate: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            status: '$status',
+            type: '$type'
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Daily appointments for the period
+    const dailyAppointments = await Appointment.aggregate([
+      {
+        $match: {
+          doctor: new mongoose.Types.ObjectId(doctorId),
+          appointmentDate: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$appointmentDate' }
+          },
+          count: { $sum: 1 },
+          completed: {
+            $sum: { $cond: [{ $eq: ['$status', 'Completed'] }, 1, 0] }
+          }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Revenue (if service price exists)
+    const revenueStats = await Appointment.aggregate([
+      {
+        $match: {
+          doctor: new mongoose.Types.ObjectId(doctorId),
+          appointmentDate: { $gte: startDate },
+          status: 'Completed'
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$service.price' },
+          averageRevenue: { $avg: '$service.price' }
+        }
+      }
+    ]);
+
+    // Patient growth
+    const patientGrowth = await Appointment.aggregate([
+      {
+        $match: {
+          doctor: new mongoose.Types.ObjectId(doctorId),
+          appointmentDate: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m', date: '$appointmentDate' }
+          },
+          newPatients: { $addToSet: '$patient' }
+        }
+      },
+      {
+        $project: {
+          month: '$_id',
+          newPatientsCount: { $size: '$newPatients' }
+        }
+      },
+      { $sort: { month: 1 } }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        period,
+        appointmentStats,
+        dailyAppointments,
+        revenue: revenueStats[0] || { totalRevenue: 0, averageRevenue: 0 },
+        patientGrowth,
+        summary: {
+          totalAppointments: dailyAppointments.reduce((sum, d) => sum + d.count, 0),
+          completedAppointments: dailyAppointments.reduce((sum, d) => sum + d.completed, 0),
+          totalRevenue: revenueStats[0]?.totalRevenue || 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get analytics error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'

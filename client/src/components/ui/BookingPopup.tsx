@@ -4,20 +4,34 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { XMarkIcon, CheckCircleIcon, QuestionMarkCircleIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import Modal from './Modal'
+import { appointmentAPI, doctorAPI } from '@/lib/api'
+import { useAuth } from '@/app/providers'
+import toast from 'react-hot-toast'
 
 interface BookingPopupProps {
   isOpen: boolean
   onClose: () => void
   defaultServiceType?: 'home' | 'tele'
+  onBookingSuccess?: () => void
 }
 
-const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home' }: BookingPopupProps) => {
+const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingSuccess }: BookingPopupProps) => {
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
+    doctorId: '',
+    appointmentDate: '',
+    appointmentTime: '',
     serviceType: defaultServiceType,
-    preferredTime: ''
+    symptoms: '',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      pincode: ''
+    }
   })
+  const [availableDoctors, setAvailableDoctors] = useState<any[]>([])
+  const [isLoadingDoctors, setIsLoadingDoctors] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [showHelper, setShowHelper] = useState(false)
@@ -27,8 +41,23 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home' }: BookingP
       setFormData(prev => ({ ...prev, serviceType: defaultServiceType }))
       setShowSuccess(false)
       setShowHelper(false)
+      loadDoctors()
     }
   }, [isOpen, defaultServiceType])
+
+  const loadDoctors = async () => {
+    try {
+      setIsLoadingDoctors(true)
+      const response = await doctorAPI.getAllDoctors({ status: 'Active', limit: 50 })
+      const doctors = response.data.data?.doctors || response.data.doctors || response.data.data || []
+      setAvailableDoctors(doctors)
+    } catch (error: any) {
+      console.error('Error loading doctors:', error)
+      toast.error('Failed to load doctors')
+    } finally {
+      setIsLoadingDoctors(false)
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -45,38 +74,77 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home' }: BookingP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.name || !formData.phone || !formData.preferredTime) {
+    if (!formData.doctorId || !formData.appointmentDate || !formData.appointmentTime) {
+      toast.error('Please fill all required fields')
       return
     }
 
     setIsSubmitting(true)
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const appointmentType = formData.serviceType === 'home' ? 'Home Visit' : 'Online Consultation'
       
-      setShowSuccess(true)
+      const appointmentData = {
+        doctorId: formData.doctorId,
+        appointmentDate: formData.appointmentDate,
+        appointmentTime: formData.appointmentTime,
+        type: appointmentType,
+        symptoms: formData.symptoms ? [formData.symptoms] : [],
+        address: formData.serviceType === 'home' ? formData.address : undefined
+      }
+
+      const response = await appointmentAPI.create(appointmentData)
       
-      setTimeout(() => {
-        setShowSuccess(false)
-        onClose()
-        setFormData({
-          name: '',
-          phone: '',
-          serviceType: defaultServiceType,
-          preferredTime: ''
-        })
-      }, 3000)
-    } catch (error) {
+      if (response.data.success) {
+        setShowSuccess(true)
+        toast.success('Appointment booked successfully!')
+        
+        // Refresh dashboard if callback provided
+        if (onBookingSuccess) {
+          setTimeout(() => {
+            onBookingSuccess()
+          }, 1000)
+        }
+        
+        setTimeout(() => {
+          setShowSuccess(false)
+          onClose()
+          setFormData({
+            doctorId: '',
+            appointmentDate: '',
+            appointmentTime: '',
+            serviceType: defaultServiceType,
+            symptoms: '',
+            address: {
+              street: '',
+              city: '',
+              state: '',
+              pincode: ''
+            }
+          })
+        }, 3000)
+      }
+    } catch (error: any) {
       console.error('Booking error:', error)
+      toast.error(error.response?.data?.message || 'Failed to book appointment')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const timeSlots = [
-    '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-    '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM'
+    '09:00', '10:00', '11:00', '12:00',
+    '14:00', '15:00', '16:00', '17:00', '18:00'
   ]
+
+  const formatTimeForDisplay = (time: string) => {
+    const [hours, minutes] = time.split(':')
+    const hour = parseInt(hours)
+    if (hour === 0) return `12:${minutes} AM`
+    if (hour < 12) return `${hour}:${minutes} AM`
+    if (hour === 12) return `12:${minutes} PM`
+    return `${hour - 12}:${minutes} PM`
+  }
 
   const specialistGuide = [
     {
@@ -191,46 +259,6 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home' }: BookingP
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Your Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  className="input-field"
-                  placeholder="Enter your full name"
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                  className="input-field"
-                  placeholder="+91 98765 43210"
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
                 <label htmlFor="serviceType" className="block text-sm font-semibold text-gray-700 mb-2">
                   Service Type *
                 </label>
@@ -238,7 +266,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home' }: BookingP
                   id="serviceType"
                   name="serviceType"
                   value={formData.serviceType}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData(prev => ({ ...prev, serviceType: e.target.value as 'home' | 'tele' }))}
                   required
                   className="input-field"
                 >
@@ -250,24 +278,131 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home' }: BookingP
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <label htmlFor="doctorId" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Select Doctor *
+                </label>
+                {isLoadingDoctors ? (
+                  <div className="input-field text-center py-2">Loading doctors...</div>
+                ) : (
+                  <select
+                    id="doctorId"
+                    name="doctorId"
+                    value={formData.doctorId}
+                    onChange={(e) => setFormData(prev => ({ ...prev, doctorId: e.target.value }))}
+                    required
+                    className="input-field"
+                  >
+                    <option value="">Select a doctor</option>
+                    {availableDoctors.map((doctor) => (
+                      <option key={doctor._id || doctor.id} value={doctor._id || doctor.id}>
+                        {doctor.name} - {doctor.specialization?.[0] || 'Physiotherapist'}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <label htmlFor="appointmentDate" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Appointment Date *
+                </label>
+                <input
+                  type="date"
+                  id="appointmentDate"
+                  name="appointmentDate"
+                  value={formData.appointmentDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, appointmentDate: e.target.value }))}
+                  required
+                  min={new Date().toISOString().split('T')[0]}
+                  className="input-field"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <label htmlFor="preferredTime" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Preferred Time *
+                <label htmlFor="appointmentTime" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Appointment Time *
                 </label>
                 <select
-                  id="preferredTime"
-                  name="preferredTime"
-                  value={formData.preferredTime}
-                  onChange={handleInputChange}
+                  id="appointmentTime"
+                  name="appointmentTime"
+                  value={formData.appointmentTime}
+                  onChange={(e) => setFormData(prev => ({ ...prev, appointmentTime: e.target.value }))}
                   required
                   className="input-field"
                 >
-                  <option value="">Select preferred time</option>
+                  <option value="">Select time</option>
                   {timeSlots.map((time) => (
-                    <option key={time} value={time}>{time}</option>
+                    <option key={time} value={time}>{formatTimeForDisplay(time)}</option>
                   ))}
                 </select>
+              </motion.div>
+
+              {formData.serviceType === 'home' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="space-y-3"
+                >
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Address (for Home Visit) *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Street Address"
+                    value={formData.address.street}
+                    onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, street: e.target.value } }))}
+                    className="input-field mb-2"
+                    required={formData.serviceType === 'home'}
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="City"
+                      value={formData.address.city}
+                      onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, city: e.target.value } }))}
+                      className="input-field"
+                      required={formData.serviceType === 'home'}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Pincode"
+                      value={formData.address.pincode}
+                      onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, pincode: e.target.value } }))}
+                      className="input-field"
+                      required={formData.serviceType === 'home'}
+                    />
+                  </div>
+                </motion.div>
+              )}
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <label htmlFor="symptoms" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Symptoms / Condition (Optional)
+                </label>
+                <textarea
+                  id="symptoms"
+                  name="symptoms"
+                  value={formData.symptoms}
+                  onChange={(e) => setFormData(prev => ({ ...prev, symptoms: e.target.value }))}
+                  className="input-field"
+                  rows={3}
+                  placeholder="Describe your symptoms or condition"
+                />
               </motion.div>
 
               <button
@@ -327,7 +462,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home' }: BookingP
               transition={{ delay: 0.5 }}
               className="text-sm text-gray-500"
             >
-              Our team will reach out to you at <strong>{formData.phone}</strong>
+              Your appointment has been booked successfully!
             </motion.p>
           </motion.div>
         )}

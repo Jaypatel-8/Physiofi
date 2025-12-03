@@ -108,8 +108,8 @@ const Hero = memo(() => {
                 transition={{ delay: 0.3 }}
                 className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-[1.1]"
               >
-                Your Path to Better
-                <span className="block text-primary-400">Movement Starts</span>
+                Your Path to <span className="text-primary-500">Better</span>
+                <span className="block"><span className="text-primary-500">Movement</span> Starts</span>
                 <span className="block">Here</span>
               </motion.h1>
               

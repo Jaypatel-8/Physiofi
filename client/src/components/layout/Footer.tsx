@@ -49,9 +49,9 @@ const Footer = () => {
                   <Image
                     src="/Physiofi Logo(1).png"
                     alt="PhysioFi Logo"
-                    width={140}
-                    height={120}
-                    className="group-hover:scale-105 transition-transform duration-300"
+                    width={120}
+                    height={50}
+                    className="group-hover:scale-105 transition-transform duration-300 object-contain"
                     priority
                   />
                 </div>

@@ -140,7 +140,7 @@ const AboutPage = () => {
         <div className="container-custom relative z-10">
           <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 max-w-6xl mx-auto">
             <h1 className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-tight">
-              ABOUT<br />PHYSIOFI
+              ABOUT<br /><span className="text-primary-500">PHYSIOFI</span>
             </h1>
             <div className="lg:ml-auto lg:max-w-2xl">
               <p className="text-xl text-gray-600 font-medium leading-relaxed">
@@ -240,7 +240,7 @@ const AboutPage = () => {
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display">
-              Our Values
+              Our <span className="text-primary-500">Values</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               The principles that guide everything we do and shape our approach to patient care.
@@ -283,7 +283,7 @@ const AboutPage = () => {
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-6xl font-black text-gray-900 mb-6 font-display">
-              Our Journey
+              Our <span className="text-primary-500">Journey</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto font-light">
               A story of purpose, growth, and care—built step by step
@@ -340,7 +340,7 @@ const AboutPage = () => {
       <section className="py-20 bg-accent-500">
         <div className="container-custom text-center">
           <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display">
-            Ready to Start Your Recovery Journey?
+            Ready to Start Your <span className="text-yellow-200">Recovery</span> <span className="text-yellow-200">Journey</span>?
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
             Join hundreds of satisfied patients who have experienced exceptional care with PhysioFi.

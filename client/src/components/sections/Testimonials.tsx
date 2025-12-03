@@ -174,7 +174,7 @@ const Testimonials = () => {
             className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
           >
             What Our Clients Say
-            <span className="block text-pastel-sky-400">About Us</span>
+            <span className="block"><span className="text-primary-500">About</span> <span className="text-primary-500">Us</span></span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}

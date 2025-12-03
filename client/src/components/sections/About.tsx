@@ -55,7 +55,7 @@ const About = () => {
             className="inline-block mb-4"
           >
             <span className="bg-pastel-lavender-100 text-pastel-lavender-400 px-5 py-2 rounded-full text-sm font-semibold">
-              About PhysioFi
+              About <span className="text-primary-500">PhysioFi</span>
             </span>
         </motion.div>
           <motion.h2
@@ -197,7 +197,7 @@ const About = () => {
               </div>
               <h4 className="text-3xl font-black mb-4 font-display relative z-10">Hands-On Leadership</h4>
               <p className="text-white/95 text-lg leading-relaxed relative z-10">
-                Shruti personally oversees every patient case, ensuring personalized care and attention to detail that sets PhysioFi apart.
+                Shruti personally oversees every patient case, ensuring personalized care and attention to detail that sets <span className="text-primary-500">PhysioFi</span> apart.
               </p>
         </motion.div>
           </div>
@@ -238,7 +238,7 @@ const About = () => {
         <div className="bg-gradient-to-br from-pastel-sky-50 via-pastel-peach-50 to-pastel-sage-50 rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl p-12 shadow-xl">
           <div className="text-center mb-12">
             <h3 className="text-4xl font-black text-gray-900 mb-4 font-display">
-              By Bridging Gaps We Make Sure Your Recovery Will Blossom
+              By Bridging Gaps We Make Sure Your <span className="text-primary-500">Recovery</span> Will <span className="text-primary-500">Blossom</span>
             </h3>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
               By serving patients we are building happy families which will contribute in spreading awareness 
