@@ -19,20 +19,10 @@ import { useAuth } from '@/app/providers'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const { user, logout } = useAuth()
   const router = useRouter()
   const submenuRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -140,11 +130,7 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-lg'
-          : 'bg-transparent'
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-all duration-300"
     >
       <div className="container-custom">
         <div className="flex items-center justify-between h-16 lg:h-20">
@@ -185,9 +171,7 @@ const Header = () => {
                 {item.hasSubmenu ? (
                   <div className="relative">
                     <button
-                      className={`font-medium relative group transition-all duration-300 hover:text-gray-900 flex items-center gap-1 ${
-                        isScrolled ? 'text-gray-900' : 'text-gray-800 drop-shadow-lg'
-                      }`}
+                      className="font-medium relative group transition-all duration-300 hover:text-primary-600 flex items-center gap-1 text-gray-900"
                     >
                       {item.name}
                       <ChevronDownIcon className={`h-4 w-4 transition-transform duration-300 ${openSubmenu === item.name ? 'rotate-180' : ''}`} />
@@ -220,21 +204,17 @@ const Header = () => {
                     </AnimatePresence>
                   </div>
                 ) : item.href.startsWith('#') ? (
-                  <a
-                    href={item.href}
-                    className={`font-medium relative group transition-all duration-300 hover:text-gray-900 ${
-                      isScrolled ? 'text-gray-900' : 'text-gray-800 drop-shadow-lg'
-                    }`}
-                  >
+                    <a
+                      href={item.href}
+                      className="font-medium relative group transition-all duration-300 hover:text-primary-600 text-gray-900"
+                    >
                     {item.name}
                     <span className={`absolute bottom-0 left-0 w-0 h-0.5 ${item.colorClass} transition-all duration-500 group-hover:w-full`}></span>
                   </a>
                 ) : (
                   <Link
                     href={item.href}
-                    className={`font-medium relative group transition-all duration-300 hover:text-gray-900 ${
-                      isScrolled ? 'text-gray-900' : 'text-gray-800 drop-shadow-lg'
-                    }`}
+                    className="font-medium relative group transition-all duration-300 hover:text-primary-600 text-gray-900"
                   >
                     {item.name}
                     <span className={`absolute bottom-0 left-0 w-0 h-0.5 ${item.colorClass} transition-all duration-500 group-hover:w-full`}></span>
@@ -283,7 +263,7 @@ const Header = () => {
             {isMenuOpen ? (
               <XMarkIcon className="h-6 w-6 text-gray-900" />
             ) : (
-              <Bars3Icon className={`h-6 w-6 ${isScrolled ? 'text-gray-900' : 'text-white'}`} />
+              <Bars3Icon className="h-6 w-6 text-gray-900" />
             )}
           </motion.button>
         </div>

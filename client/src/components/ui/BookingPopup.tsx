@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { XMarkIcon, CheckCircleIcon, QuestionMarkCircleIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import Modal from './Modal'
-import { appointmentAPI, doctorAPI } from '@/lib/api'
+import { appointmentAPI, doctorAPI, doctorPublicAPI } from '@/lib/api'
 import { useAuth } from '@/app/providers'
 import toast from 'react-hot-toast'
 
@@ -35,6 +35,8 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [showHelper, setShowHelper] = useState(false)
+  const [selectedDoctorConditions, setSelectedDoctorConditions] = useState<any[]>([])
+  const [isLoadingConditions, setIsLoadingConditions] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -52,7 +54,9 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
       const doctors = response.data.data?.doctors || response.data.doctors || response.data.data || []
       setAvailableDoctors(doctors)
     } catch (error: any) {
-      console.error('Error loading doctors:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading doctors:', error)
+      }
       toast.error('Failed to load doctors')
     } finally {
       setIsLoadingDoctors(false)
@@ -65,6 +69,29 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
       ...prev,
       [name]: value
     }))
+    
+    // Load doctor conditions when doctor is selected
+    if (name === 'doctorId' && value) {
+      loadDoctorConditions(value)
+    } else if (name === 'doctorId' && !value) {
+      setSelectedDoctorConditions([])
+    }
+  }
+
+  const loadDoctorConditions = async (doctorId: string) => {
+    try {
+      setIsLoadingConditions(true)
+      const response = await doctorPublicAPI.getDoctor(doctorId)
+      if (response.data.success) {
+        setSelectedDoctorConditions(response.data.data.conditions || [])
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading doctor conditions:', error)
+      }
+    } finally {
+      setIsLoadingConditions(false)
+    }
   }
 
   const handleToggleHelper = () => {
@@ -74,6 +101,13 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Check if user is logged in
+    if (!user) {
+      toast.error('Please login to book an appointment')
+      window.location.href = '/login'
+      return
+    }
+    
     if (!formData.doctorId || !formData.appointmentDate || !formData.appointmentTime) {
       toast.error('Please fill all required fields')
       return
@@ -82,17 +116,58 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
     setIsSubmitting(true)
     
     try {
-      const appointmentType = formData.serviceType === 'home' ? 'Home Visit' : 'Online Consultation'
+      // Map service type to appointment type
+      let appointmentType = 'Home Visit'
+      if (formData.serviceType === 'tele') {
+        appointmentType = 'Online Consultation'
+      } else if (formData.serviceType === 'home') {
+        appointmentType = 'Home Visit'
+      } else if (formData.serviceType === 'clinic') {
+        appointmentType = 'Clinic Visit'
+      }
       
+      // Validate date is not in the past
+      const selectedDate = new Date(formData.appointmentDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      selectedDate.setHours(0, 0, 0, 0)
+      
+      if (selectedDate < today) {
+        toast.error('Please select a future date')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Format address properly for home visits
+      let formattedAddress = undefined
+      if (formData.serviceType === 'home' && formData.address) {
+        // Only include address if at least street and city are provided
+        if (formData.address.street && formData.address.city) {
+          formattedAddress = {
+            street: formData.address.street,
+            city: formData.address.city,
+            state: formData.address.state || '',
+            pincode: formData.address.pincode || ''
+          }
+        } else {
+          toast.error('Please provide complete address for home visit')
+          setIsSubmitting(false)
+          return
+        }
+      }
+
       const appointmentData = {
         doctorId: formData.doctorId,
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime,
         type: appointmentType,
-        symptoms: formData.symptoms ? [formData.symptoms] : [],
-        address: formData.serviceType === 'home' ? formData.address : undefined
+        symptoms: formData.symptoms ? (Array.isArray(formData.symptoms) ? formData.symptoms : [formData.symptoms]) : [],
+        address: formattedAddress
       }
 
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Booking appointment with data:', appointmentData)
+      }
       const response = await appointmentAPI.create(appointmentData)
       
       if (response.data.success) {
@@ -125,8 +200,15 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
         }, 3000)
       }
     } catch (error: any) {
-      console.error('Booking error:', error)
-      toast.error(error.response?.data?.message || 'Failed to book appointment')
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Booking error:', error)
+        const errorDetails = error.response?.data?.received || error.response?.data?.body
+        if (errorDetails) {
+          console.error('Error details:', errorDetails)
+        }
+      }
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to book appointment'
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -151,7 +233,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
       condition: 'Back Pain, Neck Pain, Shoulder Pain',
       specialist: 'Orthopedic Physiotherapist',
       icon: '🦴',
-      color: 'bg-blue-500'
+      color: 'bg-primary-500'
     },
     {
       condition: 'Sports Injury, Athletic Recovery',
@@ -200,7 +282,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200 }}
-                className="w-16 h-16 bg-gradient-to-br from-blue-500 via-teal-500 to-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                className="w-16 h-16 bg-gradient-to-br from-primary-500 via-secondary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4"
               >
                 <span className="text-3xl">📅</span>
               </motion.div>
@@ -224,7 +306,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mb-6 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200"
+                  className="mb-6 bg-gradient-to-br from-primary-50 via-secondary-50 to-tertiary-50 rounded-xl p-4 border-2 border-primary-200"
                 >
                   <h3 className="font-bold text-gray-900 mb-3 flex items-center space-x-2">
                     <SparklesIcon className="h-5 w-5 text-purple-600" />
@@ -290,7 +372,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                     id="doctorId"
                     name="doctorId"
                     value={formData.doctorId}
-                    onChange={(e) => setFormData(prev => ({ ...prev, doctorId: e.target.value }))}
+                    onChange={handleInputChange}
                     required
                     className="input-field"
                   >
@@ -301,6 +383,30 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                       </option>
                     ))}
                   </select>
+                )}
+                
+                {/* Show doctor conditions */}
+                {formData.doctorId && selectedDoctorConditions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="mt-4 p-4 bg-primary-50 rounded-lg border border-primary-200"
+                  >
+                    <h4 className="font-semibold text-gray-900 mb-2 text-sm">Conditions Treated by This Doctor:</h4>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {selectedDoctorConditions.map((condition: any, index: number) => (
+                        <div key={index} className="bg-white p-3 rounded-lg border border-blue-100">
+                          <p className="font-semibold text-sm text-gray-900">{condition.condition}</p>
+                          <p className="text-xs text-gray-600 mt-1 line-clamp-2">{condition.treatmentPlan}</p>
+                          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                            <span>⏱️ {condition.duration}</span>
+                            {condition.sessions > 0 && <span>📋 {condition.sessions} sessions</span>}
+                            {condition.price > 0 && <span>💰 ₹{condition.price}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
                 )}
               </motion.div>
 
@@ -408,7 +514,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

@@ -25,7 +25,7 @@ const FloatingActionButton = () => {
   }, [])
 
   const handleCallNow = () => {
-    window.open('tel:+919998103191')
+    window.open('tel:+919082770384')
   }
 
   const handleBookAppointment = () => {
@@ -41,7 +41,7 @@ const FloatingActionButton = () => {
   }
 
   const handleWhatsApp = () => {
-    window.open('https://wa.me/919998103191', '_blank')
+    window.open('https://wa.me/919082770384', '_blank')
   }
 
   const quickActions = [

@@ -106,26 +106,22 @@ const AboutPage = () => {
     {
       year: "2023",
       title: "The Beginning",
-      description: "During her graduation years, Dr. Shruti saw how many patients struggled to visit clinics due to pain, mobility issues, and busy schedules. This inspired her to start PhysioFi as a home-visit physiotherapy service, offering affordable and personalised treatment right at the patient's doorstep.",
-      icon: "📍"
+      description: "During her graduation years, Dr. Shruti saw how many patients struggled to visit clinics due to pain, mobility issues, and busy schedules. This inspired her to start PhysioFi as a home-visit physiotherapy service, offering affordable and personalised treatment right at the patient's doorstep."
     },
     {
       year: "2024", 
       title: "Expansion to Navi Mumbai",
-      description: "After tremendous patient appreciation and strong results, PhysioFi expanded to Dr. Shruti's hometown — Navi Mumbai. This marked the brand's first step toward becoming a multi-city physiotherapy service.",
-      icon: "📍"
+      description: "After tremendous patient appreciation and strong results, PhysioFi expanded to Dr. Shruti's hometown — Navi Mumbai. This marked the brand's first step toward becoming a multi-city physiotherapy service."
     },
     {
       year: "2025",
       title: "Launch in Ahmedabad",
-      description: "To serve more metro cities with quality physiotherapy, PhysioFi extended its services to Ahmedabad in 2025, strengthening its footprint in key urban regions.",
-      icon: "📍"
+      description: "To serve more metro cities with quality physiotherapy, PhysioFi extended its services to Ahmedabad in 2025, strengthening its footprint in key urban regions."
     },
     {
       year: "Today",
       title: "Growing Into a Nationwide Brand",
-      description: "PhysioFi now offers Home Visit Physiotherapy, Tele-Consultation, Advanced Therapy Treatments (Cupping, Dry Needling, IASTM & more), and Coming Soon: Premium Physiotherapy Clinics in Major Cities. Through every expansion, one promise remains constant: Bringing expert physiotherapy wherever the patient needs it.",
-      icon: "✨"
+      description: "PhysioFi now offers Home Visit Physiotherapy, Tele-Consultation, Advanced Therapy Treatments (Cupping, Dry Needling, IASTM & more), and Coming Soon: Premium Physiotherapy Clinics in Major Cities. Through every expansion, one promise remains constant: Bringing expert physiotherapy wherever the patient needs it."
     }
   ]
 
@@ -278,59 +274,122 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Timeline - Redesigned */}
-      <section className="py-20 bg-gradient-to-br from-primary-50 via-pastel-mint-50 to-pastel-sage-50">
-        <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-6xl font-black text-gray-900 mb-6 font-display">
+      {/* Timeline - Ultra Modern Sleek Design */}
+      <section className="py-32 bg-white relative overflow-hidden">
+        <div className="container-custom relative z-10">
+          <div className="text-center mb-24">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-block mb-8"
+            >
+              <span className="text-primary-600 text-xs font-bold tracking-[0.2em] uppercase">
+                Our Journey
+              </span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-6xl lg:text-8xl font-black text-gray-900 mb-8 font-display tracking-tighter"
+            >
               Our <span className="text-primary-500">Journey</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto font-light">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-lg text-gray-400 max-w-xl mx-auto font-light tracking-wide"
+            >
               A story of purpose, growth, and care—built step by step
-            </p>
+            </motion.p>
           </div>
 
-          <div className="max-w-5xl mx-auto">
-          <div className="relative">
-              <div className="space-y-16 relative">
-              {milestones.map((milestone, index) => (
-                  <motion.div
-                  key={index}
-                  data-aos="fade-up"
-                  data-aos-delay={index * 100}
-                    initial={{ opacity: 0, x: -30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.2 }}
-                    className="flex gap-8 items-start relative"
-                  >
-                    {/* Connecting Line */}
-                    {index < milestones.length - 1 && (
-                      <div className="absolute left-12 top-24 w-0.5 h-16 bg-primary-300 opacity-30"></div>
-                    )}
-                    
-                    {/* Year Badge */}
-                    <div className="flex-shrink-0 relative z-10">
-                      <div className="w-24 h-24 bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center border-2 border-primary-200">
-                        <span className="text-3xl mb-1">{milestone.icon}</span>
-                        <div className="text-lg font-black text-primary-600">{milestone.year}</div>
-                      </div>
-                    </div>
-                    
-                    {/* Content Card */}
-                    <div className="flex-grow bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden">
-                      {/* Book Corner Effect */}
-                      <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-primary-100"></div>
-                      <div className="absolute top-0 right-0 w-0 h-0 border-l-[45px] border-l-transparent border-t-[45px] border-t-primary-50"></div>
+          <div className="max-w-6xl mx-auto">
+            <div className="relative">
+              {/* Ultra Minimal Vertical Timeline Line */}
+              <div className="absolute left-0 md:left-1/2 md:transform md:-translate-x-1/2 top-0 bottom-0 w-px bg-gray-200 hidden md:block"></div>
+              
+              <div className="space-y-32 md:space-y-40">
+                {milestones.map((milestone, index) => {
+                  const isEven = index % 2 === 0
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 80 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-150px" }}
+                      transition={{ 
+                        delay: index * 0.08, 
+                        duration: 1,
+                        ease: [0.19, 1, 0.22, 1]
+                      }}
+                      className={`relative flex flex-col md:flex-row items-start md:items-center gap-12 ${
+                        isEven ? 'md:flex-row' : 'md:flex-row-reverse'
+                      }`}
+                    >
+                      {/* Minimal Timeline Dot */}
+                      <div className="absolute left-0 md:left-1/2 md:transform md:-translate-x-1/2 w-3 h-3 bg-primary-500 rounded-full z-20 flex-shrink-0"></div>
                       
-                      <div className="relative z-10">
-                        <h3 className="text-2xl font-black text-gray-900 mb-4 font-display">{milestone.title}</h3>
-                        <p className="text-gray-700 leading-relaxed text-lg">{milestone.description}</p>
-                  </div>
-                  </div>
-                  </motion.div>
-                ))}
-                </div>
+                      {/* Year Badge - Mobile */}
+                      <div className="md:hidden flex-shrink-0">
+                        <div className="text-primary-500 text-4xl font-black tracking-tight">
+                          {milestone.year}
+                        </div>
+                      </div>
+                      
+                      {/* Content Card - Ultra Modern */}
+                      <div className={`flex-1 ${
+                        isEven 
+                          ? 'md:pr-16 md:text-right md:ml-auto md:max-w-[46%]' 
+                          : 'md:pl-16 md:text-left md:mr-auto md:max-w-[46%]'
+                      }`}>
+                        <motion.div
+                          whileHover={{ 
+                            y: -12,
+                            transition: { duration: 0.4, ease: [0.19, 1, 0.22, 1] }
+                          }}
+                          className="group relative"
+                        >
+                          {/* Year - Desktop */}
+                          <div className={`hidden md:block mb-8 ${
+                            isEven ? 'text-right' : 'text-left'
+                          }`}>
+                            <div className="text-primary-500 text-5xl font-black tracking-tighter inline-block">
+                              {milestone.year}
+                            </div>
+                          </div>
+                          
+                          {/* Card Content */}
+                          <div className="relative">
+                            <h3 className={`text-3xl md:text-4xl font-black text-gray-900 mb-6 font-display tracking-tight leading-tight ${
+                              isEven ? 'md:text-right' : ''
+                            }`}>
+                              {milestone.title}
+                            </h3>
+                            <p className={`text-gray-500 leading-relaxed text-lg md:text-xl font-light tracking-wide ${
+                              isEven ? 'md:text-right' : ''
+                            }`}>
+                              {milestone.description}
+                            </p>
+                            
+                            {/* Subtle Underline on Hover */}
+                            <div className={`absolute bottom-0 ${
+                              isEven ? 'right-0' : 'left-0'
+                            } w-0 h-0.5 bg-primary-500 group-hover:w-full transition-all duration-700 ease-out`}></div>
+                          </div>
+                        </motion.div>
+                      </div>
+                      
+                      {/* Spacer for desktop layout */}
+                      <div className="hidden md:block w-[46%]"></div>
+                    </motion.div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>

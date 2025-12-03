@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const Patient = require('../models/Patient');
 const Appointment = require('../models/Appointment');
+const PatientTreatmentPlan = require('../models/PatientTreatmentPlan');
 const router = express.Router();
 
 // Middleware to verify JWT token
@@ -90,7 +91,9 @@ router.put('/profile', verifyToken, async (req, res) => {
 
     // Update fields
     if (name) patient.name = name;
-    if (age) patient.age = age;
+    if (email) patient.email = email;
+    if (phone) patient.phone = phone;
+    if (age !== undefined) patient.age = age;
     if (gender) patient.gender = gender;
     if (address) patient.address = address;
     if (emergencyContact) patient.emergencyContact = emergencyContact;
@@ -193,14 +196,32 @@ router.get('/stats', verifyToken, async (req, res) => {
 
     const patient = await Patient.findById(patientId);
     
+    // Calculate upcoming appointments
+    const now = new Date();
+    const upcomingCount = await Appointment.countDocuments({
+      patient: req.user.userId,
+      status: { $in: ['Pending', 'Confirmed', 'Scheduled'] },
+      appointmentDate: { $gte: now }
+    });
+
+    // Get active treatment plans count (appointments with treatment plans)
+    const activeTreatments = await Appointment.countDocuments({
+      patient: req.user.userId,
+      status: { $in: ['Confirmed', 'In Progress'] },
+      'treatment.plan': { $exists: true, $ne: '' }
+    });
+
     res.json({
       success: true,
       data: {
-        totalAppointments: stats[0]?.totalAppointments || 0,
-        completedSessions: stats[0]?.completedAppointments || 0,
-        upcomingSessions: stats[0]?.confirmedAppointments || 0,
-        recoveryProgress: patient?.recoveryProgress || 0,
-        averageRating: stats[0]?.averageRating || 0
+        stats: {
+          totalAppointments: stats[0]?.totalAppointments || 0,
+          upcomingAppointments: upcomingCount,
+          completedAppointments: stats[0]?.completedAppointments || 0,
+          activeTreatments: activeTreatments,
+          recoveryProgress: patient?.recoveryProgress || 0,
+          averageRating: stats[0]?.averageRating || 0
+        }
       }
     });
   } catch (error) {
@@ -411,6 +432,134 @@ router.delete('/:id', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Delete patient error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Get patient treatment plans
+router.get('/treatment-plans', verifyToken, async (req, res) => {
+  try {
+    // Debug logging
+    console.log('Treatment plans request - User:', req.user?.role, 'UserId:', req.user?.userId);
+    
+    if (!req.user || req.user.role !== 'patient') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Patient role required.',
+        userRole: req.user?.role || 'none'
+      });
+    }
+
+    const { status } = req.query;
+    let query = { patient: req.user.userId };
+    if (status) query.status = status;
+
+    const treatmentPlans = await PatientTreatmentPlan.find(query)
+      .populate('doctor', 'name specialization email phone')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({
+      success: true,
+      data: { treatmentPlans: treatmentPlans || [] }
+    });
+  } catch (error) {
+    console.error('Get patient treatment plans error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+
+// Get treatment plan by ID
+router.get('/treatment-plans/:id', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'patient') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    const treatmentPlan = await PatientTreatmentPlan.findOne({
+      _id: req.params.id,
+      patient: req.user.userId
+    })
+    .populate('doctor', 'name specialization email phone')
+    .populate('patient', 'name email phone')
+    .lean();
+
+    if (!treatmentPlan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Treatment plan not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: treatmentPlan
+    });
+  } catch (error) {
+    console.error('Get treatment plan error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Add patient note to treatment plan
+router.post('/treatment-plans/:id/notes', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'patient') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    const { note } = req.body;
+
+    if (!note) {
+      return res.status(400).json({
+        success: false,
+        message: 'Note is required'
+      });
+    }
+
+    const treatmentPlan = await PatientTreatmentPlan.findOne({
+      _id: req.params.id,
+      patient: req.user.userId
+    });
+
+    if (!treatmentPlan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Treatment plan not found'
+      });
+    }
+
+    treatmentPlan.notes.push({
+      note,
+      addedBy: 'patient',
+      addedAt: new Date()
+    });
+
+    await treatmentPlan.save();
+
+    res.json({
+      success: true,
+      message: 'Note added successfully',
+      data: treatmentPlan
+    });
+  } catch (error) {
+    console.error('Add note error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'

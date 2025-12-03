@@ -576,16 +576,23 @@ router.get('/analytics', verifyToken, verifyAdmin, async (req, res) => {
       }
     ]);
 
+    // Get total patients and doctors
+    const totalPatients = await Patient.countDocuments();
+    const totalDoctors = await Doctor.countDocuments();
+    const activeUsers = totalPatients + totalDoctors;
+
     res.json({
       success: true,
       data: {
         period,
-        ...analytics[0] || {
-          totalAppointments: 0,
-          totalRevenue: 0,
-          completedAppointments: 0,
-          cancelledAppointments: 0
-        }
+        totalRevenue: analytics[0]?.totalRevenue || 0,
+        monthlyRevenue: analytics[0]?.totalRevenue || 0,
+        totalAppointments: analytics[0]?.totalAppointments || 0,
+        completedAppointments: analytics[0]?.completedAppointments || 0,
+        cancelledAppointments: analytics[0]?.cancelledAppointments || 0,
+        totalPatients,
+        totalDoctors,
+        activeUsers
       }
     });
   } catch (error) {

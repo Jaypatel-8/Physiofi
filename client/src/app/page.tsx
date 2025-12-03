@@ -308,6 +308,8 @@ const Home = memo(function Home() {
                           width={24}
                           height={24}
                           className="object-contain"
+                          loading="lazy"
+                          quality={75}
                         />
                       )}
                     </div>

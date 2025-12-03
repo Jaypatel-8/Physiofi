@@ -125,6 +125,16 @@ export const patientAPI = {
   
   deleteNotification: (id: string) => 
     api.delete(`/notifications/${id}`),
+
+  // Treatment Plans
+  getTreatmentPlans: (params?: any) => 
+    api.get('/patients/treatment-plans', { params }),
+  
+  getTreatmentPlan: (id: string) => 
+    api.get(`/patients/treatment-plans/${id}`),
+  
+  addTreatmentPlanNote: (id: string, note: string) => 
+    api.post(`/patients/treatment-plans/${id}/notes`, { note }),
 }
 
 // Doctor API
@@ -185,12 +195,50 @@ export const doctorAPI = {
     api.get(`/doctors/patients/${patientId}`),
   
   // Availability
+  getAvailability: () => 
+    api.get('/doctors/availability'),
+  
   updateAvailability: (data: any) => 
     api.patch('/doctors/availability', data),
   
   // Analytics
   getAnalytics: (period?: string) => 
     api.get('/doctors/analytics', { params: { period } }),
+
+  // Conditions and Treatment Plans (Doctor's general conditions - kept for reference)
+  getConditions: () => 
+    api.get('/doctors/conditions'),
+  
+  addCondition: (data: any) => 
+    api.post('/doctors/conditions', data),
+  
+  updateCondition: (id: string, data: any) => 
+    api.put(`/doctors/conditions/${id}`, data),
+  
+  deleteCondition: (id: string) => 
+    api.delete(`/doctors/conditions/${id}`),
+
+  // Patient-specific Treatment Plans
+  getPatientTreatmentPlans: (patientId: string) => 
+    api.get(`/doctors/patients/${patientId}/treatment-plans`),
+  
+  createPatientTreatmentPlan: (patientId: string, data: any) => 
+    api.post(`/doctors/patients/${patientId}/treatment-plans`, data),
+  
+  updatePatientTreatmentPlan: (id: string, data: any) => 
+    api.put(`/doctors/treatment-plans/${id}`, data),
+  
+  deletePatientTreatmentPlan: (id: string) => 
+    api.delete(`/doctors/treatment-plans/${id}`),
+}
+
+// Doctor Public API (for patients to view)
+export const doctorPublicAPI = {
+  getDoctor: (id: string) => 
+    api.get(`/doctors/${id}`),
+  
+  getAvailableDoctors: (params?: any) => 
+    api.get('/doctors/available', { params }),
 }
 
 // Appointment API
@@ -215,6 +263,16 @@ export const appointmentAPI = {
   
   getAllAppointments: (params?: any) => 
     api.get('/appointments', { params }),
+
+  // Reschedule
+  requestReschedule: (id: string, data: { newDate: string; newTime: string; reason: string }) => 
+    api.post(`/appointments/${id}/reschedule-request`, data),
+  
+  respondToReschedule: (id: string, action: 'accept' | 'decline', declinedReason?: string) => 
+    api.patch(`/appointments/${id}/reschedule-response`, { action, declinedReason }),
+  
+  reschedule: (id: string, data: { newDate: string; newTime: string; reason: string }) => 
+    api.patch(`/appointments/${id}/reschedule`, data),
 }
 
 // Admin API

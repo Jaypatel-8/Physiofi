@@ -21,7 +21,11 @@ const notificationSchema = new mongoose.Schema({
       'appointment_reminder',
       'treatment_update',
       'progress_update',
-      'system_announcement'
+      'system_announcement',
+      'reschedule_request',
+      'reschedule_accepted',
+      'reschedule_declined',
+      'appointment_status_change'
     ],
     required: true
   },
@@ -75,7 +79,8 @@ notificationSchema.statics.createAppointmentNotification = async function(
   appointmentId,
   patientData,
   appointmentData,
-  status
+  status,
+  doctorData
 ) {
   const appointmentType = appointmentData.type === 'Home Visit' ? 'Home Visit' : appointmentData.type === 'Online Consultation' ? 'Tele Consultation' : 'Clinic Visit';
   
@@ -93,17 +98,33 @@ notificationSchema.statics.createAppointmentNotification = async function(
     }
   };
 
+  // Helper function to format time
+  const formatTime = (time) => {
+    if (!time) return 'N/A';
+    return time;
+  };
+
   switch(status) {
     case 'Pending':
       type = 'appointment_request';
-      title = `New ${appointmentType} Appointment Request`;
-      message = `${patientData.name || 'Patient'} has requested a ${appointmentType.toLowerCase()} appointment on ${formatDate(appointmentData.appointmentDate)} at ${appointmentData.appointmentTime || 'N/A'}`;
+      if (userModel === 'Doctor') {
+        title = `New ${appointmentType} Appointment Request`;
+        message = `${patientData.name || 'Patient'} (${patientData.phone || 'N/A'}) has requested a ${appointmentType.toLowerCase()} appointment on ${formatDate(appointmentData.appointmentDate)} at ${formatTime(appointmentData.appointmentTime)}. Symptoms: ${(appointmentData.symptoms || []).join(', ') || 'None'}`;
+      } else {
+        title = `Appointment Requested - ${appointmentType}`;
+        message = `Your ${appointmentType.toLowerCase()} appointment with Dr. ${doctorData?.name || 'Doctor'} has been requested for ${formatDate(appointmentData.appointmentDate)} at ${formatTime(appointmentData.appointmentTime)}. Status: Pending confirmation.`;
+      }
       priority = 'high';
       break;
     case 'Confirmed':
       type = 'appointment_confirmed';
-      title = `Appointment Confirmed - ${appointmentType}`;
-      message = `Your ${appointmentType.toLowerCase()} appointment on ${formatDate(appointmentData.appointmentDate)} at ${appointmentData.appointmentTime || 'N/A'} has been confirmed`;
+      if (userModel === 'Doctor') {
+        title = `Appointment Confirmed - ${appointmentType}`;
+        message = `Appointment with ${patientData.name || 'Patient'} confirmed for ${formatDate(appointmentData.appointmentDate)} at ${formatTime(appointmentData.appointmentTime)}. Type: ${appointmentType}`;
+      } else {
+        title = `Appointment Confirmed - ${appointmentType}`;
+        message = `Your ${appointmentType.toLowerCase()} appointment with Dr. ${doctorData?.name || 'Doctor'} is confirmed for ${formatDate(appointmentData.appointmentDate)} at ${formatTime(appointmentData.appointmentTime)}.`;
+      }
       priority = 'medium';
       break;
     case 'Cancelled':
@@ -146,6 +167,10 @@ notificationSchema.statics.createAppointmentNotification = async function(
       gender: patientData.gender,
       address: patientData.address || {}
     },
+    doctor: doctorData ? {
+      name: doctorData.name,
+      specialization: doctorData.specialization || []
+    } : null,
     appointment: {
       date: appointmentData.appointmentDate,
       time: appointmentData.appointmentTime,

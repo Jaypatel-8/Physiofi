@@ -84,7 +84,7 @@ export default function RootLayout({
     "url": "https://physiofi.com",
     "logo": "https://physiofi.com/images/logo.png",
     "image": "https://physiofi.com/images/og-image.jpg",
-    "telephone": "+91 9998103191",
+    "telephone": "+91 9082770384",
     "email": "info@physiofi.com",
     "address": {
       "@type": "PostalAddress",
@@ -144,12 +144,15 @@ export default function RootLayout({
         <link rel="canonical" href="https://physiofi.com" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1C1F4A" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/Physiofi Logo icon.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/Physiofi Logo icon.png" />
+        <link rel="shortcut icon" href="/Physiofi Logo icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/Physiofi Logo icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="preload" as="image" href="/Physiofi.svg" />
       </head>
       <body className={`${inter.className} overflow-x-hidden`}>
         <Providers>

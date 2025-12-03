@@ -22,6 +22,10 @@ const doctorSchema = new mongoose.Schema({
     type: [String],
     required: true
   },
+  occupation: {
+    type: String,
+    trim: true
+  },
   qualifications: [{
     degree: String,
     institution: String,
@@ -53,7 +57,7 @@ const doctorSchema = new mongoose.Schema({
       end: String,
       type: {
         type: String,
-        enum: ['Home Visit', 'Online Consultation', 'Clinic']
+        enum: ['Home Visit', 'Online Consultation', 'Clinic Visit']
       }
     }],
     tuesday: [{
@@ -61,7 +65,7 @@ const doctorSchema = new mongoose.Schema({
       end: String,
       type: {
         type: String,
-        enum: ['Home Visit', 'Online Consultation', 'Clinic']
+        enum: ['Home Visit', 'Online Consultation', 'Clinic Visit']
       }
     }],
     wednesday: [{
@@ -69,7 +73,7 @@ const doctorSchema = new mongoose.Schema({
       end: String,
       type: {
         type: String,
-        enum: ['Home Visit', 'Online Consultation', 'Clinic']
+        enum: ['Home Visit', 'Online Consultation', 'Clinic Visit']
       }
     }],
     thursday: [{
@@ -77,7 +81,7 @@ const doctorSchema = new mongoose.Schema({
       end: String,
       type: {
         type: String,
-        enum: ['Home Visit', 'Online Consultation', 'Clinic']
+        enum: ['Home Visit', 'Online Consultation', 'Clinic Visit']
       }
     }],
     friday: [{
@@ -85,7 +89,7 @@ const doctorSchema = new mongoose.Schema({
       end: String,
       type: {
         type: String,
-        enum: ['Home Visit', 'Online Consultation', 'Clinic']
+        enum: ['Home Visit', 'Online Consultation', 'Clinic Visit']
       }
     }],
     saturday: [{
@@ -93,7 +97,7 @@ const doctorSchema = new mongoose.Schema({
       end: String,
       type: {
         type: String,
-        enum: ['Home Visit', 'Online Consultation', 'Clinic']
+        enum: ['Home Visit', 'Online Consultation', 'Clinic Visit']
       }
     }],
     sunday: [{
@@ -101,10 +105,32 @@ const doctorSchema = new mongoose.Schema({
       end: String,
       type: {
         type: String,
-        enum: ['Home Visit', 'Online Consultation', 'Clinic']
+        enum: ['Home Visit', 'Online Consultation', 'Clinic Visit']
       }
     }]
   },
+  dateSpecificAvailability: [{
+    date: {
+      type: Date,
+      required: true
+    },
+    start: {
+      type: String,
+      required: true
+    },
+    end: {
+      type: String,
+      required: true
+    },
+    available: {
+      type: Boolean,
+      default: true
+    },
+    note: {
+      type: String,
+      trim: true
+    }
+  }],
   services: [{
     name: String,
     description: String,
@@ -198,14 +224,39 @@ doctorSchema.methods.updateRating = function(newRating) {
 };
 
 // Method to check availability
-doctorSchema.methods.isAvailable = function(day, time, type) {
+doctorSchema.methods.isAvailable = function(day, time, type, specificDate = null) {
+  // First check date-specific availability if a specific date is provided
+  if (specificDate) {
+    const dateStr = specificDate instanceof Date 
+      ? specificDate.toISOString().split('T')[0] 
+      : specificDate;
+    
+    const dateSpecific = this.dateSpecificAvailability?.find(da => {
+      const daDateStr = da.date instanceof Date 
+        ? da.date.toISOString().split('T')[0] 
+        : da.date;
+      return daDateStr === dateStr;
+    });
+    
+    if (dateSpecific) {
+      // If date-specific availability exists, use it
+      if (!dateSpecific.available) return false;
+      return time >= dateSpecific.start && time <= dateSpecific.end;
+    }
+  }
+  
+  // Otherwise, check weekly schedule
   const daySchedule = this.availability[day.toLowerCase()];
   if (!daySchedule || daySchedule.length === 0) return false;
   
   return daySchedule.some(slot => {
     const slotStart = slot.start;
     const slotEnd = slot.end;
-    return slot.type === type && time >= slotStart && time <= slotEnd;
+    // Match type (handle both 'Clinic' and 'Clinic Visit')
+    const typeMatch = slot.type === type || 
+                      (slot.type === 'Clinic' && type === 'Clinic Visit') ||
+                      (slot.type === 'Clinic Visit' && type === 'Clinic');
+    return typeMatch && time >= slotStart && time <= slotEnd;
   });
 };
 

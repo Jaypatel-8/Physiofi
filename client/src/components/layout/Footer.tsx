@@ -25,9 +25,9 @@ const Footer = () => {
   }
 
   const socialLinks = [
-    { name: 'Instagram', href: '#', icon: 'instagram' },
-    { name: 'YouTube', href: '#', icon: 'youtube' },
-    { name: 'LinkedIn', href: '#', icon: 'linkedin' }
+    { name: 'Instagram', href: 'https://instagram.com/physiofi', icon: 'instagram' },
+    { name: 'YouTube', href: 'https://youtube.com/@physiofi', icon: 'youtube' },
+    { name: 'LinkedIn', href: 'https://linkedin.com/company/physiofi', icon: 'linkedin' }
   ]
 
   return (
@@ -181,10 +181,10 @@ const Footer = () => {
             </div>
             
             <div className="flex items-center space-x-6 text-sm text-gray-600">
-              <Link href="#" className="hover:text-primary-600 transition-colors duration-300">
+              <Link href="/privacy-policy" className="hover:text-primary-600 transition-colors duration-300">
                 Privacy Policy
               </Link>
-              <Link href="#" className="hover:text-primary-600 transition-colors duration-300">
+              <Link href="/terms" className="hover:text-primary-600 transition-colors duration-300">
                 Terms of Service
               </Link>
             </div>

@@ -8,7 +8,7 @@ import {
   UserIcon,
   EyeIcon,
   EyeSlashIcon,
-  CheckCircleIcon
+  UserGroupIcon
 } from '@heroicons/react/24/outline'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -19,7 +19,6 @@ const LoginPage = () => {
   const router = useRouter()
   const { login, user, loading } = useAuth()
   const [loginType, setLoginType] = useState<'patient' | 'doctor' | 'admin'>('patient')
-  const [step, setStep] = useState<'login' | 'success'>('login')
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -28,17 +27,44 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Redirect if already logged in
+  // Redirect if already logged in - prevent direct access to login page
   useEffect(() => {
-    if (!loading && user) {
-      const dashboardPath = user.role === 'patient' 
-        ? '/patient/dashboard' 
-        : user.role === 'doctor' 
-        ? '/doctor/dashboard' 
-        : '/admin/dashboard'
-      router.push(dashboardPath)
+    if (!loading) {
+      // Check if user is logged in
+      const storedToken = localStorage.getItem('token')
+      const storedUser = localStorage.getItem('user')
+      
+      if (storedToken && storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser)
+          if (parsedUser && parsedUser.role) {
+            const dashboardPath = parsedUser.role === 'patient' 
+              ? '/patient/dashboard' 
+              : parsedUser.role === 'doctor' 
+              ? '/doctor/dashboard' 
+              : '/admin/dashboard'
+            // Use replace to avoid adding to history
+            window.location.replace(dashboardPath)
+            return
+          }
+        } catch (error) {
+          // Invalid user data, clear it
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+        }
+      }
+      
+      // Also check if user state is set (from context)
+      if (user && !isLoading) {
+        const dashboardPath = user.role === 'patient' 
+          ? '/patient/dashboard' 
+          : user.role === 'doctor' 
+          ? '/doctor/dashboard' 
+          : '/admin/dashboard'
+        window.location.replace(dashboardPath)
+      }
     }
-  }, [user, loading, router])
+  }, [user, loading, isLoading])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -66,8 +92,7 @@ const LoginPage = () => {
           role: 'patient' as const
         }
         login(userData, response.data.data.token)
-        router.push('/patient/dashboard')
-        router.refresh()
+        window.location.replace('/patient/dashboard')
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid email or password')
@@ -77,6 +102,7 @@ const LoginPage = () => {
 
   const handleDoctorLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isLoading) return // Prevent multiple submissions
     setIsLoading(true)
     setError('')
 
@@ -92,8 +118,7 @@ const LoginPage = () => {
           role: 'doctor' as const
         }
         login(userData, response.data.data.token)
-        router.push('/doctor/dashboard')
-        router.refresh()
+        window.location.replace('/doctor/dashboard')
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid email or password')
@@ -103,6 +128,7 @@ const LoginPage = () => {
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isLoading) return // Prevent multiple submissions
     setIsLoading(true)
     setError('')
 
@@ -118,8 +144,7 @@ const LoginPage = () => {
           role: 'admin' as const
         }
         login(userData, response.data.data.token)
-        router.push('/admin/dashboard')
-        router.refresh()
+        window.location.replace('/admin/dashboard')
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid email or password')
@@ -164,15 +189,35 @@ const LoginPage = () => {
             className="bg-white rounded-2xl shadow-xl p-8"
           >
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-              <p className="text-gray-600">Sign in to your account</p>
+              <div className="flex justify-center mb-4">
+                {loginType === 'patient' ? (
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                    <UserIcon className="h-8 w-8 text-primary-600" />
+                  </div>
+                ) : loginType === 'doctor' ? (
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                    <UserGroupIcon className="h-8 w-8 text-primary-600" />
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                    <UserIcon className="h-8 w-8 text-purple-600" />
+                  </div>
+                )}
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {loginType === 'patient' ? 'Patient Login' : loginType === 'doctor' ? 'Doctor Login' : 'Admin Login'}
+              </h1>
+              <p className="text-gray-600">Sign in to your {loginType} account</p>
             </div>
 
             {/* Login Type Selector */}
             <div className="flex gap-2 mb-6 p-1 bg-gray-100 rounded-lg">
               <button
                 type="button"
-                onClick={() => setLoginType('patient')}
+                onClick={() => {
+                  setLoginType('patient')
+                  setError('')
+                }}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
                   loginType === 'patient'
                     ? 'bg-primary-500 text-white shadow-md'
@@ -183,7 +228,10 @@ const LoginPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setLoginType('doctor')}
+                onClick={() => {
+                  setLoginType('doctor')
+                  setError('')
+                }}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
                   loginType === 'doctor'
                     ? 'bg-primary-500 text-white shadow-md'
@@ -194,10 +242,13 @@ const LoginPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setLoginType('admin')}
+                onClick={() => {
+                  setLoginType('admin')
+                  setError('')
+                }}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
                   loginType === 'admin'
-                    ? 'bg-primary-500 text-white shadow-md'
+                    ? 'bg-purple-500 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -214,7 +265,7 @@ const LoginPage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
+                  {loginType === 'patient' ? 'Email Address' : loginType === 'doctor' ? 'Professional Email' : 'Admin Email'}
                 </label>
                 <input
                   type="email"
@@ -224,7 +275,7 @@ const LoginPage = () => {
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Enter your email"
+                  placeholder={loginType === 'patient' ? 'Enter your email' : loginType === 'doctor' ? 'Enter your professional email' : 'Enter admin email'}
                 />
               </div>
 
@@ -269,16 +320,23 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-primary-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`w-full text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  loginType === 'patient' ? 'bg-primary-500 hover:bg-primary-600' :
+                  loginType === 'doctor' ? 'bg-primary-500 hover:bg-primary-600' :
+                  'bg-purple-500 hover:bg-purple-600'
+                }`}
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? 'Signing in...' : `Sign In as ${loginType.charAt(0).toUpperCase() + loginType.slice(1)}`}
               </button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link href="/register" className="text-primary-600 hover:text-primary-700 font-semibold">
+                <Link 
+                  href={loginType === 'patient' ? '/register?type=patient' : loginType === 'doctor' ? '/register?type=doctor' : '#'} 
+                  className="text-primary-600 hover:text-primary-700 font-semibold"
+                >
                   Sign up
                 </Link>
               </p>

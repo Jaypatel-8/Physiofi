@@ -212,7 +212,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Phone</h3>
-                    <p className="text-gray-600">+91 9998103191</p>
+                    <p className="text-gray-600">+91 9082770384</p>
                     <p className="text-sm text-gray-500">Available 9 AM - 6 PM</p>
                   </div>
                 </div>
@@ -265,10 +265,10 @@ const ContactPage = () => {
                 For urgent physiotherapy needs outside business hours, call our emergency line.
               </p>
               <a
-                href="tel:+919998103191"
+                href="tel:+919082770384"
                 className="text-red-600 font-semibold text-lg hover:text-red-700 transition-colors duration-300"
               >
-                +91 9998103191
+                +91 9082770384
               </a>
             </div>
 

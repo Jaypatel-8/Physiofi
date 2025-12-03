@@ -109,23 +109,23 @@ const About = () => {
           })}
         </div>
 
-        {/* Founder Section - Rounded Design */}
-        <div className="bg-gradient-to-r from-primary-300 via-pastel-mint-300 to-pastel-sky-300 rounded-tl-[80px] rounded-br-[80px] rounded-tr-3xl rounded-bl-3xl p-12 mb-16 text-white shadow-2xl">
+        {/* Founder Section - Rounded Design with Mild Colors */}
+        <div className="bg-gradient-to-br from-primary-50 via-pastel-mint-50 to-pastel-sky-50 rounded-tl-[80px] rounded-br-[80px] rounded-tr-3xl rounded-bl-3xl p-12 mb-16 border border-primary-100/50 shadow-lg">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 mb-6"
+                className="inline-block bg-primary-100/60 backdrop-blur-sm rounded-full px-6 py-3 mb-6"
               >
-                <span className="text-base font-bold">👑 Founder & Director</span>
+                <span className="text-base font-bold text-primary-800">👑 Founder & Director</span>
               </motion.div>
               <motion.h3
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-4xl font-black mb-6 font-display"
+                className="text-4xl font-black mb-6 font-display text-gray-900"
               >
                 Dr. Shruti Singh (PT)
               </motion.h3>
@@ -134,7 +134,7 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 }}
-                className="text-lg mb-4 text-white/95 font-medium"
+                className="text-lg mb-4 text-gray-700 font-medium"
               >
                 A compassionate physiotherapist with a clear purpose—to make quality physiotherapy accessible to everyone.
               </motion.p>
@@ -143,7 +143,7 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.15 }}
-                className="text-base mb-4 text-white/90 font-medium"
+                className="text-base mb-4 text-gray-700 font-medium"
               >
                 With clinical expertise in:
               </motion.p>
@@ -152,7 +152,7 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="text-base mb-6 text-white/90 space-y-2 list-disc list-inside"
+                className="text-base mb-6 text-gray-700 space-y-2 list-disc list-inside"
               >
                 <li>Pediatric Physiotherapy</li>
                 <li>Pain Management</li>
@@ -164,7 +164,7 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.25 }}
-                className="text-base text-white/90 leading-relaxed mb-6"
+                className="text-base text-gray-700 leading-relaxed mb-6"
               >
                 Dr. Shruti blends modern techniques with a patient-first approach, ensuring every treatment plan is customised, safe, and results-driven.
               </motion.p>
@@ -176,7 +176,7 @@ const About = () => {
                 className="flex flex-wrap gap-3"
               >
                 {['Pediatric Care', 'Sports Rehab', 'Post-Surgery Recovery', 'Neurological Care', 'Geriatric Care'].map((tag, idx) => (
-                  <span key={idx} className="bg-white/20 backdrop-blur-sm rounded-full px-5 py-2 text-sm font-semibold">
+                  <span key={idx} className="bg-primary-100/60 backdrop-blur-sm rounded-full px-5 py-2 text-sm font-semibold text-primary-800">
                     {tag}
                   </span>
                 ))}
@@ -186,18 +186,18 @@ const About = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="bg-white/10 backdrop-blur-sm rounded-3xl p-10 text-center relative overflow-hidden"
+              className="bg-white/80 backdrop-blur-sm rounded-3xl p-10 text-center relative overflow-hidden border border-primary-100/50 shadow-md"
             >
               {/* Book Corner Effect */}
-              <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-white/20"></div>
-              <div className="absolute top-0 right-0 w-0 h-0 border-l-[45px] border-l-transparent border-t-[45px] border-t-white/10"></div>
+              <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-primary-100/40"></div>
+              <div className="absolute top-0 right-0 w-0 h-0 border-l-[45px] border-l-transparent border-t-[45px] border-t-primary-50/60"></div>
               
-              <div className="w-40 h-40 bg-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl relative z-10">
-                <HeartIcon className="h-20 w-20 text-primary-500" />
+              <div className="w-40 h-40 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl relative z-10">
+                <HeartIcon className="h-20 w-20 text-primary-600" />
               </div>
-              <h4 className="text-3xl font-black mb-4 font-display relative z-10">Hands-On Leadership</h4>
-              <p className="text-white/95 text-lg leading-relaxed relative z-10">
-                Shruti personally oversees every patient case, ensuring personalized care and attention to detail that sets <span className="text-primary-500">PhysioFi</span> apart.
+              <h4 className="text-3xl font-black mb-4 font-display relative z-10 text-gray-900">Hands-On Leadership</h4>
+              <p className="text-gray-700 text-lg leading-relaxed relative z-10">
+                Shruti personally oversees every patient case, ensuring personalized care and attention to detail that sets <span className="text-primary-600 font-semibold">PhysioFi</span> apart.
               </p>
         </motion.div>
           </div>
