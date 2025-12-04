@@ -2,16 +2,9 @@ import type { Metadata } from 'next'
 import { Inter, Bebas_Neue } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
-import dynamic from 'next/dynamic'
 
 // Import Toaster normally - it's already lightweight
 import { Toaster } from 'react-hot-toast'
-
-// Import loader wrapper dynamically to avoid SSR issues
-const LoaderWrapper = dynamic(
-  () => import('@/components/ui/LoaderWrapper'),
-  { ssr: false }
-)
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -152,11 +145,11 @@ export default function RootLayout({
         <link rel="canonical" href="https://physiofi.com" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1C1F4A" />
-        <link rel="icon" type="image/svg+xml" href="/physiofi-logo-icon.svg" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/physiofi-logo-icon.svg" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/physiofi-logo-icon.svg" />
-        <link rel="shortcut icon" href="/physiofi-logo-icon.svg" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/physiofi-logo-icon.svg" />
+        <link rel="icon" type="image/png" href="/Physiofi Logo icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/Physiofi Logo icon.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/Physiofi Logo icon.png" />
+        <link rel="shortcut icon" href="/Physiofi Logo icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/Physiofi Logo icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -164,9 +157,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} ${barbara.variable} overflow-x-hidden`}>
         <Providers>
-          <LoaderWrapper>
-            {children}
-          </LoaderWrapper>
+          {children}
           <Toaster
             position="top-right"
             toastOptions={{

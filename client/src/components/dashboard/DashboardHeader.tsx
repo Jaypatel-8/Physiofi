@@ -1,66 +1,68 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { User } from '@/types/auth'
 
 interface DashboardHeaderProps {
   title?: string
   subtitle?: string
-  user?: any
+  user?: User | null
   greeting?: string
 }
 
 const DashboardHeader = ({ title, subtitle, user, greeting }: DashboardHeaderProps) => {
   const getGreeting = () => {
     if (greeting) return greeting
-    if (!user) return ''
     
-    const firstName = user.name?.split(' ')[0] || 'User'
-    const role = user.role || ''
-    
-    if (role === 'patient') {
-      return `Hello ${firstName}! 👋`
-    } else if (role === 'doctor') {
-      return `Hello Dr. ${firstName}! 👨‍⚕️`
-    } else if (role === 'admin') {
-      return `Hello ${firstName}! 👨‍💼`
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good Morning'
+    if (hour < 18) return 'Good Afternoon'
+    return 'Good Evening'
+  }
+
+  const getUserName = () => {
+    if (user?.name) {
+      return user.name.split(' ')[0] // First name only
     }
-    return `Hello ${firstName}!`
+    return 'User'
+  }
+
+  const getTitle = () => {
+    if (title) return title
+    
+    if (user?.role === 'patient') {
+      return 'Patient Dashboard'
+    } else if (user?.role === 'doctor') {
+      return 'Doctor Dashboard'
+    } else if (user?.role === 'admin') {
+      return 'Admin Dashboard'
+    }
+    return 'Dashboard'
   }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative bg-gradient-to-br from-primary-600 via-primary-500 to-secondary-500 text-white py-12 shadow-2xl overflow-hidden"
+      transition={{ duration: 0.5 }}
+      className="bg-gradient-to-r from-primary-500 to-primary-600 text-white py-12 px-4"
     >
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/10 rounded-full -ml-36 -mb-36 blur-3xl"></div>
-      <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
-      
-      <div className="container-custom relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          {greeting || user ? (
-            <h1 className="text-4xl lg:text-5xl font-black mb-3 font-display tracking-tight text-white">
-              {getGreeting()}
+      <div className="container-custom max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black mb-2">
+              {getGreeting()}, {getUserName()}! 👋
             </h1>
-          ) : title ? (
-            <h1 className="text-4xl lg:text-5xl font-black mb-3 font-display tracking-tight text-white">{title}</h1>
-          ) : null}
-          {subtitle && (
-            <p className="text-white/95 text-lg lg:text-xl max-w-2xl leading-relaxed">{subtitle}</p>
-          )}
-          {user && (
-            <div className="mt-4 flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-white text-sm font-medium">Online</span>
-            </div>
-          )}
-        </motion.div>
+            <h2 className="text-xl md:text-2xl font-bold mb-2">
+              {getTitle()}
+            </h2>
+            {subtitle && (
+              <p className="text-primary-100 text-lg">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </motion.div>
   )

@@ -74,6 +74,8 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+  const [autoSaveStatus, setAutoSaveStatus] = useState<string | null>(null)
 
   useEffect(() => {
     const urlType = searchParams.get('type')
@@ -154,10 +156,19 @@ const RegisterPage = () => {
         }
       } else {
         const hasData = Object.values(doctorFormData).some(v => {
-          if (typeof v === 'object' && v !== null) {
+          if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
             return Object.values(v).some(subV => subV !== '')
           }
-          return v !== '' && v !== 0
+          if (Array.isArray(v)) {
+            return v.length > 0
+          }
+          if (typeof v === 'number') {
+            return v !== 0
+          }
+          if (typeof v === 'boolean') {
+            return v === true
+          }
+          return v !== ''
         })
         if (hasData) {
           localStorage.setItem('doctor_registration_draft', JSON.stringify(doctorFormData))
