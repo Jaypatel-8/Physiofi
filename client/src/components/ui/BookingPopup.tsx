@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { XMarkIcon, CheckCircleIcon, QuestionMarkCircleIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, CheckCircleIcon, QuestionMarkCircleIcon, SparklesIcon, HomeIcon, VideoCameraIcon } from '@heroicons/react/24/outline'
 import Modal from './Modal'
 import { appointmentAPI, doctorAPI, doctorPublicAPI } from '@/lib/api'
 import { useAuth } from '@/app/providers'
@@ -344,17 +344,38 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                 <label htmlFor="serviceType" className="block text-sm font-semibold text-gray-700 mb-2">
                   Service Type *
                 </label>
-                <select
-                  id="serviceType"
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, serviceType: 'home' }))}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-300 ${
+                      formData.serviceType === 'home'
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-primary-200 hover:bg-primary-50/50'
+                    }`}
+                  >
+                    <HomeIcon className={`h-5 w-5 ${formData.serviceType === 'home' ? 'text-primary-500' : 'text-gray-400'}`} />
+                    <span className="font-medium">Home Visit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, serviceType: 'tele' }))}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-300 ${
+                      formData.serviceType === 'tele'
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-primary-200 hover:bg-primary-50/50'
+                    }`}
+                  >
+                    <VideoCameraIcon className={`h-5 w-5 ${formData.serviceType === 'tele' ? 'text-primary-500' : 'text-gray-400'}`} />
+                    <span className="font-medium">Tele-Consultation</span>
+                  </button>
+                </div>
+                <input
+                  type="hidden"
                   name="serviceType"
                   value={formData.serviceType}
-                  onChange={(e) => setFormData(prev => ({ ...prev, serviceType: e.target.value as 'home' | 'tele' }))}
                   required
-                  className="input-field"
-                >
-                  <option value="home">🏠 Home Visit</option>
-                  <option value="tele">💻 Tele-Consultation</option>
-                </select>
+                />
               </motion.div>
 
               <motion.div

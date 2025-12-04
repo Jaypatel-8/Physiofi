@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -44,26 +44,49 @@ const AdminDashboard = () => {
   const [doctors, setDoctors] = useState<any[]>([])
   const [patients, setPatients] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const loadingRef = useRef(false)
+  const hasLoadedRef = useRef(false)
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
-        return
-      }
-      if (user.role !== 'admin') {
-        window.location.href = '/'
-        return
-      }
-      loadDashboardData()
-      
-      // Set up polling for real-time updates (every 30 seconds)
-      const interval = setInterval(loadDashboardData, 30000)
-      return () => clearInterval(interval)
+    if (loading) return
+    
+    if (!user) {
+      window.location.href = '/login'
+      return
     }
-  }, [user, loading])
+    if (user.role !== 'admin') {
+      window.location.href = '/'
+      return
+    }
+    
+    // Prevent multiple loads
+    if (hasLoadedRef.current) return
+    
+    let mounted = true
+    let intervalId: NodeJS.Timeout | null = null
+    
+    loadDashboardData().then(() => {
+      if (!mounted) return
+      hasLoadedRef.current = true
+      // Set up polling for real-time updates (every 60 seconds - reduced frequency)
+      intervalId = setInterval(() => {
+        if (!loadingRef.current) {
+          loadDashboardData()
+        }
+      }, 60000) // Increased from 30s to 60s
+    })
+    
+    return () => {
+      mounted = false
+      if (intervalId) clearInterval(intervalId)
+    }
+  }, [user?.id, loading])
 
   const loadDashboardData = async () => {
+    // Prevent duplicate calls using ref
+    if (loadingRef.current) return
+    loadingRef.current = true
+    
     try {
       setIsLoading(true)
       const [dashboardRes, appointmentsRes, doctorsRes, patientsRes] = await Promise.all([
@@ -94,6 +117,7 @@ const AdminDashboard = () => {
       toast.error('Failed to load dashboard data')
     } finally {
       setIsLoading(false)
+      loadingRef.current = false
     }
   }
 

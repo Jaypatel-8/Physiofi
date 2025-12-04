@@ -1,16 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import PhysiofiFullLogoLoader from './PhysiofiFullLogoLoader'
+import { useState, useEffect, useRef } from 'react'
+import MedicalLoader from './MedicalLoader'
 
 interface LoaderWrapperProps {
   children: React.ReactNode
+  videoSrc?: string // Optional MP4 video path for loader
 }
 
-export default function LoaderWrapper({ children }: LoaderWrapperProps) {
+export default function LoaderWrapper({ children, videoSrc }: LoaderWrapperProps) {
   const [isLoading, setIsLoading] = useState(true)
+  const hasInitializedRef = useRef(false)
 
   useEffect(() => {
+    // Only initialize once
+    if (hasInitializedRef.current) return
+    hasInitializedRef.current = true
+
     // Prevent body scroll while loading
     if (isLoading) {
       document.body.style.overflow = 'hidden'
@@ -23,18 +29,27 @@ export default function LoaderWrapper({ children }: LoaderWrapperProps) {
     }
   }, [isLoading])
 
+  const handleLoadingChange = (loading: boolean) => {
+    setIsLoading(loading)
+  }
+
+  const handleComplete = () => {
+    setIsLoading(false)
+  }
+
   return (
     <>
-      <PhysiofiFullLogoLoader 
-        onLoadingChange={setIsLoading}
-        onComplete={() => setIsLoading(false)}
-      />
+      {isLoading && (
+        <MedicalLoader 
+          videoSrc={videoSrc}
+          onLoadingChange={handleLoadingChange}
+          onComplete={handleComplete}
+        />
+      )}
       <div 
+        className={isLoading ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}
         style={{ 
-          display: isLoading ? 'none' : 'block',
-          opacity: isLoading ? 0 : 1,
-          transition: 'opacity 0.5s ease-in-out',
-          pointerEvents: isLoading ? 'none' : 'auto'
+          transition: 'opacity 0.6s ease-in-out',
         }}
       >
         {children}
@@ -42,4 +57,5 @@ export default function LoaderWrapper({ children }: LoaderWrapperProps) {
     </>
   )
 }
+
 

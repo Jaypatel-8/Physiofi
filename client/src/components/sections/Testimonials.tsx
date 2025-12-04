@@ -47,7 +47,7 @@ const Testimonials = () => {
     {
       id: 6,
       name: 'Priya Agarwal',
-      text: 'My child having Delay speech issue we are started physiotherapy at the PhysioFi before 7 month now my son started speak still we continue the therapy we really thankful to Dr Arth Patel and Dr Prakruti Patel.',
+      text: 'My child having Delay speech issue we are started physiotherapy at the PhysioFi before 7 month now my son started speak still we continue the therapy we really thankful to the team.',
       location: 'Ahmedabad'
     },
     {
@@ -59,7 +59,7 @@ const Testimonials = () => {
     {
       id: 8,
       name: 'Priti Pandey',
-      text: 'PhysioFi is best. Really admire our transparent nature, Dr Arth & Dr Prakruti guided me completely, my son having ASD. I came from Banaras for therapy here in PhysioFi, after ten session only my kid showing improvement.',
+      text: 'PhysioFi is best. Really admire our transparent nature, the team guided me completely, my son having ASD. I came from Banaras for therapy here in PhysioFi, after ten session only my kid showing improvement.',
       location: 'Ahmedabad'
     }
   ]

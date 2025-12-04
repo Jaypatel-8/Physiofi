@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { AuthContextType, User } from '@/types/auth'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import NotificationContainer from '@/components/ui/NotificationContainer'
@@ -93,16 +93,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isInitialized])
 
   // Handle page refresh - validate token when page becomes visible
+  // Use ref to prevent duplicate validation calls
+  const validatingRef = useRef(false)
+  
   useEffect(() => {
     if (!isInitialized) return
 
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && !validatingRef.current) {
         // Page became visible after refresh, verify token is still valid
         const storedToken = localStorage.getItem('token')
         if (storedToken && user) {
-          // Validate token with server
-          await validateToken(storedToken)
+          validatingRef.current = true
+          try {
+            await validateToken(storedToken)
+          } finally {
+            // Reset after a delay to allow validation to complete
+            setTimeout(() => {
+              validatingRef.current = false
+            }, 2000)
+          }
         } else if (!storedToken && user) {
           // Token was cleared, logout
           logout()
@@ -110,20 +120,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    // Also check on focus (when user switches back to tab)
+    // Also check on focus (when user switches back to tab) - debounced
+    let focusTimeout: NodeJS.Timeout
     const handleFocus = async () => {
-      const storedToken = localStorage.getItem('token')
-      if (storedToken && user) {
-        await validateToken(storedToken)
-      } else if (!storedToken && user) {
-        logout()
-      }
+      clearTimeout(focusTimeout)
+      focusTimeout = setTimeout(async () => {
+        if (validatingRef.current) return // Skip if already validating
+        
+        const storedToken = localStorage.getItem('token')
+        if (storedToken && user) {
+          validatingRef.current = true
+          try {
+            await validateToken(storedToken)
+          } finally {
+            setTimeout(() => {
+              validatingRef.current = false
+            }, 2000)
+          }
+        } else if (!storedToken && user) {
+          logout()
+        }
+      }, 500) // Debounce focus events
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('focus', handleFocus)
 
     return () => {
+      clearTimeout(focusTimeout)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
     }

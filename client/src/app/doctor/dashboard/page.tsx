@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -40,22 +40,40 @@ const DoctorDashboard = () => {
   const [recentPatients, setRecentPatients] = useState<any[]>([])
   const [notifications, setNotifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const loadingRef = useRef(false)
+  const hasLoadedRef = useRef(false)
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
-        return
-      }
-      if (user.role !== 'doctor') {
-        window.location.href = '/'
-        return
-      }
-      loadDashboardData()
+    if (loading) return
+    
+    if (!user) {
+      window.location.href = '/login'
+      return
     }
-  }, [user, loading])
+    if (user.role !== 'doctor') {
+      window.location.href = '/'
+      return
+    }
+    
+    // Prevent multiple loads
+    if (hasLoadedRef.current) return
+    
+    let mounted = true
+    loadDashboardData().then(() => {
+      if (!mounted) return
+      hasLoadedRef.current = true
+    })
+    
+    return () => {
+      mounted = false
+    }
+  }, [user?.id, loading])
 
   const loadDashboardData = async () => {
+    // Prevent duplicate calls using ref
+    if (loadingRef.current) return
+    loadingRef.current = true
+    
     try {
       setIsLoading(true)
       const today = new Date().toISOString().split('T')[0]
@@ -90,6 +108,7 @@ const DoctorDashboard = () => {
       console.error('Error loading dashboard data:', error)
     } finally {
       setIsLoading(false)
+      loadingRef.current = false
     }
   }
 

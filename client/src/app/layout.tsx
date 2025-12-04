@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Bebas_Neue } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 import dynamic from 'next/dynamic'
@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic'
 // Import Toaster normally - it's already lightweight
 import { Toaster } from 'react-hot-toast'
 
-// Import the loader wrapper component dynamically to avoid SSR issues
+// Import loader wrapper dynamically to avoid SSR issues
 const LoaderWrapper = dynamic(
   () => import('@/components/ui/LoaderWrapper'),
   { ssr: false }
@@ -18,6 +18,14 @@ const inter = Inter({
   display: 'swap',
   preload: true,
   variable: '--font-inter'
+})
+
+// Barbara-style font (using Bebas Neue as professional alternative)
+const barbara = Bebas_Neue({ 
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-barbara'
 })
 
 export const metadata: Metadata = {
@@ -144,17 +152,17 @@ export default function RootLayout({
         <link rel="canonical" href="https://physiofi.com" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1C1F4A" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/Physiofi Logo icon.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/Physiofi Logo icon.png" />
-        <link rel="shortcut icon" href="/Physiofi Logo icon.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/Physiofi Logo icon.png" />
+        <link rel="icon" type="image/svg+xml" href="/physiofi-logo-icon.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/physiofi-logo-icon.svg" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/physiofi-logo-icon.svg" />
+        <link rel="shortcut icon" href="/physiofi-logo-icon.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/physiofi-logo-icon.svg" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="preload" as="image" href="/Physiofi.svg" />
       </head>
-      <body className={`${inter.className} overflow-x-hidden`}>
+      <body className={`${inter.className} ${barbara.variable} overflow-x-hidden`}>
         <Providers>
           <LoaderWrapper>
             {children}

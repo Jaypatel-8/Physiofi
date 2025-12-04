@@ -79,3 +79,5 @@
 - All heavy components are lazy-loaded
 - Production builds will have smaller bundle sizes due to optimizations
 
+
+

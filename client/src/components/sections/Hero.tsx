@@ -121,6 +121,25 @@ const Hero = memo(() => {
               >
                 Personalized physiotherapy through home visits, tele-consultation, and soon-to-open advanced clinics — designed for your comfort, recovery, and long-term wellbeing.
               </motion.p>
+              
+              {/* Company Slogan */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="mt-4"
+              >
+                <p 
+                  className="text-sm md:text-base text-gray-400 font-light italic"
+                  style={{
+                    fontFamily: 'var(--font-barbara), "Bebas Neue", "Arial", sans-serif',
+                    letterSpacing: '0.1em',
+                    fontWeight: 300,
+                  }}
+                >
+                  Empowering minds, Transforming lives...
+                </p>
+              </motion.div>
             </div>
 
             {/* Stats - Smaller Design */}

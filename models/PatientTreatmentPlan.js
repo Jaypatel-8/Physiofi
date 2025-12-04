@@ -107,3 +107,5 @@ patientTreatmentPlanSchema.index({ conditionSlug: 1 });
 
 module.exports = mongoose.model('PatientTreatmentPlan', patientTreatmentPlanSchema);
 
+
+

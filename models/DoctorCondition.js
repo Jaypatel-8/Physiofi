@@ -58,3 +58,5 @@ doctorConditionSchema.index({ isActive: 1 });
 
 module.exports = mongoose.model('DoctorCondition', doctorConditionSchema);
 
+
+
