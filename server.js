@@ -74,14 +74,53 @@ const connectDB = async () => {
 // Connect to database
 connectDB();
 
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.error('❌ Unhandled Promise Rejection:', err);
+  console.error('📍 Error Stack:', err.stack);
+  // Don't exit in production, just log
+  if (process.env.NODE_ENV === 'development') {
+    console.error('⚠️  This should be handled properly!');
+  }
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+  console.error('📍 Error Stack:', err.stack);
+  console.error('⚠️  Server will shut down...');
+  process.exit(1);
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
     success: true,
     message: 'PhysioFi API is running',
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.0.0',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    environment: process.env.NODE_ENV || 'development'
   });
+});
+
+// Diagnostic endpoint
+app.get('/api/diagnostic', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      server: 'running',
+      database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      nodeVersion: process.version
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 // API Routes
@@ -91,6 +130,41 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/medical-records', require('./routes/medicalRecords'));
+app.use('/api/prescriptions', require('./routes/prescriptions'));
+app.use('/api/exercise-plans', require('./routes/exercisePlans'));
+app.use('/api/session-notes', require('./routes/sessionNotes'));
+app.use('/api/payments', require('./routes/payments'));
+
+// Async error wrapper for routes
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Error handling middleware (must be after all routes, before 404 handler)
+app.use((err, req, res, next) => {
+  // Don't log 404 errors as server errors
+  if (err.status === 404) {
+    return next(err);
+  }
+  
+  console.error('❌ Server Error:', err);
+  console.error('📍 Error Stack:', err.stack);
+  console.error('📍 Request URL:', req.originalUrl);
+  console.error('📍 Request Method:', req.method);
+  console.error('📍 Request Body:', req.body);
+  console.error('📍 Request Query:', req.query);
+  
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { 
+      stack: err.stack,
+      path: req.originalUrl,
+      method: req.method
+    })
+  });
+});
 
 // Serve static files from the React app build directory
 if (process.env.NODE_ENV === 'production') {
@@ -101,22 +175,13 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
-});
-
-// 404 handler
+// 404 handler (must be last)
 app.use('*', (req, res) => {
+  console.warn('⚠️  404 - Route not found:', req.originalUrl);
   res.status(404).json({
     success: false,
-    message: 'Route not found'
+    message: 'Route not found',
+    path: req.originalUrl
   });
 });
 

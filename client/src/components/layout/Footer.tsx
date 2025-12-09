@@ -52,6 +52,7 @@ const Footer = () => {
                     width={120}
                     height={50}
                     className="group-hover:scale-105 transition-transform duration-300 object-contain"
+                    style={{ width: 'auto', height: 'auto', maxWidth: '120px' }}
                     priority
                   />
                 </div>
@@ -84,14 +85,6 @@ const Footer = () => {
                 </div>
               </div>
 
-              {/* Service Cities */}
-              <div className="bg-gradient-to-br from-primary-50 to-pastel-mint-50 rounded-2xl p-5 shadow-md">
-                <h5 className="text-base font-bold text-gray-900 mb-3">We Serve</h5>
-                <div className="flex flex-wrap gap-2">
-                  <span className="bg-primary-300 text-white px-3 py-1 rounded-full text-xs font-semibold">Ahmedabad</span>
-                  <span className="bg-pastel-mint-300 text-white px-3 py-1 rounded-full text-xs font-semibold">Mumbai</span>
-                </div>
-              </div>
 
               {/* Social Links */}
               <div className="mt-8">

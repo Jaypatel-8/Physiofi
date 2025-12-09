@@ -1,47 +1,13 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const Appointment = require('../models/Appointment');
 const Admin = require('../models/Admin');
+const { isAdmin } = require('../middleware/rbac');
 const router = express.Router();
 
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Access denied. No token provided.'
-    });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Invalid token.'
-    });
-  }
-};
-
-// Middleware to verify admin role
-const verifyAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({
-      success: false,
-      message: 'Access denied. Admin only.'
-    });
-  }
-  next();
-};
-
 // Get dashboard stats
-router.get('/dashboard', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/dashboard', isAdmin, async (req, res) => {
   try {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -107,7 +73,7 @@ router.get('/dashboard', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Get all patients
-router.get('/patients', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/patients', isAdmin, async (req, res) => {
   try {
     const { status, search, page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -126,7 +92,8 @@ router.get('/patients', verifyToken, verifyAdmin, async (req, res) => {
       .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // Use lean() for better performance
 
     const total = await Patient.countDocuments(query);
 
@@ -151,7 +118,7 @@ router.get('/patients', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Get patient by ID
-router.get('/patients/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/patients/:id', isAdmin, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id).select('-password');
 
@@ -176,7 +143,7 @@ router.get('/patients/:id', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Update patient
-router.put('/patients/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.put('/patients/:id', isAdmin, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
 
@@ -205,7 +172,7 @@ router.put('/patients/:id', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Delete patient
-router.delete('/patients/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.delete('/patients/:id', isAdmin, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
     if (!patient) {
@@ -239,7 +206,7 @@ router.delete('/patients/:id', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Get all doctors
-router.get('/doctors', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/doctors', isAdmin, async (req, res) => {
   try {
     const { status, specialization, search, page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -259,7 +226,8 @@ router.get('/doctors', verifyToken, verifyAdmin, async (req, res) => {
       .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // Use lean() for better performance
 
     const total = await Doctor.countDocuments(query);
 
@@ -284,7 +252,7 @@ router.get('/doctors', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Get doctor by ID
-router.get('/doctors/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/doctors/:id', isAdmin, async (req, res) => {
   try {
     const doctor = await Doctor.findById(req.params.id).select('-password');
 
@@ -309,7 +277,7 @@ router.get('/doctors/:id', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Update doctor
-router.put('/doctors/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.put('/doctors/:id', isAdmin, async (req, res) => {
   try {
     const doctor = await Doctor.findById(req.params.id);
 
@@ -338,7 +306,7 @@ router.put('/doctors/:id', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Delete doctor
-router.delete('/doctors/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.delete('/doctors/:id', isAdmin, async (req, res) => {
   try {
     const doctor = await Doctor.findById(req.params.id);
     if (!doctor) {
@@ -372,7 +340,7 @@ router.delete('/doctors/:id', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Approve doctor
-router.put('/doctors/:id/approve', verifyToken, verifyAdmin, async (req, res) => {
+router.put('/doctors/:id/approve', isAdmin, async (req, res) => {
   try {
     const { isApproved, reason } = req.body;
     const doctor = await Doctor.findById(req.params.id);
@@ -407,7 +375,7 @@ router.put('/doctors/:id/approve', verifyToken, verifyAdmin, async (req, res) =>
 });
 
 // Get all appointments
-router.get('/appointments', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/appointments', isAdmin, async (req, res) => {
   try {
     const { status, type, startDate, endDate, page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -427,7 +395,8 @@ router.get('/appointments', verifyToken, verifyAdmin, async (req, res) => {
       .populate('doctor', 'name specialization')
       .sort({ appointmentDate: -1, appointmentTime: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // Use lean() for better performance
 
     const total = await Appointment.countDocuments(query);
 
@@ -452,7 +421,7 @@ router.get('/appointments', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Get appointment by ID
-router.get('/appointments/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/appointments/:id', isAdmin, async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
       .populate('patient', 'name email phone age gender address')
@@ -479,7 +448,7 @@ router.get('/appointments/:id', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Update appointment
-router.put('/appointments/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.put('/appointments/:id', isAdmin, async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
 
@@ -508,7 +477,7 @@ router.put('/appointments/:id', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 // Delete appointment
-router.delete('/appointments/:id', verifyToken, verifyAdmin, async (req, res) => {
+router.delete('/appointments/:id', isAdmin, async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
 
@@ -535,7 +504,7 @@ router.delete('/appointments/:id', verifyToken, verifyAdmin, async (req, res) =>
 });
 
 // Get analytics
-router.get('/analytics', verifyToken, verifyAdmin, async (req, res) => {
+router.get('/analytics', isAdmin, async (req, res) => {
   try {
     const { period = 'month' } = req.query;
     const now = new Date();
@@ -605,10 +574,5 @@ router.get('/analytics', verifyToken, verifyAdmin, async (req, res) => {
 });
 
 module.exports = router;
-
-
-
-
-
 
 

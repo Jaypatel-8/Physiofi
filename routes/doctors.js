@@ -1,34 +1,11 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const Doctor = require('../models/Doctor');
 const Appointment = require('../models/Appointment');
 const DoctorCondition = require('../models/DoctorCondition');
 const PatientTreatmentPlan = require('../models/PatientTreatmentPlan');
+const { isDoctor, isAdminOrDoctor } = require('../middleware/rbac');
 const router = express.Router();
-
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Access denied. No token provided.'
-    });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Invalid token.'
-    });
-  }
-};
 
 // Get all doctors (public route for booking)
 router.get('/', async (req, res) => {
@@ -104,15 +81,8 @@ router.get('/:id', async (req, res) => {
 });
 
 // Get doctor profile
-router.get('/profile', verifyToken, async (req, res) => {
+router.get('/profile', isDoctor, async (req, res) => {
   try {
-    if (req.user.role !== 'doctor') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
-
     const doctor = await Doctor.findById(req.user.userId);
     if (!doctor) {
       return res.status(404).json({
@@ -135,7 +105,7 @@ router.get('/profile', verifyToken, async (req, res) => {
 });
 
 // Update doctor profile
-router.put('/profile', verifyToken, async (req, res) => {
+router.put('/profile', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -201,7 +171,7 @@ router.put('/profile', verifyToken, async (req, res) => {
 });
 
 // Get doctor conditions and treatment plans
-router.get('/conditions', verifyToken, async (req, res) => {
+router.get('/conditions', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -229,7 +199,7 @@ router.get('/conditions', verifyToken, async (req, res) => {
 });
 
 // Add condition and treatment plan
-router.post('/conditions', verifyToken, async (req, res) => {
+router.post('/conditions', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -276,7 +246,7 @@ router.post('/conditions', verifyToken, async (req, res) => {
 });
 
 // Update condition and treatment plan
-router.put('/conditions/:id', verifyToken, async (req, res) => {
+router.put('/conditions/:id', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -325,7 +295,7 @@ router.put('/conditions/:id', verifyToken, async (req, res) => {
 });
 
 // Delete condition
-router.delete('/conditions/:id', verifyToken, async (req, res) => {
+router.delete('/conditions/:id', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -360,7 +330,7 @@ router.delete('/conditions/:id', verifyToken, async (req, res) => {
 });
 
 // Get doctor stats
-router.get('/stats', verifyToken, async (req, res) => {
+router.get('/stats', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -452,7 +422,7 @@ router.get('/stats', verifyToken, async (req, res) => {
 });
 
 // Get all patients for doctor
-router.get('/patients', verifyToken, async (req, res) => {
+router.get('/patients', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -523,7 +493,7 @@ router.get('/patients', verifyToken, async (req, res) => {
 });
 
 // Get patient details
-router.get('/patients/:patientId', verifyToken, async (req, res) => {
+router.get('/patients/:patientId', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -582,7 +552,7 @@ router.get('/patients/:patientId', verifyToken, async (req, res) => {
 });
 
 // Get patient treatment plans (doctor view)
-router.get('/patients/:patientId/treatment-plans', verifyToken, async (req, res) => {
+router.get('/patients/:patientId/treatment-plans', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -616,7 +586,7 @@ router.get('/patients/:patientId/treatment-plans', verifyToken, async (req, res)
 });
 
 // Create treatment plan for patient
-router.post('/patients/:patientId/treatment-plans', verifyToken, async (req, res) => {
+router.post('/patients/:patientId/treatment-plans', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -679,7 +649,7 @@ router.post('/patients/:patientId/treatment-plans', verifyToken, async (req, res
 });
 
 // Update treatment plan
-router.put('/treatment-plans/:id', verifyToken, async (req, res) => {
+router.put('/treatment-plans/:id', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -763,7 +733,7 @@ router.put('/treatment-plans/:id', verifyToken, async (req, res) => {
 });
 
 // Delete treatment plan
-router.delete('/treatment-plans/:id', verifyToken, async (req, res) => {
+router.delete('/treatment-plans/:id', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -798,7 +768,7 @@ router.delete('/treatment-plans/:id', verifyToken, async (req, res) => {
 });
 
 // Get doctor availability
-router.get('/availability', verifyToken, async (req, res) => {
+router.get('/availability', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -863,7 +833,7 @@ router.get('/availability', verifyToken, async (req, res) => {
 });
 
 // Update doctor availability
-router.patch('/availability', verifyToken, async (req, res) => {
+router.patch('/availability', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -938,7 +908,7 @@ router.patch('/availability', verifyToken, async (req, res) => {
 });
 
 // Get analytics for doctor
-router.get('/analytics', verifyToken, async (req, res) => {
+router.get('/analytics', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -1080,7 +1050,7 @@ router.get('/analytics', verifyToken, async (req, res) => {
 });
 
 // Get appointments
-router.get('/appointments', verifyToken, async (req, res) => {
+router.get('/appointments', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -1132,7 +1102,7 @@ router.get('/appointments', verifyToken, async (req, res) => {
 });
 
 // Get appointment by ID
-router.get('/appointments/:id', verifyToken, async (req, res) => {
+router.get('/appointments/:id', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -1173,7 +1143,7 @@ router.get('/appointments/:id', verifyToken, async (req, res) => {
 });
 
 // Update appointment status (Accept/Decline)
-router.put('/appointments/:id/status', verifyToken, async (req, res) => {
+router.put('/appointments/:id/status', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -1259,7 +1229,7 @@ router.put('/appointments/:id/status', verifyToken, async (req, res) => {
 });
 
 // Add prescription
-router.post('/appointments/:id/prescription', verifyToken, async (req, res) => {
+router.post('/appointments/:id/prescription', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -1304,7 +1274,7 @@ router.post('/appointments/:id/prescription', verifyToken, async (req, res) => {
 });
 
 // Add exercises
-router.post('/appointments/:id/exercises', verifyToken, async (req, res) => {
+router.post('/appointments/:id/exercises', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -1349,7 +1319,7 @@ router.post('/appointments/:id/exercises', verifyToken, async (req, res) => {
 });
 
 // Get notifications
-router.get('/notifications', verifyToken, async (req, res) => {
+router.get('/notifications', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -1445,7 +1415,7 @@ router.get('/available', async (req, res) => {
 });
 
 // Get all doctors (admin)
-router.get('/all', verifyToken, async (req, res) => {
+router.get('/all', isDoctor, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
       return res.status(403).json({

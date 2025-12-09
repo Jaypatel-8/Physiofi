@@ -37,7 +37,7 @@ const heroImages = [
 const stats = [
   { number: "70+", label: "Patients", color: "primary" },
   { number: "2+", label: "Years Experience", color: "secondary" },
-  { number: "100%", label: "Client Satisfaction", color: "tertiary" }
+  { number: "98.2%", label: "Client Satisfaction", color: "tertiary" }
 ]
 
 const Hero = memo(() => {
@@ -46,10 +46,18 @@ const Hero = memo(() => {
   const [imageLoading, setImageLoading] = useState<{ [key: number]: boolean }>({})
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroImages.length)
-    }, 5000)
-    return () => clearInterval(interval)
+    // Use requestAnimationFrame for better performance
+    let timeoutId: NodeJS.Timeout
+    const scheduleNext = () => {
+      timeoutId = setTimeout(() => {
+        setCurrentSlide((prev) => (prev + 1) % heroImages.length)
+        scheduleNext()
+      }, 5000)
+    }
+    scheduleNext()
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [])
 
   const nextSlide = useCallback(() => {
@@ -83,16 +91,16 @@ const Hero = memo(() => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content - Modern Typography */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.5 }} // Reduced duration
             className="space-y-8"
           >
             {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.1, duration: 0.4 }} // Reduced delay and added duration
               className="inline-block"
             >
               <span className="bg-primary-100 text-primary-800 px-5 py-2 rounded-full text-sm font-semibold">
@@ -103,9 +111,9 @@ const Hero = memo(() => {
             {/* Main Heading - Modern Typography */}
             <div className="space-y-4">
               <motion.h1
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.15, duration: 0.5 }} // Reduced delay and y movement
                 className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-[1.1]"
               >
                 Your Path to <span className="text-primary-500">Better</span>
@@ -114,9 +122,9 @@ const Hero = memo(() => {
               </motion.h1>
               
               <motion.p
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.2, duration: 0.4 }} // Reduced delay and y movement
                 className="text-xl lg:text-2xl text-gray-600 font-light leading-relaxed max-w-xl"
               >
                 Personalized physiotherapy through home visits, tele-consultation, and soon-to-open advanced clinics — designed for your comfort, recovery, and long-term wellbeing.
@@ -124,9 +132,9 @@ const Hero = memo(() => {
               
               {/* Company Slogan */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.4 }} // Reduced delay, removed y movement
                 className="mt-4"
               >
                 <p 
@@ -195,7 +203,7 @@ const Hero = memo(() => {
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.1 }} // Reduced duration and delay
             className="relative"
           >
             <div className="relative rounded-tl-[80px] rounded-br-[80px] rounded-tr-3xl rounded-bl-3xl overflow-hidden shadow-2xl">
@@ -203,10 +211,10 @@ const Hero = memo(() => {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentSlide}
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: imageLoading[heroImages[currentSlide].id] ? 0.7 : 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.5 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: imageLoading[heroImages[currentSlide].id] ? 0.7 : 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }} // Reduced from 0.5, removed scale animation
                     className="absolute inset-0"
                   >
                     {!imageError[heroImages[currentSlide].id] ? (
@@ -219,28 +227,39 @@ const Hero = memo(() => {
                             </div>
                           </div>
                         )}
-                        <Image
-                          src={heroImages[currentSlide].image}
-                          alt={heroImages[currentSlide].title}
-                          fill
-                          className={`object-cover transition-opacity duration-300 ${
-                            imageLoading[heroImages[currentSlide].id] ? 'opacity-0' : 'opacity-100'
-                          }`}
-                          priority={currentSlide === 0}
-                          quality={75}
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-                          loading={currentSlide === 0 ? "eager" : "lazy"}
-                          onLoadStart={() => {
-                            setImageLoading(prev => ({ ...prev, [heroImages[currentSlide].id]: true }))
-                          }}
-                          onLoad={() => {
-                            setImageLoading(prev => ({ ...prev, [heroImages[currentSlide].id]: false }))
-                          }}
-                          onError={() => {
-                            setImageError(prev => ({ ...prev, [heroImages[currentSlide].id]: true }))
-                            setImageLoading(prev => ({ ...prev, [heroImages[currentSlide].id]: false }))
-                          }}
-                        />
+                        {imageError[heroImages[currentSlide].id] ? (
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary-100 via-secondary-100 to-tertiary-100 flex items-center justify-center">
+                            <div className="text-center p-8">
+                              <HomeIcon className="h-24 w-24 text-primary-300 mx-auto mb-4" />
+                              <p className="text-primary-600 font-semibold">{heroImages[currentSlide].title}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <Image
+                            src={heroImages[currentSlide].image}
+                            alt={heroImages[currentSlide].title}
+                            fill
+                            className={`object-cover transition-opacity duration-300 ${
+                              imageLoading[heroImages[currentSlide].id] ? 'opacity-0' : 'opacity-100'
+                            }`}
+                            priority={currentSlide === 0}
+                            quality={70}
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                            loading={currentSlide === 0 ? "eager" : "lazy"}
+                            placeholder="blur"
+                            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                            onError={() => {
+                              setImageError(prev => ({ ...prev, [heroImages[currentSlide].id]: true }))
+                              setImageLoading(prev => ({ ...prev, [heroImages[currentSlide].id]: false }))
+                            }}
+                            onLoadStart={() => {
+                              setImageLoading(prev => ({ ...prev, [heroImages[currentSlide].id]: true }))
+                            }}
+                            onLoad={() => {
+                              setImageLoading(prev => ({ ...prev, [heroImages[currentSlide].id]: false }))
+                            }}
+                          />
+                        )}
                       </>
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary-100 via-secondary-100 to-tertiary-100">

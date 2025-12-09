@@ -16,10 +16,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Logout function - defined early to avoid circular dependency
   const logout = () => {
+    // Clear state first
     setUser(null)
     setToken(null)
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    // Clear localStorage (only on client side)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+    }
+    // Reset initialization state
+    setIsInitialized(false)
+    setLoading(true)
   }
 
   // Validate token with server
@@ -30,24 +37,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userData = response.data.data
         const userObj: User = {
           id: userData.id || userData._id,
-          name: userData.name,
+          name: userData.name || userData.full_name,
           email: userData.email,
           mobile: userData.phone || userData.mobile || '',
-          role: userData.role
+          role: userData.role // Role comes from backend response
         }
         setUser(userObj)
         setToken(authToken)
-        localStorage.setItem('user', JSON.stringify(userObj))
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(userObj))
+          localStorage.setItem('token', authToken) // Ensure token is stored
+        }
         return true
       }
-      return false
-    } catch (error) {
-      // Token is invalid or expired - clear auth state
+      // Invalid response, clear auth state
       logout()
-      // Redirect to login if not already there
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        window.location.href = '/login'
+      return false
+    } catch (error: any) {
+      // Only logout on 401 (unauthorized) or 403 (forbidden) errors
+      // Network errors or 500 errors should not cause logout
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.error('Token validation failed - unauthorized:', error)
+        logout()
+        return false
       }
+      // For other errors (network, 500, etc.), don't logout - just return false
+      console.warn('Token validation error (non-critical):', error)
       return false
     }
   }
@@ -57,112 +72,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isInitialized) return
     
     const initializeAuth = async () => {
+      // Only run on client side
+      if (typeof window === 'undefined') {
+        setLoading(false)
+        setIsInitialized(true)
+        return
+      }
+      
       // Check for stored token on mount
       const storedToken = localStorage.getItem('token')
       const storedUser = localStorage.getItem('user')
       
       if (storedToken && storedUser) {
         try {
-          // Validate token with server on refresh
+          // Parse user from localStorage first to set state immediately
+          try {
+            const parsedUser = JSON.parse(storedUser)
+            if (parsedUser && parsedUser.role) {
+              // Set user state immediately from localStorage (optimistic update)
+              setUser(parsedUser)
+              setToken(storedToken)
+            }
+          } catch (e) {
+            // Invalid user data, will be cleared below
+          }
+          
+          // Validate token with server
           const isValid = await validateToken(storedToken)
-          if (!isValid) {
+          
+          if (isValid) {
+            // Token is valid, user state is already set by validateToken
+            setLoading(false)
+            setIsInitialized(true)
+          } else {
             // Token is invalid, clear everything
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
-            setUser(null)
-            setToken(null)
+            logout()
+            setLoading(false)
+            setIsInitialized(true)
           }
         } catch (error) {
           // Error validating token, clear everything
-          localStorage.removeItem('token')
-          localStorage.removeItem('user')
-          setUser(null)
-          setToken(null)
+          console.error('Token validation error:', error)
+          logout()
+          setLoading(false)
+          setIsInitialized(true)
         }
       } else {
         // No token found, ensure clean state
         setUser(null)
         setToken(null)
+        setLoading(false)
+        setIsInitialized(true)
       }
-      
-      setLoading(false)
-      setIsInitialized(true)
     }
 
     initializeAuth()
   }, [isInitialized])
 
-  // Handle page refresh - validate token when page becomes visible
-  // Use ref to prevent duplicate validation calls
-  const validatingRef = useRef(false)
-  
-  useEffect(() => {
-    if (!isInitialized) return
-
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && !validatingRef.current) {
-        // Page became visible after refresh, verify token is still valid
-        const storedToken = localStorage.getItem('token')
-        if (storedToken && user) {
-          validatingRef.current = true
-          try {
-            await validateToken(storedToken)
-          } finally {
-            // Reset after a delay to allow validation to complete
-            setTimeout(() => {
-              validatingRef.current = false
-            }, 2000)
-          }
-        } else if (!storedToken && user) {
-          // Token was cleared, logout
-          logout()
-        }
-      }
-    }
-
-    // Also check on focus (when user switches back to tab) - debounced
-    let focusTimeout: NodeJS.Timeout
-    const handleFocus = async () => {
-      clearTimeout(focusTimeout)
-      focusTimeout = setTimeout(async () => {
-        if (validatingRef.current) return // Skip if already validating
-        
-        const storedToken = localStorage.getItem('token')
-        if (storedToken && user) {
-          validatingRef.current = true
-          try {
-            await validateToken(storedToken)
-          } finally {
-            setTimeout(() => {
-              validatingRef.current = false
-            }, 2000)
-          }
-        } else if (!storedToken && user) {
-          logout()
-        }
-      }, 500) // Debounce focus events
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      clearTimeout(focusTimeout)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [isInitialized, user])
+  // Removed aggressive token validation on visibility/focus changes
+  // This was causing users to be logged out automatically
+  // Token validation only happens on initial load now
 
   const login = (userData: User, authToken: string) => {
+    // Store in localStorage first (synchronous) - this happens immediately (only on client side)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('token', authToken)
+      localStorage.setItem('user', JSON.stringify(userData))
+    }
+    // Update state synchronously to avoid delays
     setUser(userData)
     setToken(authToken)
-    localStorage.setItem('token', authToken)
-    localStorage.setItem('user', JSON.stringify(userData))
+    // Mark as initialized to prevent re-initialization
+    setIsInitialized(true)
+    setLoading(false)
+    // Return a promise that resolves after state is set
+    return Promise.resolve()
   }
 
   const updateUser = (userData: User) => {
     setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(userData))
+    }
   }
 
   const value = {

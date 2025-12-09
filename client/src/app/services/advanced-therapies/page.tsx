@@ -336,7 +336,7 @@ export default function AdvancedTherapiesPage() {
                       className="text-center relative z-10"
                     >
                       {/* Enhanced Process Card */}
-                      <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden border-2 border-primary-100">
+                      <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden border-2 border-primary-100 h-full flex flex-col">
                         {/* Book Corner Effect */}
                         <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-primary-100"></div>
                         <div className="absolute top-0 right-0 w-0 h-0 border-l-[45px] border-l-transparent border-t-[45px] border-t-primary-50"></div>
@@ -364,8 +364,8 @@ export default function AdvancedTherapiesPage() {
                           </div>
                           
                           {/* Content */}
-                          <div className="space-y-2">
-                            <h3 className="text-lg font-black text-gray-900 font-display">
+                          <div className="space-y-2 flex-grow flex flex-col justify-center">
+                            <h3 className="text-lg font-black text-gray-900 font-display mb-2">
                               {step.title}
                             </h3>
                             <p className="text-sm text-gray-600 leading-relaxed">

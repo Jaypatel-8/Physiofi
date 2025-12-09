@@ -13,16 +13,23 @@ import {
   HomeIcon,
   UserGroupIcon,
   Cog6ToothIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
   const { user, logout } = useAuth()
   const router = useRouter()
   const submenuRef = useRef<HTMLDivElement>(null)
+
+  // Handle client-side mounting to prevent hydration errors
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -77,8 +84,10 @@ const Header = () => {
   ]
 
   const handleLogout = () => {
+    // Logout function already clears localStorage, just call it
     logout()
-    router.push('/')
+    // Redirect to home page immediately
+    window.location.replace('/')
   }
 
   const handleCloseSubmenu = () => {
@@ -98,10 +107,12 @@ const Header = () => {
     setOpenSubmenu(null)
   }
 
-  const getDashboardLink = () => {
-    if (!user) return '/login'
+  const getDashboardLinkFromUser = (userData: any): string => {
+    if (!userData || !userData.role) {
+      return '/login'
+    }
     
-    switch (user.role) {
+    switch (userData.role) {
       case 'patient':
         return '/patient/dashboard'
       case 'doctor':
@@ -111,6 +122,80 @@ const Header = () => {
       default:
         return '/login'
     }
+  }
+
+  const handleDashboardClick = () => {
+    let dashboardLink = '/login'
+    
+    // Check user state first (most reliable)
+    if (user && user.role) {
+      dashboardLink = getDashboardLinkFromUser(user)
+      console.log('Dashboard click - Using user state:', user.role, '->', dashboardLink)
+    } else if (typeof window !== 'undefined' && isMounted) {
+      // Fallback to localStorage
+      try {
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser)
+          dashboardLink = getDashboardLinkFromUser(parsedUser)
+          console.log('Dashboard click - Using localStorage:', parsedUser?.role, '->', dashboardLink)
+        }
+      } catch (e) {
+        console.error('Error parsing user data:', e)
+      }
+    }
+    
+    // Redirect
+    if (dashboardLink && dashboardLink !== '/login') {
+      console.log('Redirecting to:', dashboardLink)
+      window.location.href = dashboardLink
+    } else {
+      console.log('No valid user found, redirecting to login')
+      window.location.href = '/login'
+    }
+  }
+
+  const getDashboardLink = () => {
+    // Check user state first (most reliable)
+    if (user && user.role) {
+      switch (user.role) {
+        case 'patient':
+          return '/patient/dashboard'
+        case 'doctor':
+          return '/doctor/dashboard'
+        case 'admin':
+          return '/admin/dashboard'
+        default:
+          return '/login'
+      }
+    }
+    
+    // Fallback: check localStorage if user state not ready yet (only on client after mount)
+    if (isMounted && typeof window !== 'undefined') {
+      try {
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser)
+          if (parsedUser && parsedUser.role) {
+            switch (parsedUser.role) {
+              case 'patient':
+                return '/patient/dashboard'
+              case 'doctor':
+                return '/doctor/dashboard'
+              case 'admin':
+                return '/admin/dashboard'
+              default:
+                return '/login'
+            }
+          }
+        }
+      } catch (e) {
+        // Invalid user data, fall through to return /login
+        console.error('Error parsing user data:', e)
+      }
+    }
+    
+    return '/login'
   }
 
   const getDashboardIcon = () => {
@@ -130,7 +215,7 @@ const Header = () => {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100/50 transition-all duration-300"
     >
       <div className="container-custom">
         <div className="flex items-center justify-between h-16 lg:h-20">
@@ -143,12 +228,14 @@ const Header = () => {
           >
             <Link href="/" className="flex items-center space-x-3 group">
               <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-secondary-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <Image
                   src="/Physiofi Logo(1).png"
                   alt="PhysioFi Logo"
                   width={120}
                   height={50}
-                  className="group-hover:scale-105 transition-transform duration-300 object-contain"
+                  className="relative z-10 group-hover:scale-105 transition-transform duration-300 object-contain"
+                  style={{ width: 'auto', height: 'auto', maxWidth: '120px' }}
                   priority
                 />
               </div>
@@ -156,7 +243,7 @@ const Header = () => {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8" ref={submenuRef}>
+          <nav className="hidden lg:flex items-center space-x-1" ref={submenuRef}>
             {navigation.map((item, index) => (
               <motion.div
                 key={item.name}
@@ -170,31 +257,34 @@ const Header = () => {
                 {item.hasSubmenu ? (
                   <div className="relative">
                     <button
-                      className="font-medium relative group transition-all duration-300 hover:text-primary-600 flex items-center gap-1 text-gray-900"
+                      className="font-semibold relative group transition-all duration-300 hover:text-primary-600 flex items-center gap-1.5 text-gray-800 px-4 py-2 rounded-xl hover:bg-primary-50/50"
                     >
                       {item.name}
-                      <ChevronDownIcon className={`h-4 w-4 transition-transform duration-300 ${openSubmenu === item.name ? 'rotate-180' : ''}`} />
-                      <span className={`absolute bottom-0 left-0 w-0 h-0.5 ${item.colorClass} transition-all duration-500 group-hover:w-full`}></span>
+                      <ChevronDownIcon className={`h-4 w-4 transition-transform duration-300 ${openSubmenu === item.name ? 'rotate-180 text-primary-600' : ''}`} />
+                      <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r ${item.colorClass} transition-all duration-500 group-hover:w-3/4 rounded-full`}></span>
                     </button>
                     
                     <AnimatePresence>
                       {openSubmenu === item.name && item.submenu && (
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
                           transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+                          className="absolute top-full left-0 mt-2 w-72 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100/50 overflow-hidden z-50"
                         >
                           <div className="py-2">
                             {item.submenu.map((subItem, subIndex) => (
                               <Link
                                 key={subIndex}
                                 href={subItem.href}
-                                className="block px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors duration-200"
+                                className="block px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100/50 hover:text-primary-700 transition-all duration-200 group/item"
                                 onClick={handleCloseSubmenu}
                               >
-                                {subItem.name}
+                                <span className="flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary-300 opacity-0 group-hover/item:opacity-100 transition-opacity"></span>
+                                  {subItem.name}
+                                </span>
                               </Link>
                             ))}
                           </div>
@@ -205,18 +295,18 @@ const Header = () => {
                 ) : item.href.startsWith('#') ? (
                     <a
                       href={item.href}
-                      className="font-medium relative group transition-all duration-300 hover:text-primary-600 text-gray-900"
+                      className="font-semibold relative group transition-all duration-300 hover:text-primary-600 text-gray-800 px-4 py-2 rounded-xl hover:bg-primary-50/50"
                     >
                     {item.name}
-                    <span className={`absolute bottom-0 left-0 w-0 h-0.5 ${item.colorClass} transition-all duration-500 group-hover:w-full`}></span>
+                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r ${item.colorClass} transition-all duration-500 group-hover:w-3/4 rounded-full`}></span>
                   </a>
                 ) : (
                   <Link
                     href={item.href}
-                    className="font-medium relative group transition-all duration-300 hover:text-primary-600 text-gray-900"
+                    className="font-semibold relative group transition-all duration-300 hover:text-primary-600 text-gray-800 px-4 py-2 rounded-xl hover:bg-primary-50/50"
                   >
                     {item.name}
-                    <span className={`absolute bottom-0 left-0 w-0 h-0.5 ${item.colorClass} transition-all duration-500 group-hover:w-full`}></span>
+                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r ${item.colorClass} transition-all duration-500 group-hover:w-3/4 rounded-full`}></span>
                   </Link>
                 )}
               </motion.div>
@@ -224,30 +314,36 @@ const Header = () => {
           </nav>
 
           {/* Desktop CTA Buttons */}
-          <div className="hidden lg:flex items-center space-x-4">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <Link
-                        href={getDashboardLink()}
-                        className="flex items-center space-x-2 bg-primary-300 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-400 transition-all duration-300 shadow-lg hover:shadow-xl"
+          <div className="hidden lg:flex items-center space-x-3">
+            {typeof window === 'undefined' || !isMounted || !user || !user.role ? (
+              // Always render Login during SSR and initial render to prevent hydration mismatch
+              <Link
+                href="/login"
+                className="group relative bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                <span className="relative z-10">Login</span>
+              </Link>
+            ) : (
+              // Show dashboard/logout only after mount and if user is authenticated
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleDashboardClick}
+                  className="group relative flex items-center space-x-2 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 overflow-hidden"
                 >
-                  {getDashboardIcon()}
-                  <span>Dashboard</span>
-                </Link>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                  <span className="relative z-10">{getDashboardIcon()}</span>
+                  <span className="relative z-10">Dashboard</span>
+                </button>
                 <button
                   onClick={handleLogout}
-                  className="text-sm font-semibold text-gray-700 hover:text-red-600 transition-colors duration-300"
+                  className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 border border-transparent hover:border-red-200"
+                  title="Logout"
                 >
-                  Logout
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               </div>
-            ) : (
-                      <Link
-                        href="/login"
-                        className="bg-primary-300 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-400 transition-all duration-300 shadow-lg hover:shadow-xl"
-                      >
-                        Login
-                      </Link>
             )}
           </div>
 
@@ -257,12 +353,12 @@ const Header = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300"
+            className="lg:hidden p-2.5 rounded-xl hover:bg-primary-50 transition-all duration-300 group"
           >
             {isMenuOpen ? (
-              <XMarkIcon className="h-6 w-6 text-gray-900" />
+              <XMarkIcon className="h-6 w-6 text-gray-900 group-hover:text-primary-600 transition-colors" />
             ) : (
-              <Bars3Icon className="h-6 w-6 text-gray-900" />
+              <Bars3Icon className="h-6 w-6 text-gray-900 group-hover:text-primary-600 transition-colors" />
             )}
           </motion.button>
         </div>
@@ -276,19 +372,24 @@ const Header = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="lg:hidden bg-white shadow-lg"
+            className="lg:hidden bg-white/95 backdrop-blur-md shadow-2xl border-t border-gray-100/50"
           >
-            <div className="px-4 py-6 space-y-4">
-              {navigation.map((item) => (
-                <div key={item.name}>
+            <div className="px-4 py-6 space-y-3">
+              {navigation.map((item, index) => (
+                <motion.div
+                  key={item.name}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
                   {item.hasSubmenu ? (
                     <div>
                       <button
                         onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
-                        className="flex items-center justify-between w-full text-lg font-medium text-gray-700 hover:text-gray-900 transition-all duration-300"
+                        className="flex items-center justify-between w-full text-base font-semibold text-gray-800 hover:text-primary-600 px-4 py-3 rounded-xl hover:bg-primary-50/50 transition-all duration-300"
                       >
                         <span>{item.name}</span>
-                        <ChevronDownIcon className={`h-5 w-5 transition-transform duration-300 ${openSubmenu === item.name ? 'rotate-180' : ''}`} />
+                        <ChevronDownIcon className={`h-5 w-5 transition-transform duration-300 ${openSubmenu === item.name ? 'rotate-180 text-primary-600' : ''}`} />
                       </button>
                       <AnimatePresence>
                         {openSubmenu === item.name && item.submenu && (
@@ -299,7 +400,7 @@ const Header = () => {
                             transition={{ duration: 0.3 }}
                             className="overflow-hidden"
                           >
-                            <div className="pl-4 pt-2 space-y-2">
+                            <div className="pl-4 pt-2 space-y-1">
                               {item.submenu.map((subItem, subIndex) => (
                                 <Link
                                   key={subIndex}
@@ -308,7 +409,7 @@ const Header = () => {
                                     setIsMenuOpen(false)
                                     setOpenSubmenu(null)
                                   }}
-                                  className="block text-base text-gray-600 hover:text-primary-600 transition-colors duration-200"
+                                  className="block text-sm font-medium text-gray-600 hover:text-primary-600 px-4 py-2.5 rounded-lg hover:bg-primary-50/50 transition-all duration-200"
                                 >
                                   {subItem.name}
                                 </Link>
@@ -322,53 +423,58 @@ const Header = () => {
                     <a
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="block text-lg font-medium text-gray-700 hover:text-gray-900 transition-all duration-300 relative group"
+                      className="block text-base font-semibold text-gray-800 hover:text-primary-600 px-4 py-3 rounded-xl hover:bg-primary-50/50 transition-all duration-300"
                     >
                       {item.name}
-                      <span className={`absolute bottom-0 left-0 w-0 h-0.5 ${item.colorClass} transition-all duration-500 group-hover:w-full`}></span>
                     </a>
                   ) : (
                     <Link
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="block text-lg font-medium text-gray-700 hover:text-gray-900 transition-all duration-300 relative group"
+                      className="block text-base font-semibold text-gray-800 hover:text-primary-600 px-4 py-3 rounded-xl hover:bg-primary-50/50 transition-all duration-300"
                     >
                       {item.name}
-                      <span className={`absolute bottom-0 left-0 w-0 h-0.5 ${item.colorClass} transition-all duration-500 group-hover:w-full`}></span>
                     </Link>
                   )}
-                </div>
+                </motion.div>
               ))}
               
-              <div className="pt-4 border-t border-gray-200 space-y-3">
-                {user ? (
+              <div className="pt-4 mt-4 border-t border-gray-200 space-y-3">
+                {typeof window === 'undefined' || !isMounted || !user || !user.role ? (
+                  // Always render Login during SSR and initial render to prevent hydration mismatch
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="group relative block bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white px-6 py-3 rounded-xl font-bold text-sm w-full text-center hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                    <span className="relative z-10">Login</span>
+                  </Link>
+                ) : (
+                  // Show dashboard/logout only after mount and if user is authenticated
                   <div className="space-y-3">
-                    <Link
-                      href={getDashboardLink()}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center space-x-2 bg-primary-300 text-white px-6 py-2.5 rounded-lg font-semibold text-sm w-full justify-center hover:bg-primary-400 transition-all duration-300"
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false)
+                        handleDashboardClick()
+                      }}
+                      className="group relative flex items-center space-x-2 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white px-6 py-3 rounded-xl font-bold text-sm w-full justify-center hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg overflow-hidden"
                     >
-                      {getDashboardIcon()}
-                      <span>Dashboard</span>
-                    </Link>
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                      <span className="relative z-10">{getDashboardIcon()}</span>
+                      <span className="relative z-10">Dashboard</span>
+                    </button>
                     <button
                       onClick={() => {
                         handleLogout()
                         setIsMenuOpen(false)
                       }}
-                      className="w-full text-sm font-semibold text-gray-700 hover:text-red-600 transition-colors duration-300 text-center"
+                      className="flex items-center justify-center space-x-2 w-full px-6 py-3 rounded-xl text-sm font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 border border-gray-200 hover:border-red-200"
                     >
-                      Logout
+                      <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                      <span>Logout</span>
                     </button>
                   </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block bg-primary-300 text-white px-6 py-2.5 rounded-lg font-semibold text-sm w-full text-center hover:bg-primary-400 transition-all duration-300"
-                  >
-                    Login
-                  </Link>
                 )}
               </div>
             </div>

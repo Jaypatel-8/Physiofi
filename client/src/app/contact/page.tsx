@@ -72,7 +72,7 @@ const ContactPage = () => {
             className="text-xl text-white/90 max-w-3xl mx-auto"
           >
             Have questions about our services? Need to schedule an appointment? 
-            We're here to help you on your recovery journey.
+            We&apos;re here to help you on your recovery journey.
           </motion.p>
         </div>
       </section>
@@ -92,7 +92,7 @@ const ContactPage = () => {
               <div className="text-center py-8">
                 <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Message Sent Successfully!</h3>
-                <p className="text-gray-600">We'll get back to you within 24 hours.</p>
+                <p className="text-gray-600">We&apos;ll get back to you within 24 hours.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -224,7 +224,7 @@ const ContactPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900">Email</h3>
                     <p className="text-gray-600">info@physiofi.com</p>
-                    <p className="text-sm text-gray-500">We'll respond within 24 hours</p>
+                    <p className="text-sm text-gray-500">We&apos;ll respond within 24 hours</p>
                   </div>
                 </div>
 
@@ -260,13 +260,13 @@ const ContactPage = () => {
 
             {/* Emergency Contact */}
             <div className="bg-accent-50 rounded-2xl p-6 shadow-lg">
-              <h3 className="text-lg font-bold text-red-800 mb-3">Emergency Contact</h3>
-              <p className="text-red-700 mb-4">
+              <h3 className="text-lg font-bold text-accent-800 mb-3">Emergency Contact</h3>
+              <p className="text-accent-700 mb-4">
                 For urgent physiotherapy needs outside business hours, call our emergency line.
               </p>
               <a
                 href="tel:+919082770384"
-                className="text-red-600 font-semibold text-lg hover:text-red-700 transition-colors duration-300"
+                className="text-accent-600 font-semibold text-lg hover:text-accent-700 transition-colors duration-300"
               >
                 +91 9082770384
               </a>

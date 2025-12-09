@@ -20,6 +20,7 @@ import {
 
 const ServicesPage = () => {
   const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const [bookingType, setBookingType] = useState<'home' | 'tele'>('home')
 
   useEffect(() => {
     AOS.init({
@@ -29,7 +30,10 @@ const ServicesPage = () => {
       offset: 100,
     })
 
-    const handleOpenBooking = () => {
+    const handleOpenBooking = (e: Event) => {
+      const customEvent = e as CustomEvent
+      const type = customEvent.detail?.type === 'tele' ? 'tele' : 'home'
+      setBookingType(type)
       setIsBookingOpen(true)
     }
 
@@ -38,13 +42,13 @@ const ServicesPage = () => {
   }, [])
 
   const handleBookHomeVisit = () => {
-    const event = new CustomEvent('openBooking')
-    window.dispatchEvent(event)
+    setBookingType('home')
+    setIsBookingOpen(true)
   }
 
   const handleBookTeleConsultation = () => {
-    const event = new CustomEvent('openBooking', { detail: { type: 'tele' } })
-    window.dispatchEvent(event)
+    setBookingType('tele')
+    setIsBookingOpen(true)
   }
 
   const services = [
@@ -251,10 +255,10 @@ const ServicesPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-secondary-500">
+      <section className="py-20 bg-gradient-to-br from-secondary-500 via-secondary-600 to-secondary-700">
         <div className="container-custom text-center">
           <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display">
-            Ready to Start Your <span className="text-yellow-200">Recovery</span>?
+            Get Started Today
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
             Book your consultation today and take the first step towards better health and wellness.
@@ -262,15 +266,17 @@ const ServicesPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handleBookHomeVisit}
-              className="bg-white text-accent-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-xl transition-colors duration-300 text-center"
+              className="bg-white text-secondary-700 hover:bg-gray-50 font-bold py-4 px-8 rounded-xl transition-all duration-300 text-center shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center justify-center gap-2"
             >
-              📅 Book Home Visit
+              <HomeIcon className="h-5 w-5" />
+              Book Appointment
             </button>
             <button
               onClick={handleBookTeleConsultation}
-              className="bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-secondary-600 font-semibold py-4 px-8 rounded-xl transition-colors duration-300 text-center shadow-md"
+              className="bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-secondary-700 font-bold py-4 px-8 rounded-xl transition-all duration-300 text-center shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center justify-center gap-2"
             >
-              💻 Start Tele-Consultation
+              <VideoCameraIcon className="h-5 w-5" />
+              Book Tele-Consultation
             </button>
           </div>
         </div>
@@ -280,6 +286,7 @@ const ServicesPage = () => {
       <BookingPopup 
         isOpen={isBookingOpen} 
         onClose={() => setIsBookingOpen(false)}
+        defaultServiceType={bookingType}
       />
     </main>
   )

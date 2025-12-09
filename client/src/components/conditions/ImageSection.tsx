@@ -3,6 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { HomeIcon } from '@heroicons/react/24/outline'
 
 interface ImageSectionProps {
   imageAlt: string
@@ -16,6 +17,7 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
     <section className="py-16 bg-white">
       <div className="container-custom">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left Content */}
           {title && description && (
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -44,6 +46,7 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
             </motion.div>
           )}
           
+          {/* Right Image */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -60,12 +63,17 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                    }}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center p-8">
-                    <div className="text-center">
-                      <div className="w-40 h-40 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                        <span className="text-8xl">💪</span>
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-secondary-100 to-pastel-blue-100">
+                    <div className="text-center p-8">
+                      <div className="w-32 h-32 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                        <HomeIcon className="h-16 w-16 text-primary-500" />
                       </div>
                       <p className="text-gray-600 font-medium">{imageAlt}</p>
                     </div>

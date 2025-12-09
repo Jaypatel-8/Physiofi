@@ -211,10 +211,10 @@ const Services = () => {
                   viewport={{ once: true }}
                       transition={{ delay: index * 0.15, type: "spring" }}
                       whileHover={{ y: -8, scale: 1.02 }}
-                      className="text-center relative z-10"
+                      className="text-center relative z-10 h-full flex"
                 >
                       {/* Enhanced Process Card */}
-                      <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden border-2 border-primary-100">
+                      <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden border-2 border-primary-100 w-full flex flex-col">
                         {/* Book Corner Effect */}
                         <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-primary-100"></div>
                         <div className="absolute top-0 right-0 w-0 h-0 border-l-[45px] border-l-transparent border-t-[45px] border-t-primary-50"></div>
@@ -242,8 +242,8 @@ const Services = () => {
                           </div>
                           
                           {/* Content */}
-                          <div className="space-y-2">
-                            <h4 className="text-lg font-black text-gray-900 font-display">{step.title}</h4>
+                          <div className="space-y-2 flex-grow flex flex-col justify-center">
+                            <h4 className="text-lg font-black text-gray-900 font-display mb-2">{step.title}</h4>
                             <p className="text-xs text-gray-600 leading-relaxed">{step.description}</p>
                           </div>
                         </div>
@@ -266,23 +266,23 @@ const Services = () => {
         >
           <div className="bg-gradient-to-r from-secondary-300 via-pastel-blue-300 to-tertiary-300 rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl p-12 text-white shadow-2xl">
             <h3 className="text-4xl font-black mb-4 font-display">
-              Ready to Start Your <span className="text-white">Recovery</span> <span className="text-white">Journey</span>?
+              Get Started Today
             </h3>
             <p className="text-lg mb-8 opacity-95 max-w-xl mx-auto font-light">
               Book your consultation today and take the first step towards better health.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={handleBookHomeVisit}
+                onClick={handleBookTeleConsultation}
                 className="bg-white text-secondary-700 hover:bg-gray-50 font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-center shadow-xl hover:scale-105 hover:-translate-y-0.5 active:scale-95"
               >
-                Book Home Visit
+                Book Tele-Consultation
               </button>
               <button
-                onClick={handleBookTeleConsultation}
+                onClick={handleBookHomeVisit}
                 className="bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-secondary-700 font-bold py-4 px-8 rounded-2xl transition-all duration-300 text-center shadow-lg hover:scale-105 hover:-translate-y-0.5 active:scale-95"
               >
-                Online Consultation
+                Book Appointment
               </button>
             </div>
           </div>

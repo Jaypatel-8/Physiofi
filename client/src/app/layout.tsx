@@ -10,7 +10,9 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
-  variable: '--font-inter'
+  variable: '--font-inter',
+  fallback: ['system-ui', 'arial'],
+  adjustFontFallback: true,
 })
 
 // Barbara-style font (using Bebas Neue as professional alternative)
@@ -18,7 +20,10 @@ const barbara = Bebas_Neue({
   weight: '400',
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-barbara'
+  variable: '--font-barbara',
+  fallback: ['Arial', 'sans-serif'],
+  adjustFontFallback: false,
+  preload: false, // Don't preload secondary font
 })
 
 export const metadata: Metadata = {

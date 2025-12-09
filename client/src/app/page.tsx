@@ -2,6 +2,8 @@
 
 import { useEffect, useState, memo } from 'react'
 import dynamic from 'next/dynamic'
+import { useAuth } from '@/app/providers'
+import { useRouter } from 'next/navigation'
 
 // AOS CSS will be loaded dynamically in useEffect
 
@@ -36,42 +38,77 @@ import {
   ShieldCheckIcon,
   HomeIcon,
   ArrowRightIcon,
-  SparklesIcon
+  SparklesIcon,
+  VideoCameraIcon
 } from '@heroicons/react/24/outline'
 
 // Memoize component to prevent unnecessary re-renders
 const Home = memo(function Home() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
   const [isBookingOpen, setIsBookingOpen] = useState(false)
   const [bookingType, setBookingType] = useState<'home' | 'tele'>('home')
+  
+  const handleDashboardClick = () => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    
+    const dashboardPath = user.role === 'patient' 
+      ? '/patient/dashboard' 
+      : user.role === 'doctor' 
+      ? '/doctor/dashboard' 
+      : '/admin/dashboard'
+    
+    router.push(dashboardPath)
+  }
 
   useEffect(() => {
     // Initialize AOS after page load for better performance
     const initAOS = async () => {
       try {
         if (typeof window !== 'undefined' && !document.body.hasAttribute('data-aos-initialized')) {
-          // Dynamically import AOS only when needed
-          const AOS = (await import('aos')).default
-          AOS.init({
-            duration: 800,
-            easing: 'ease-in-out',
-            once: true,
-            offset: 100,
-            delay: 0,
-          })
-          document.body.setAttribute('data-aos-initialized', 'true')
+          // Check if user prefers reduced motion
+          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          
+          // Only load AOS if user doesn't prefer reduced motion
+          if (!prefersReducedMotion) {
+            // Dynamically import AOS only when needed and after initial render
+            const AOS = (await import('aos')).default
+            AOS.init({
+              duration: 600, // Reduced from 800
+              easing: 'ease-in-out',
+              once: true,
+              offset: 50, // Reduced from 100 for faster triggering
+              delay: 0,
+              disable: false,
+            })
+            document.body.setAttribute('data-aos-initialized', 'true')
+          } else {
+            // Skip AOS for users who prefer reduced motion
+            document.body.setAttribute('data-aos-initialized', 'true')
+          }
         }
       } catch (error) {
         console.warn('AOS initialization failed:', error)
       }
     }
 
-    // Initialize AOS after page load
-    const loadHandler = () => setTimeout(initAOS, 100)
+    // Initialize AOS after page load with requestIdleCallback for better performance
+    const loadHandler = () => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(initAOS, { timeout: 2000 })
+      } else {
+        setTimeout(initAOS, 200)
+      }
+    }
+    
     if (typeof window !== 'undefined') {
       if (document.readyState === 'complete') {
-        setTimeout(initAOS, 100)
+        loadHandler()
       } else {
-        window.addEventListener('load', loadHandler)
+        window.addEventListener('load', loadHandler, { once: true })
       }
     }
 
@@ -95,13 +132,13 @@ const Home = memo(function Home() {
   }, [])
 
   const handleBookHomeVisit = () => {
-    const event = new CustomEvent('openBooking')
-    window.dispatchEvent(event)
+    setBookingType('home')
+    setIsBookingOpen(true)
   }
 
   const handleBookTeleConsultation = () => {
-    const event = new CustomEvent('openBooking', { detail: { type: 'tele' } })
-    window.dispatchEvent(event)
+    setBookingType('tele')
+    setIsBookingOpen(true)
   }
 
   const handleCloseBooking = () => {
@@ -152,7 +189,7 @@ const Home = memo(function Home() {
   ]
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen overflow-x-hidden">
       <Header />
       <Hero />
       
@@ -200,9 +237,10 @@ const Home = memo(function Home() {
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -8, scale: 1.05 }}
-                  className={`${item.bgColor} rounded-2xl p-6 h-full transition-all duration-300 text-center shadow-md hover:shadow-lg flex flex-col`}
+                  className={`${item.bgColor} rounded-2xl p-6 transition-all duration-300 text-center shadow-md hover:shadow-lg flex flex-col`}
+                  style={{ minHeight: '200px' }}
                 >
-                  <div className="flex flex-col h-full">
+                  <div className="flex flex-col">
                     <div className={`w-14 h-14 ${item.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4`}>
                       <div className="text-white">
                         {item.icon}
@@ -309,7 +347,7 @@ const Home = memo(function Home() {
                           height={24}
                           className="object-contain"
                           loading="lazy"
-                          quality={75}
+                          quality={70} // Reduced for faster loading
                         />
                       )}
                     </div>
@@ -324,8 +362,8 @@ const Home = memo(function Home() {
       <Testimonials />
       <Contact />
       
-      {/* CTA Footer Section - Rounded Design */}
-      <section className="py-20 bg-primary-300">
+      {/* Get Started Section */}
+      <section className="py-20 bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600">
         <div className="container-custom text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -334,7 +372,7 @@ const Home = memo(function Home() {
             className="inline-block mb-6"
           >
             <span className="bg-white/20 backdrop-blur-sm text-white px-5 py-2 rounded-full text-sm font-semibold">
-              Get Started Today
+              Get Started
             </span>
           </motion.div>
           <motion.h2
@@ -344,8 +382,7 @@ const Home = memo(function Home() {
             transition={{ delay: 0.1 }}
             className="text-5xl lg:text-6xl font-black text-white mb-6 font-display leading-tight"
           >
-            Ready to Start Your
-            <span className="block"><span className="text-white">Recovery</span> <span className="text-white">Journey</span>?</span>
+            Get Started Today
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -354,20 +391,22 @@ const Home = memo(function Home() {
             transition={{ delay: 0.2 }}
             className="text-xl text-white/95 mb-10 max-w-xl mx-auto font-light"
           >
-            Get started with expert physiotherapy care today. Quick booking, professional service.
+            Book your appointment or start a tele-consultation with our expert physiotherapists.
           </motion.p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handleBookHomeVisit}
-              className="bg-white text-primary-700 hover:bg-gray-50 font-black px-8 py-4 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl text-lg hover:scale-105 hover:-translate-y-0.5 active:scale-95"
+              className="bg-white text-primary-700 hover:bg-gray-50 font-black px-8 py-4 rounded-2xl transition-all duration-300 shadow-2xl hover:shadow-3xl text-lg hover:scale-105 hover:-translate-y-0.5 active:scale-95 inline-flex items-center justify-center gap-2"
             >
+              <HomeIcon className="h-5 w-5" />
               Book Appointment
             </button>
             <button
               onClick={handleBookTeleConsultation}
-              className="bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-primary-700 font-black px-8 py-4 rounded-2xl transition-all duration-300 shadow-xl text-lg hover:scale-105 hover:-translate-y-0.5 active:scale-95"
+              className="bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-primary-700 font-black px-8 py-4 rounded-2xl transition-all duration-300 shadow-xl text-lg hover:scale-105 hover:-translate-y-0.5 active:scale-95 inline-flex items-center justify-center gap-2"
             >
-              Tele Consultation
+              <VideoCameraIcon className="h-5 w-5" />
+              Book Tele-Consultation
             </button>
           </div>
         </div>

@@ -43,8 +43,8 @@ const CareerPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Career application submitted:', formData)
-    // Handle form submission
+    // TODO: Handle form submission
+    // Form submission logic will be implemented here
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -246,7 +246,7 @@ const CareerPage = () => {
             </h1>
             <div className="lg:ml-auto lg:max-w-md">
               <p className="text-xl text-gray-600 font-medium leading-relaxed mb-6">
-                Be part of a team that's making a real difference in people's lives.
+                Be part of a team that&apos;s making a real difference in people&apos;s lives.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.button 
@@ -541,8 +541,8 @@ const CareerPage = () => {
                     >
                       <option value="">Select education</option>
                       <option value="diploma">Diploma in Physiotherapy</option>
-                      <option value="bachelor">Bachelor's in Physiotherapy</option>
-                      <option value="master">Master's in Physiotherapy</option>
+                      <option value="bachelor">Bachelor&apos;s in Physiotherapy</option>
+                      <option value="master">Master&apos;s in Physiotherapy</option>
                       <option value="phd">PhD in Physiotherapy</option>
                     </select>
                   </div>

@@ -13,9 +13,12 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    // Only access localStorage on client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token')
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
     return config
   },
@@ -28,11 +31,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Don't automatically redirect on 401 - let the auth provider handle it
+    // This prevents conflicts with the auth context
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Only clear storage if we're not already on login page
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        // Let the auth provider handle logout to avoid race conditions
+        console.warn('401 Unauthorized - Auth provider will handle logout')
+      }
     }
     return Promise.reject(error)
   }
@@ -140,7 +146,7 @@ export const patientAPI = {
 // Doctor API
 export const doctorAPI = {
   register: (data: any) => 
-    api.post('/doctors/register', data),
+    api.post('/auth/doctor/register', data),
   
   getProfile: () => 
     api.get('/doctors/profile'),
@@ -230,6 +236,67 @@ export const doctorAPI = {
   
   deletePatientTreatmentPlan: (id: string) => 
     api.delete(`/doctors/treatment-plans/${id}`),
+
+  // Medical Records
+  getMedicalRecords: (params?: any) => 
+    api.get('/medical-records', { params }),
+  
+  getMedicalRecord: (id: string) => 
+    api.get(`/medical-records/${id}`),
+  
+  uploadMedicalRecord: (data: any) => 
+    api.post('/medical-records', data),
+  
+  deleteMedicalRecord: (id: string) => 
+    api.delete(`/medical-records/${id}`),
+
+  // Prescriptions
+  getPrescriptions: (params?: any) => 
+    api.get('/prescriptions', { params }),
+  
+  getPrescription: (id: string) => 
+    api.get(`/prescriptions/${id}`),
+  
+  createPrescription: (data: any) => 
+    api.post('/prescriptions', data),
+  
+  updatePrescription: (id: string, data: any) => 
+    api.put(`/prescriptions/${id}`, data),
+  
+  deletePrescription: (id: string) => 
+    api.delete(`/prescriptions/${id}`),
+
+  // Exercise Plans
+  getExercisePlans: (params?: any) => 
+    api.get('/exercise-plans', { params }),
+  
+  getExercisePlan: (id: string) => 
+    api.get(`/exercise-plans/${id}`),
+  
+  createExercisePlan: (data: any) => 
+    api.post('/exercise-plans', data),
+  
+  updateExercisePlan: (id: string, data: any) => 
+    api.put(`/exercise-plans/${id}`, data),
+  
+  deleteExercisePlan: (id: string) => 
+    api.delete(`/exercise-plans/${id}`),
+
+  // Session Notes
+  getSessionNotes: (params?: any) => 
+    api.get('/session-notes', { params }),
+  
+  getSessionNote: (id: string) => 
+    api.get(`/session-notes/${id}`),
+  
+  createSessionNote: (data: any) => 
+    api.post('/session-notes', data),
+  
+  updateSessionNote: (id: string, data: any) => 
+    api.put(`/session-notes/${id}`, data),
+  
+  deleteSessionNote: (id: string) => 
+    api.delete(`/session-notes/${id}`),
 }
 
 // Doctor Public API (for patients to view)
@@ -325,6 +392,53 @@ export const adminAPI = {
   // Analytics
   getAnalytics: (period?: string) => 
     api.get('/admin/analytics', { params: { period } }),
+
+  // Medical Records
+  getMedicalRecords: (params?: any) => 
+    api.get('/medical-records', { params }),
+  
+  getMedicalRecord: (id: string) => 
+    api.get(`/medical-records/${id}`),
+  
+  uploadMedicalRecord: (data: any) => 
+    api.post('/medical-records', data),
+  
+  deleteMedicalRecord: (id: string) => 
+    api.delete(`/medical-records/${id}`),
+
+  // Prescriptions
+  getPrescriptions: (params?: any) => 
+    api.get('/prescriptions', { params }),
+  
+  getPrescription: (id: string) => 
+    api.get(`/prescriptions/${id}`),
+
+  // Exercise Plans
+  getExercisePlans: (params?: any) => 
+    api.get('/exercise-plans', { params }),
+  
+  getExercisePlan: (id: string) => 
+    api.get(`/exercise-plans/${id}`),
+
+  // Session Notes
+  getSessionNotes: (params?: any) => 
+    api.get('/session-notes', { params }),
+  
+  getSessionNote: (id: string) => 
+    api.get(`/session-notes/${id}`),
+
+  // Payments
+  getPayments: (params?: any) => 
+    api.get('/payments', { params }),
+  
+  getPayment: (id: string) => 
+    api.get(`/payments/${id}`),
+  
+  updatePaymentStatus: (id: string, data: any) => 
+    api.put(`/payments/${id}/status`, data),
+  
+  getPaymentStats: (params?: any) => 
+    api.get('/payments/stats/overview', { params }),
 }
 
 export default api

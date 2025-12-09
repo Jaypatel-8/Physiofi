@@ -19,6 +19,38 @@
     overflow-x: hidden;
     width: 100%;
     max-width: 100vw;
+    position: relative;
+    /* Performance optimizations */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Respect user's motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* Fix scroll issues from nested boxes */
+  * {
+    box-sizing: border-box;
+  }
+  
+  .container-custom {
+    position: relative;
+    overflow: visible;
+  }
+  
+  section {
+    position: relative;
+    overflow: visible;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -132,6 +164,25 @@
   background: #4b5563;
 }
 
+/* Custom scrollbar for dashboard */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #10b981, #059669);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #059669, #047857);
+}
+
 /* Loading animations */
 .loading-dots {
   display: inline-block;
@@ -228,15 +279,20 @@
   }
 }
 
-/* 3D Card Flip Effect */
+/* 3D Card Flip Effect - Optimized for performance */
 .perspective-1000 {
   perspective: 1000px;
   -webkit-perspective: 1000px;
+  /* Performance optimization */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .preserve-3d {
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
+  /* Performance optimization */
+  will-change: transform;
 }
 
 .backface-hidden {
@@ -247,4 +303,24 @@
 .rotate-y-180 {
   transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
+  /* Performance optimization */
+  will-change: transform;
+}
+
+/* Performance optimizations for animations */
+[data-framer-component] {
+  contain: layout style paint;
+}
+
+/* Optimize image rendering */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Reduce repaints for fixed elements */
+.fixed,
+.sticky {
+  will-change: transform;
+  transform: translateZ(0);
 }

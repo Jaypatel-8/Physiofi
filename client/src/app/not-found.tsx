@@ -1,12 +1,29 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { HomeIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 export default function NotFound() {
+  const router = useRouter()
+
   const handleGoBack = () => {
-    window.history.back()
+    if (window.history.length > 1) {
+      router.back()
+    } else {
+      router.push('/')
+    }
   }
+
+  useEffect(() => {
+    // If the page was accessed directly via URL, redirect to home after a short delay
+    const referrer = document.referrer
+    if (!referrer || referrer === window.location.href) {
+      // No referrer means direct access, but we'll still show the 404 page
+      // User can choose to go home or back
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">

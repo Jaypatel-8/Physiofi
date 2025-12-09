@@ -36,6 +36,23 @@ const PatientProfile = () => {
     }
   }, [user, loading])
 
+  // Helper function to format address (string or object)
+  const formatAddress = (address: any): string => {
+    if (!address) return 'N/A'
+    if (typeof address === 'string') return address
+    if (typeof address === 'object') {
+      const parts = [
+        address.street,
+        address.city,
+        address.state,
+        address.pincode,
+        address.country
+      ].filter(Boolean)
+      return parts.length > 0 ? parts.join(', ') : 'N/A'
+    }
+    return 'N/A'
+  }
+
   const loadProfile = async () => {
     try {
       setIsLoading(true)
@@ -43,13 +60,17 @@ const PatientProfile = () => {
       if (response.data.success) {
         const data = response.data.data.patient || response.data.data
         setProfile(data)
+        
+        // Handle address - could be string or object
+        const addressString = formatAddress(data.address)
+        
         setFormData({
           name: data.name || '',
           email: data.email || '',
           phone: data.phone || data.mobile || '',
           age: data.age || '',
           gender: data.gender || '',
-          address: data.address || ''
+          address: addressString
         })
       }
     } catch (error) {
@@ -68,7 +89,7 @@ const PatientProfile = () => {
         loadProfile()
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to update profile')
+      toast.error(error.response?.data?.message || 'Failed to update profile')  
     }
   }
 
@@ -211,7 +232,7 @@ const PatientProfile = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg">{profile?.address || 'N/A'}</p>
+                <p className="px-4 py-3 bg-gray-50 rounded-lg">{formatAddress(profile?.address)}</p>
               )}
             </div>
           </div>
@@ -244,3 +265,6 @@ const PatientProfile = () => {
 }
 
 export default PatientProfile
+
+
+

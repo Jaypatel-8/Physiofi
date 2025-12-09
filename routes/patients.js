@@ -1,44 +1,14 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const Patient = require('../models/Patient');
 const Appointment = require('../models/Appointment');
 const PatientTreatmentPlan = require('../models/PatientTreatmentPlan');
+const { isPatient, isAdmin, isAuthenticated } = require('../middleware/rbac');
 const router = express.Router();
 
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Access denied. No token provided.'
-    });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Invalid token.'
-    });
-  }
-};
-
 // Get patient profile
-router.get('/profile', verifyToken, async (req, res) => {
+router.get('/profile', isPatient, async (req, res) => {
   try {
-    if (req.user.role !== 'patient') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
-
     const patient = await Patient.findById(req.user.userId);
     if (!patient) {
       return res.status(404).json({
@@ -61,14 +31,8 @@ router.get('/profile', verifyToken, async (req, res) => {
 });
 
 // Update patient profile
-router.put('/profile', verifyToken, async (req, res) => {
+router.put('/profile', isPatient, async (req, res) => {
   try {
-    if (req.user.role !== 'patient') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
 
     const {
       name,
@@ -118,14 +82,8 @@ router.put('/profile', verifyToken, async (req, res) => {
 });
 
 // Get patient appointments
-router.get('/appointments', verifyToken, async (req, res) => {
+router.get('/appointments', isPatient, async (req, res) => {
   try {
-    if (req.user.role !== 'patient') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
 
     const { status, type, page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -138,7 +96,8 @@ router.get('/appointments', verifyToken, async (req, res) => {
       .populate('doctor', 'name specialization')
       .sort({ appointmentDate: -1, appointmentTime: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // Use lean() for better performance - returns plain JavaScript objects
 
     const total = await Appointment.countDocuments(query);
 
@@ -163,14 +122,8 @@ router.get('/appointments', verifyToken, async (req, res) => {
 });
 
 // Get patient stats
-router.get('/stats', verifyToken, async (req, res) => {
+router.get('/stats', isPatient, async (req, res) => {
   try {
-    if (req.user.role !== 'patient') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
 
     const patientId = req.user.userId;
 
@@ -234,7 +187,7 @@ router.get('/stats', verifyToken, async (req, res) => {
 });
 
 // Update recovery progress
-router.patch('/progress', verifyToken, async (req, res) => {
+router.patch('/progress', isAuthenticated, async (req, res) => {
   try {
     if (req.user.role !== 'patient') {
       return res.status(403).json({
@@ -277,14 +230,8 @@ router.patch('/progress', verifyToken, async (req, res) => {
 });
 
 // Get all patients (admin only)
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', isAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
 
     const { status, search, page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -303,7 +250,8 @@ router.get('/', verifyToken, async (req, res) => {
       .select('-otp -password')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // Use lean() for better performance
 
     const total = await Patient.countDocuments(query);
 
@@ -328,9 +276,10 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Get patient by ID (admin/doctor only)
-router.get('/:id', verifyToken, async (req, res) => {
+router.get('/:id', isPatient, async (req, res) => {
   try {
-    if (req.user.role === 'patient' && req.params.id !== req.user.userId) {
+    // Patients can only see their own profile
+    if (req.params.id !== req.user.userId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -361,7 +310,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 });
 
 // Update patient status (admin only)
-router.patch('/:id/status', verifyToken, async (req, res) => {
+router.patch('/:id/status', isAuthenticated, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
       return res.status(403).json({
@@ -398,14 +347,8 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
 });
 
 // Delete patient (admin only)
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', isAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
 
     const patient = await Patient.findById(req.params.id);
     if (!patient) {
@@ -440,19 +383,11 @@ router.delete('/:id', verifyToken, async (req, res) => {
 });
 
 // Get patient treatment plans
-router.get('/treatment-plans', verifyToken, async (req, res) => {
+router.get('/treatment-plans', isPatient, async (req, res) => {
   try {
     // Debug logging
     console.log('Treatment plans request - User:', req.user?.role, 'UserId:', req.user?.userId);
     
-    if (!req.user || req.user.role !== 'patient') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Patient role required.',
-        userRole: req.user?.role || 'none'
-      });
-    }
-
     const { status } = req.query;
     let query = { patient: req.user.userId };
     if (status) query.status = status;
@@ -477,14 +412,8 @@ router.get('/treatment-plans', verifyToken, async (req, res) => {
 });
 
 // Get treatment plan by ID
-router.get('/treatment-plans/:id', verifyToken, async (req, res) => {
+router.get('/treatment-plans/:id', isPatient, async (req, res) => {
   try {
-    if (req.user.role !== 'patient') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
 
     const treatmentPlan = await PatientTreatmentPlan.findOne({
       _id: req.params.id,
@@ -515,14 +444,8 @@ router.get('/treatment-plans/:id', verifyToken, async (req, res) => {
 });
 
 // Add patient note to treatment plan
-router.post('/treatment-plans/:id/notes', verifyToken, async (req, res) => {
+router.post('/treatment-plans/:id/notes', isPatient, async (req, res) => {
   try {
-    if (req.user.role !== 'patient') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
 
     const { note } = req.body;
 

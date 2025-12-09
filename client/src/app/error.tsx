@@ -18,12 +18,12 @@ export default function Error({
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-        <ExclamationTriangleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
+        <ExclamationTriangleIcon className="h-16 w-16 text-accent-500 mx-auto mb-4" />
         <h1 className="text-2xl font-black text-gray-900 mb-4 font-display">
           Something went wrong
         </h1>
         <p className="text-gray-600 mb-6">
-          We're sorry, but something unexpected happened. Please try refreshing the page.
+          We&apos;re sorry, but something unexpected happened. Please try refreshing the page.
         </p>
         
         {process.env.NODE_ENV === 'development' && error && (
@@ -31,7 +31,7 @@ export default function Error({
             <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
               Error Details (Development)
             </summary>
-            <pre className="mt-2 text-xs text-red-600 bg-red-50 p-3 rounded overflow-auto">
+            <pre className="mt-2 text-xs text-accent-600 bg-accent-50 p-3 rounded overflow-auto">
               {error.toString()}
             </pre>
           </details>

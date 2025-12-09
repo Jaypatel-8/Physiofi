@@ -28,40 +28,46 @@ const LoginPage = () => {
   const [error, setError] = useState('')
 
   // Redirect if already logged in - prevent direct access to login page
+  // Only check on initial load, not during login process
   useEffect(() => {
-    if (!loading) {
-      // Check if user is logged in
-      const storedToken = localStorage.getItem('token')
-      const storedUser = localStorage.getItem('user')
-      
-      if (storedToken && storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser)
-          if (parsedUser && parsedUser.role) {
-            const dashboardPath = parsedUser.role === 'patient' 
-              ? '/patient/dashboard' 
-              : parsedUser.role === 'doctor' 
-              ? '/doctor/dashboard' 
-              : '/admin/dashboard'
-            // Use replace to avoid adding to history
-            window.location.replace(dashboardPath)
-            return
-          }
-        } catch (error) {
-          // Invalid user data, clear it
-          localStorage.removeItem('token')
-          localStorage.removeItem('user')
+    // Don't redirect if we're currently processing a login
+    if (isLoading) return
+    
+    // Only check after auth context has finished loading
+    if (loading) return
+    
+    // Check if user is already logged in (only on mount, not during login)
+    const storedToken = localStorage.getItem('token')
+    const storedUser = localStorage.getItem('user')
+    
+    // Only redirect if we have both token and user data, AND user state is set
+    // This prevents redirecting during the login process
+    if (storedToken && storedUser && user && user.role) {
+      // User is logged in and on login page - redirect to correct dashboard
+      const dashboardPath = user.role === 'patient' 
+        ? '/patient/dashboard' 
+        : user.role === 'doctor' 
+        ? '/doctor/dashboard' 
+        : '/admin/dashboard'
+      // Use window.location.replace to ensure clean redirect
+      window.location.replace(dashboardPath)
+    } else if (storedToken && storedUser && !user) {
+      // We have localStorage data but user state not ready yet
+      // Try to parse from localStorage as fallback
+      try {
+        const parsedUser = JSON.parse(storedUser)
+        if (parsedUser && parsedUser.role) {
+          const dashboardPath = parsedUser.role === 'patient' 
+            ? '/patient/dashboard' 
+            : parsedUser.role === 'doctor' 
+            ? '/doctor/dashboard' 
+            : '/admin/dashboard'
+          window.location.replace(dashboardPath)
         }
-      }
-      
-      // Also check if user state is set (from context)
-      if (user && !isLoading) {
-        const dashboardPath = user.role === 'patient' 
-          ? '/patient/dashboard' 
-          : user.role === 'doctor' 
-          ? '/doctor/dashboard' 
-          : '/admin/dashboard'
-        window.location.replace(dashboardPath)
+      } catch (e) {
+        // Invalid user data, clear it
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
       }
     }
   }, [user, loading, isLoading])
@@ -86,13 +92,20 @@ const LoginPage = () => {
         const patientData = response.data.data.patient
         const userData = {
           id: patientData.id || patientData._id,
-          name: patientData.name,
+          name: patientData.name || patientData.full_name,
           mobile: patientData.phone || patientData.mobile || '',
           email: patientData.email,
           role: 'patient' as const
         }
+        // Store token and user data first - this updates localStorage immediately
         login(userData, response.data.data.token)
-        window.location.replace('/patient/dashboard')
+        
+        // Small delay to ensure localStorage is written and state is updated
+        await new Promise(resolve => setTimeout(resolve, 150))
+        
+        // Use window.location.href for full page reload to ensure clean state
+        // This ensures localStorage is read correctly on the dashboard page
+        window.location.href = '/patient/dashboard'
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid email or password')
@@ -112,13 +125,20 @@ const LoginPage = () => {
         const doctorData = response.data.data.doctor
         const userData = {
           id: doctorData.id || doctorData._id,
-          name: doctorData.name,
+          name: doctorData.name || doctorData.full_name,
           mobile: doctorData.phone || doctorData.mobile || '',
           email: doctorData.email,
           role: 'doctor' as const
         }
+        // Store token and user data first - this updates localStorage immediately
         login(userData, response.data.data.token)
-        window.location.replace('/doctor/dashboard')
+        
+        // Small delay to ensure localStorage is written and state is updated
+        await new Promise(resolve => setTimeout(resolve, 150))
+        
+        // Use window.location.href for full page reload to ensure clean state
+        // This ensures localStorage is read correctly on the dashboard page
+        window.location.href = '/doctor/dashboard'
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid email or password')
@@ -138,13 +158,20 @@ const LoginPage = () => {
         const adminData = response.data.data.admin
         const userData = {
           id: adminData.id || adminData._id,
-          name: adminData.name,
+          name: adminData.name || adminData.full_name,
           mobile: adminData.phone || adminData.mobile || '',
           email: adminData.email,
           role: 'admin' as const
         }
+        // Store token and user data first - this updates localStorage immediately
         login(userData, response.data.data.token)
-        window.location.replace('/admin/dashboard')
+        
+        // Small delay to ensure localStorage is written and state is updated
+        await new Promise(resolve => setTimeout(resolve, 150))
+        
+        // Use window.location.href for full page reload to ensure clean state
+        // This ensures localStorage is read correctly on the dashboard page
+        window.location.href = '/admin/dashboard'
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid email or password')
@@ -199,8 +226,8 @@ const LoginPage = () => {
                     <UserGroupIcon className="h-8 w-8 text-primary-600" />
                   </div>
                 ) : (
-                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                    <UserIcon className="h-8 w-8 text-purple-600" />
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                    <UserIcon className="h-8 w-8 text-primary-600" />
                   </div>
                 )}
               </div>
@@ -248,7 +275,7 @@ const LoginPage = () => {
                 }}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-semibold transition-all ${
                   loginType === 'admin'
-                    ? 'bg-purple-500 text-white shadow-md'
+                    ? 'bg-secondary-500 text-white shadow-md'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -257,7 +284,7 @@ const LoginPage = () => {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              <div className="mb-4 p-3 bg-accent-50 border border-accent-200 rounded-lg text-accent-700 text-sm">
                 {error}
               </div>
             )}
@@ -323,7 +350,7 @@ const LoginPage = () => {
                 className={`w-full text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   loginType === 'patient' ? 'bg-primary-500 hover:bg-primary-600' :
                   loginType === 'doctor' ? 'bg-primary-500 hover:bg-primary-600' :
-                  'bg-purple-500 hover:bg-purple-600'
+                  'bg-secondary-500 hover:bg-secondary-600'
                 }`}
               >
                 {isLoading ? 'Signing in...' : `Sign In as ${loginType.charAt(0).toUpperCase() + loginType.slice(1)}`}

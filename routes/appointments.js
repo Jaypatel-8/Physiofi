@@ -1,36 +1,13 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const Appointment = require('../models/Appointment');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const Notification = require('../models/Notification');
+const { isPatient, isDoctor, isAdmin, isAuthenticated } = require('../middleware/rbac');
 const router = express.Router();
 
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Access denied. No token provided.'
-    });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Invalid token.'
-    });
-  }
-};
-
-// Create new appointment
-router.post('/', verifyToken, async (req, res) => {
+// Create new appointment (Patient can create)
+router.post('/', isPatient, async (req, res) => {
   try {
     // Debug logging
     console.log('Appointment creation request - Body:', JSON.stringify(req.body));
@@ -98,7 +75,9 @@ router.post('/', verifyToken, async (req, res) => {
       });
     }
 
-    if (doctor.status !== 'Active') {
+    // Handle doctors without status field (legacy records)
+    const doctorStatus = doctor.status || 'Active';
+    if (doctorStatus !== 'Active') {
       return res.status(400).json({
         success: false,
         message: 'Doctor is not available'
@@ -289,7 +268,7 @@ router.post('/', verifyToken, async (req, res) => {
 });
 
 // Get appointments for a user (patient, doctor, or admin)
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
   try {
     const { status, type, startDate, endDate, page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -319,7 +298,8 @@ router.get('/', verifyToken, async (req, res) => {
       .populate('doctor', 'name specialization')
       .sort({ appointmentDate: -1, appointmentTime: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // Use lean() for better performance
 
     const total = await Appointment.countDocuments(query);
 
@@ -344,7 +324,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Get appointment by ID
-router.get('/:id', verifyToken, async (req, res) => {
+router.get('/:id', isAuthenticated, async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
       .populate('patient', 'name email phone age gender address')
@@ -386,7 +366,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 });
 
 // Update appointment status
-router.patch('/:id/status', verifyToken, async (req, res) => {
+router.patch('/:id/status', isAuthenticated, async (req, res) => {
   try {
     const { status, notes } = req.body;
     const appointment = await Appointment.findById(req.params.id);
@@ -503,7 +483,7 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
 });
 
 // Request reschedule (Patient or Doctor)
-router.post('/:id/reschedule-request', verifyToken, async (req, res) => {
+router.post('/:id/reschedule-request', isAuthenticated, async (req, res) => {
   try {
     const { newDate, newTime, reason } = req.body;
     const appointment = await Appointment.findById(req.params.id);
@@ -601,7 +581,7 @@ router.post('/:id/reschedule-request', verifyToken, async (req, res) => {
 });
 
 // Accept/Decline reschedule request (Doctor or Patient)
-router.patch('/:id/reschedule-response', verifyToken, async (req, res) => {
+router.patch('/:id/reschedule-response', isAuthenticated, async (req, res) => {
   try {
     const { action, declinedReason } = req.body; // action: 'accept' or 'decline'
     const appointment = await Appointment.findById(req.params.id);
@@ -753,7 +733,7 @@ router.patch('/:id/reschedule-response', verifyToken, async (req, res) => {
 });
 
 // Reschedule appointment (direct reschedule without request)
-router.patch('/:id/reschedule', verifyToken, async (req, res) => {
+router.patch('/:id/reschedule', isAuthenticated, async (req, res) => {
   try {
     const { newDate, newTime, reason } = req.body;
     const appointment = await Appointment.findById(req.params.id);
@@ -862,7 +842,7 @@ router.patch('/:id/reschedule', verifyToken, async (req, res) => {
 });
 
 // Cancel appointment
-router.patch('/:id/cancel', verifyToken, async (req, res) => {
+router.patch('/:id/cancel', isAuthenticated, async (req, res) => {
   try {
     const { reason } = req.body;
     const appointment = await Appointment.findById(req.params.id);
@@ -971,7 +951,7 @@ router.patch('/:id/cancel', verifyToken, async (req, res) => {
 });
 
 // Complete appointment (doctor only)
-router.patch('/:id/complete', verifyToken, async (req, res) => {
+router.patch('/:id/complete', isAuthenticated, async (req, res) => {
   try {
     if (req.user.role !== 'doctor') {
       return res.status(403).json({
@@ -1071,7 +1051,7 @@ router.patch('/:id/complete', verifyToken, async (req, res) => {
 });
 
 // Get today's appointments
-router.get('/today', verifyToken, async (req, res) => {
+router.get('/today', isAuthenticated, async (req, res) => {
   try {
     let appointments;
     
@@ -1103,7 +1083,7 @@ router.get('/today', verifyToken, async (req, res) => {
 });
 
 // Get appointments by type (Home Visit or Online Consultation)
-router.get('/type/:type', verifyToken, async (req, res) => {
+router.get('/type/:type', isAuthenticated, async (req, res) => {
   try {
     const { type } = req.params;
     const { status, startDate, endDate, page = 1, limit = 50 } = req.query;

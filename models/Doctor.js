@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const doctorSchema = new mongoose.Schema({
-  name: {
+  full_name: {
     type: String,
     required: true,
     trim: true
@@ -13,33 +13,74 @@ const doctorSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  password_hash: {
+    type: String,
+    required: true
+  },
   phone: {
     type: String,
     required: true,
     trim: true
   },
   specialization: {
-    type: [String],
+    type: String,
+    enum: ['Ortho', 'Neuro', 'Pedia', 'Sports', 'General'],
     required: true
+  },
+  // Legacy field for backward compatibility
+  name: {
+    type: String,
+    trim: true
   },
   occupation: {
     type: String,
     trim: true
   },
-  qualifications: [{
+  qualifications: {
+    type: String,
+    trim: true
+  },
+  qualificationsArray: [{
     degree: String,
     institution: String,
     year: Number
   }],
-  experience: {
+  license_no: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  experience_years: {
     type: Number,
     required: true,
     min: 0
   },
+  clinic_address: {
+    type: String,
+    trim: true
+  },
+  consultation_fees: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  availability_schedule: {
+    type: mongoose.Schema.Types.Mixed, // JSON object
+    default: {}
+  },
+  profile_image_url: {
+    type: String,
+    default: null
+  },
+  // Legacy fields for backward compatibility
+  experience: {
+    type: Number,
+    min: 0
+  },
   license: {
     type: String,
-    required: true,
-    unique: true
+    unique: true,
+    sparse: true
   },
   address: {
     street: String,
@@ -185,8 +226,7 @@ const doctorSchema = new mongoose.Schema({
     accountHolderName: String
   },
   password: {
-    type: String,
-    required: true
+    type: String
   },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
@@ -283,16 +323,56 @@ doctorSchema.methods.incrementSessionCount = function() {
 // Method to compare password
 doctorSchema.methods.comparePassword = async function(candidatePassword) {
   const bcrypt = require('bcryptjs');
-  return await bcrypt.compare(candidatePassword, this.password);
+  const hashToCompare = this.password_hash || this.password;
+  
+  if (!hashToCompare) {
+    return false;
+  }
+  
+  try {
+    return await bcrypt.compare(candidatePassword, hashToCompare);
+  } catch (error) {
+    console.error('Password comparison error:', error);
+    return false;
+  }
 };
 
 // Pre-save middleware to hash password
 doctorSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  // Handle both password and password_hash fields
+  if (this.isModified('password') && this.password) {
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    this.password_hash = await bcrypt.hash(this.password, salt);
+    this.password = undefined; // Don't store plain password
+  } else if (this.isModified('password_hash') && !this.password_hash && this.password) {
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    this.password_hash = await bcrypt.hash(this.password, salt);
+    this.password = undefined;
+  }
   
-  const bcrypt = require('bcryptjs');
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  // Sync name with full_name
+  if (this.isModified('full_name') && this.full_name && !this.name) {
+    this.name = this.full_name;
+  } else if (this.isModified('name') && this.name && !this.full_name) {
+    this.full_name = this.name;
+  }
+  
+  // Sync experience with experience_years
+  if (this.isModified('experience_years') && this.experience_years !== undefined && !this.experience) {
+    this.experience = this.experience_years;
+  } else if (this.isModified('experience') && this.experience !== undefined && !this.experience_years) {
+    this.experience_years = this.experience;
+  }
+  
+  // Sync license with license_no
+  if (this.isModified('license_no') && this.license_no && !this.license) {
+    this.license = this.license_no;
+  } else if (this.isModified('license') && this.license && !this.license_no) {
+    this.license_no = this.license;
+  }
+  
   next();
 });
 

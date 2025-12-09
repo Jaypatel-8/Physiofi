@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const adminSchema = new mongoose.Schema({
-  name: {
+  full_name: {
     type: String,
     required: true,
     trim: true
@@ -13,6 +13,10 @@ const adminSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  password_hash: {
+    type: String,
+    required: true
+  },
   phone: {
     type: String,
     required: true,
@@ -20,13 +24,18 @@ const adminSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['Super Admin', 'Admin', 'Manager', 'Support'],
-    default: 'Admin'
+    enum: ['superadmin', 'staff'],
+    default: 'staff'
   },
-  permissions: [{
-    module: String,
-    actions: [String] // ['create', 'read', 'update', 'delete']
-  }],
+  permissions: {
+    type: mongoose.Schema.Types.Mixed, // JSON object
+    default: {}
+  },
+  // Legacy fields for backward compatibility
+  name: {
+    type: String,
+    trim: true
+  },
   department: {
     type: String,
     enum: ['Operations', 'Finance', 'HR', 'Support', 'Marketing'],
@@ -44,8 +53,7 @@ const adminSchema = new mongoose.Schema({
   },
   lockUntil: Date,
   password: {
-    type: String,
-    required: true
+    type: String
   },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
@@ -127,12 +135,20 @@ adminSchema.methods.resetLoginAttempts = function() {
 
 // Method to check permission
 adminSchema.methods.hasPermission = function(module, action) {
-  if (this.role === 'Super Admin') return true;
+  if (this.role === 'superadmin') return true;
   
-  const permission = this.permissions.find(p => p.module === module);
-  if (!permission) return false;
+  // Handle both array and object format for permissions
+  if (Array.isArray(this.permissions)) {
+    const permission = this.permissions.find(p => p.module === module);
+    if (!permission) return false;
+    return permission.actions.includes(action);
+  } else if (typeof this.permissions === 'object' && this.permissions !== null) {
+    const modulePerms = this.permissions[module];
+    if (!modulePerms || !Array.isArray(modulePerms)) return false;
+    return modulePerms.includes(action);
+  }
   
-  return permission.actions.includes(action);
+  return false;
 };
 
 // Method to add permission
@@ -195,16 +211,55 @@ adminSchema.statics.findByRole = function(role) {
 // Method to compare password
 adminSchema.methods.comparePassword = async function(candidatePassword) {
   const bcrypt = require('bcryptjs');
-  return await bcrypt.compare(candidatePassword, this.password);
+  const hashToCompare = this.password_hash || this.password;
+  
+  if (!hashToCompare) {
+    return false;
+  }
+  
+  try {
+    return await bcrypt.compare(candidatePassword, hashToCompare);
+  } catch (error) {
+    console.error('Password comparison error:', error);
+    return false;
+  }
 };
 
 // Pre-save middleware to hash password
 adminSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  // Handle both password and password_hash fields
+  if (this.isModified('password') && this.password) {
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    this.password_hash = await bcrypt.hash(this.password, salt);
+    this.password = undefined; // Don't store plain password
+  } else if (this.isModified('password_hash') && !this.password_hash && this.password) {
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    this.password_hash = await bcrypt.hash(this.password, salt);
+    this.password = undefined;
+  }
   
-  const bcrypt = require('bcryptjs');
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  // Sync name with full_name
+  if (this.isModified('full_name') && this.full_name && !this.name) {
+    this.name = this.full_name;
+  } else if (this.isModified('name') && this.name && !this.full_name) {
+    this.full_name = this.name;
+  }
+  
+  // Normalize role
+  if (this.isModified('role') && this.role) {
+    const roleMap = {
+      'Super Admin': 'superadmin',
+      'Admin': 'staff',
+      'Manager': 'staff',
+      'Support': 'staff'
+    };
+    if (roleMap[this.role]) {
+      this.role = roleMap[this.role];
+    }
+  }
+  
   next();
 });
 

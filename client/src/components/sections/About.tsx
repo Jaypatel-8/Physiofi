@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { 
   UserGroupIcon, 
@@ -9,11 +10,11 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
 
-const About = () => {
+const About = memo(() => {
   const stats = [
     { number: "70+", label: "Patients", icon: UserGroupIcon, color: "primary" },
     { number: "2+", label: "Years Experience", icon: TrophyIcon, color: "secondary" },
-    { number: "100%", label: "Client Satisfaction", icon: CalendarDaysIcon, color: "tertiary" }
+    { number: "98.2%", label: "Client Satisfaction", icon: CalendarDaysIcon, color: "tertiary" }
   ]
 
   const whyChooseUs = [
@@ -54,8 +55,8 @@ const About = () => {
           viewport={{ once: true }}
             className="inline-block mb-4"
           >
-            <span className="bg-pastel-lavender-100 text-pastel-lavender-400 px-5 py-2 rounded-full text-sm font-semibold">
-              About <span className="text-primary-500">PhysioFi</span>
+            <span className="bg-primary-100 text-primary-800 px-5 py-2 rounded-full text-sm font-semibold">
+              About PhysioFi
             </span>
         </motion.div>
           <motion.h2
@@ -66,7 +67,7 @@ const About = () => {
             className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
           >
             We Are The Best
-            <span className="block text-pastel-mint-400">For Your Recovery</span>
+            <span className="block text-primary-500">For Your Recovery</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -213,7 +214,7 @@ const About = () => {
           >
             {[
               { icon: HeartIcon, title: "Compassionate Care", desc: "Personalized attention", bg: "bg-primary-50", text: "text-primary-700", iconBg: "bg-primary-100 border-primary-300" },
-            { icon: CheckCircleIcon, title: "Expert Team", desc: "Led by Dr. Shruti Singh", bg: "bg-pastel-lavender-50", text: "text-pastel-lavender-400", iconBg: "bg-pastel-lavender-100 border-pastel-lavender-300" },
+            { icon: CheckCircleIcon, title: "Expert Team", desc: "Led by Dr. Shruti Singh", bg: "bg-primary-50", text: "text-primary-700", iconBg: "bg-primary-100 border-primary-300" },
               { icon: UserGroupIcon, title: "Home & Online", desc: "Flexible options", bg: "bg-pastel-peach-50", text: "text-pastel-peach-400", iconBg: "bg-pastel-peach-100 border-pastel-peach-300" },
               { icon: TrophyIcon, title: "Proven Results", desc: "70+ happy patients", bg: "bg-pastel-sage-50", text: "text-pastel-sage-400", iconBg: "bg-pastel-sage-100 border-pastel-sage-300" }
             ].map((item, index) => {
@@ -253,7 +254,7 @@ const About = () => {
                 { bg: 'bg-primary-50', text: 'text-primary-700', iconBg: 'bg-primary-100 border-primary-300' },
                 { bg: 'bg-pastel-blue-50', text: 'text-pastel-blue-400', iconBg: 'bg-pastel-blue-100 border-pastel-blue-300' },
                 { bg: 'bg-pastel-mint-50', text: 'text-pastel-mint-400', iconBg: 'bg-pastel-mint-100 border-pastel-mint-300' },
-                { bg: 'bg-pastel-lavender-50', text: 'text-pastel-lavender-400', iconBg: 'bg-pastel-lavender-100 border-pastel-lavender-300' },
+                { bg: 'bg-primary-50', text: 'text-primary-700', iconBg: 'bg-primary-100 border-primary-300' },
                 { bg: 'bg-pastel-peach-50', text: 'text-pastel-peach-400', iconBg: 'bg-pastel-peach-100 border-pastel-peach-300' },
                 { bg: 'bg-pastel-sage-50', text: 'text-pastel-sage-400', iconBg: 'bg-pastel-sage-100 border-pastel-sage-300' }
               ]
@@ -286,6 +287,8 @@ const About = () => {
       </div>
     </section>
   )
-}
+})
+
+About.displayName = 'About'
 
 export default About

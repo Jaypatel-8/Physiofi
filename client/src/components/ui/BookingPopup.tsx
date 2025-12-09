@@ -2,8 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { XMarkIcon, CheckCircleIcon, QuestionMarkCircleIcon, SparklesIcon, HomeIcon, VideoCameraIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, CheckCircleIcon, QuestionMarkCircleIcon, SparklesIcon, HomeIcon, VideoCameraIcon, CalendarIcon, ClockIcon, CurrencyDollarIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
+import { 
+  UserGroupIcon, // Pediatric - children/group
+  HeartIcon, // Rehabilitation - recovery/heart (HeartPulseIcon not available in solid)
+  BoltIcon, // Sports - energy/athletic
+  CpuChipIcon, // Neurological - brain/neural
+  UserIcon, // Geriatric - elderly care
+  CubeIcon // Orthopedic - structure/bones
+} from '@heroicons/react/24/solid'
 import Modal from './Modal'
+import ThemedCalendar from './ThemedCalendar'
 import { appointmentAPI, doctorAPI, doctorPublicAPI } from '@/lib/api'
 import { useAuth } from '@/app/providers'
 import toast from 'react-hot-toast'
@@ -37,12 +46,14 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
   const [showHelper, setShowHelper] = useState(false)
   const [selectedDoctorConditions, setSelectedDoctorConditions] = useState<any[]>([])
   const [isLoadingConditions, setIsLoadingConditions] = useState(false)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
       setFormData(prev => ({ ...prev, serviceType: defaultServiceType }))
       setShowSuccess(false)
       setShowHelper(false)
+      setIsCalendarOpen(false)
       loadDoctors()
     }
   }, [isOpen, defaultServiceType])
@@ -232,38 +243,38 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
     {
       condition: 'Back Pain, Neck Pain, Shoulder Pain',
       specialist: 'Orthopedic Physiotherapist',
-      icon: '🦴',
+      icon: CubeIcon, // Structure/bones icon for orthopedic
       color: 'bg-primary-500'
     },
     {
       condition: 'Sports Injury, Athletic Recovery',
       specialist: 'Sports Physiotherapist',
-      icon: '⚽',
-      color: 'bg-green-500'
+      icon: BoltIcon, // Energy/athletic icon for sports
+      color: 'bg-primary-600'
     },
     {
       condition: 'Post-Surgery (Knee, Hip, Spine)',
       specialist: 'Rehabilitation Specialist',
-      icon: '🏥',
-      color: 'bg-purple-500'
+      icon: HeartIcon, // Heart for recovery/rehabilitation
+      color: 'bg-secondary-500'
     },
     {
       condition: 'Children\'s Development, Motor Skills',
       specialist: 'Pediatric Physiotherapist',
-      icon: '👶',
-      color: 'bg-pink-500'
+      icon: UserGroupIcon, // Children/group icon for pediatric
+      color: 'bg-accent-500'
     },
     {
       condition: 'Stroke, Parkinson\'s, Neurological',
       specialist: 'Neurological Physiotherapist',
-      icon: '🧠',
-      color: 'bg-orange-500'
+      icon: CpuChipIcon, // Brain/neural processing icon for neurological
+      color: 'bg-primary-700'
     },
     {
       condition: 'Elderly Care, Balance, Mobility',
       specialist: 'Geriatric Physiotherapist',
-      icon: '👴',
-      color: 'bg-teal-500'
+      icon: UserIcon, // Elderly care icon for geriatric
+      color: 'bg-secondary-600'
     }
   ]
 
@@ -284,7 +295,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                 transition={{ type: "spring", stiffness: 200 }}
                 className="w-16 h-16 bg-gradient-to-br from-primary-500 via-secondary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4"
               >
-                <span className="text-3xl">📅</span>
+                <CalendarIcon className="h-8 w-8 text-white" />
               </motion.div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Book Your Appointment</h2>
               <p className="text-gray-600">Quick & Easy - Just 2 minutes!</p>
@@ -322,7 +333,9 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                         className={`${item.color} bg-opacity-10 border-2 ${item.color.replace('bg-', 'border-')} rounded-lg p-3`}
                       >
                         <div className="flex items-start space-x-2">
-                          <span className="text-2xl">{item.icon}</span>
+                          <div className={`w-8 h-8 ${item.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                            {item.icon && <item.icon className="h-5 w-5 text-white" />}
+                          </div>
                           <div className="flex-1">
                             <p className="text-sm font-semibold text-gray-900">{item.condition}</p>
                             <p className="text-xs text-gray-600 mt-1">→ {item.specialist}</p>
@@ -395,7 +408,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                     value={formData.doctorId}
                     onChange={handleInputChange}
                     required
-                    className="input-field"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                   >
                     <option value="">Select a doctor</option>
                     {availableDoctors.map((doctor) => (
@@ -420,9 +433,9 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                           <p className="font-semibold text-sm text-gray-900">{condition.condition}</p>
                           <p className="text-xs text-gray-600 mt-1 line-clamp-2">{condition.treatmentPlan}</p>
                           <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                            <span>⏱️ {condition.duration}</span>
-                            {condition.sessions > 0 && <span>📋 {condition.sessions} sessions</span>}
-                            {condition.price > 0 && <span>💰 ₹{condition.price}</span>}
+                            <span className="flex items-center gap-1"><ClockIcon className="h-3 w-3" /> {condition.duration}</span>
+                            {condition.sessions > 0 && <span className="flex items-center gap-1"><DocumentTextIcon className="h-3 w-3" /> {condition.sessions} sessions</span>}
+                            {condition.price > 0 && <span className="flex items-center gap-1"><CurrencyDollarIcon className="h-3 w-3" /> ₹{condition.price}</span>}
                           </div>
                         </div>
                       ))}
@@ -436,19 +449,41 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <label htmlFor="appointmentDate" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Appointment Date *
                 </label>
-                <input
-                  type="date"
-                  id="appointmentDate"
-                  name="appointmentDate"
-                  value={formData.appointmentDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, appointmentDate: e.target.value }))}
-                  required
-                  min={new Date().toISOString().split('T')[0]}
-                  className="input-field"
-                />
+                {!isCalendarOpen ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsCalendarOpen(true)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 bg-white text-left hover:border-primary-300 hover:bg-primary-50/50 cursor-pointer"
+                  >
+                    {formData.appointmentDate ? (
+                      <span className="text-gray-900 font-medium">
+                        {new Date(formData.appointmentDate).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Click to select date</span>
+                    )}
+                  </button>
+                ) : (
+                  <div className="relative">
+                    <ThemedCalendar
+                      selectedDate={formData.appointmentDate}
+                      onDateSelect={(date) => {
+                        setFormData(prev => ({ ...prev, appointmentDate: date }))
+                        setIsCalendarOpen(false)
+                      }}
+                      minDate={new Date().toISOString().split('T')[0]}
+                      className="w-full"
+                    />
+                  </div>
+                )}
               </motion.div>
 
               <motion.div
@@ -465,7 +500,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                   value={formData.appointmentTime}
                   onChange={(e) => setFormData(prev => ({ ...prev, appointmentTime: e.target.value }))}
                   required
-                  className="input-field"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                 >
                   <option value="">Select time</option>
                   {timeSlots.map((time) => (
@@ -489,8 +524,10 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                     placeholder="Street Address"
                     value={formData.address.street}
                     onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, street: e.target.value } }))}
-                    className="input-field mb-2"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 mb-2"
                     required={formData.serviceType === 'home'}
+                    pattern=".{3,}"
+                    title="Please enter a valid street address (at least 3 characters)"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <input
@@ -498,17 +535,29 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                       placeholder="City"
                       value={formData.address.city}
                       onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, city: e.target.value } }))}
-                      className="input-field"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                       required={formData.serviceType === 'home'}
+                      pattern="[A-Za-z\s]{2,}"
+                      title="Please enter a valid city name"
                     />
-                    <input
-                      type="text"
-                      placeholder="Pincode"
-                      value={formData.address.pincode}
-                      onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, pincode: e.target.value } }))}
-                      className="input-field"
-                      required={formData.serviceType === 'home'}
-                    />
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        Pincode *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter 6-digit pincode"
+                        value={formData.address.pincode}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 6)
+                          setFormData(prev => ({ ...prev, address: { ...prev.address, pincode: value } }))
+                        }}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                        required={formData.serviceType === 'home'}
+                        pattern="[0-9]{6}"
+                        title="Please enter a valid 6-digit pincode"
+                      />
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -526,9 +575,10 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                   name="symptoms"
                   value={formData.symptoms}
                   onChange={(e) => setFormData(prev => ({ ...prev, symptoms: e.target.value }))}
-                  className="input-field"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 resize-none"
                   rows={3}
                   placeholder="Describe your symptoms or condition"
+                  maxLength={500}
                 />
               </motion.div>
 
@@ -546,7 +596,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                     Booking...
                   </span>
                 ) : (
-                  '📅 Book Now'
+                  'Book Now'
                 )}
               </button>
             </form>
@@ -573,7 +623,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
               transition={{ delay: 0.3 }}
               className="text-3xl font-bold text-gray-900 mb-2"
             >
-              🎉 Booking Confirmed!
+              Booking Confirmed!
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}

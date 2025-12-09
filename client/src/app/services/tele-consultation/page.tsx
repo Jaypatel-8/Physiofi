@@ -11,13 +11,17 @@ import WhyChooseSection from '@/components/conditions/WhyChooseSection'
 import CTASection from '@/components/conditions/CTASection'
 import ImageSection from '@/components/conditions/ImageSection'
 import { motion } from 'framer-motion'
-import { VideoCameraIcon, CalendarDaysIcon, DocumentTextIcon, ClockIcon, CheckCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
+import { PhoneIcon, CalendarDaysIcon, DocumentTextIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 
 export default function TeleConsultationPage() {
   const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const [bookingType, setBookingType] = useState<'home' | 'tele'>('tele')
 
   useEffect(() => {
-    const handleOpenBooking = () => {
+    const handleOpenBooking = (e: Event) => {
+      const customEvent = e as CustomEvent
+      const type = customEvent.detail?.type === 'tele' ? 'tele' : 'home'
+      setBookingType(type)
       setIsBookingOpen(true)
     }
     window.addEventListener('openBooking', handleOpenBooking)
@@ -33,20 +37,20 @@ export default function TeleConsultationPage() {
     },
     {
       step: "2",
-      title: "Video Call Assessment",
-      description: "Join a secure video call with our expert physiotherapist for initial assessment.",
-      icon: VideoCameraIcon
+      title: "Phone Consultation",
+      description: "Receive a phone call from our expert physiotherapist for initial assessment and consultation.",
+      icon: PhoneIcon
     },
     {
       step: "3",
-      title: "Guided Movements",
-      description: "Receive real-time guidance on exercises and movements during the session.",
-      icon: ChatBubbleLeftRightIcon
+      title: "Exercise Guidance",
+      description: "Receive detailed guidance on exercises and movements tailored to your condition.",
+      icon: DocumentTextIcon
     },
     {
       step: "4",
       title: "Exercise Plan",
-      description: "Get a personalized exercise plan delivered via PDF and video demonstrations.",
+      description: "Get a personalized exercise plan delivered via PDF with detailed instructions.",
       icon: DocumentTextIcon
     },
     {
@@ -67,10 +71,10 @@ export default function TeleConsultationPage() {
   ]
 
   const requirements = [
-    "Stable internet connection",
-    "Smartphone, tablet, or computer",
-    "Quiet, well-lit space",
-    "Comfortable clothing for movement"
+    "Phone with good network connection",
+    "Quiet space for consultation",
+    "List of symptoms and concerns ready",
+    "Any previous medical reports (optional)"
   ]
 
   return (
@@ -144,7 +148,7 @@ export default function TeleConsultationPage() {
       <ImageSection
         imageAlt="Tele-consultation physiotherapy illustration"
         title="Expert Care from Anywhere"
-        description="Connect with our certified physiotherapists from the comfort of your home. Receive professional assessment, guided exercises, and personalized treatment plans through secure video consultations."
+        description="Connect with our certified physiotherapists from the comfort of your home. Receive professional assessment, guided exercises, and personalized treatment plans through phone consultations."
         imagePath="/images/hero/tele-consultation.jpg"
       />
 
@@ -186,6 +190,12 @@ export default function TeleConsultationPage() {
       <BookingPopup 
         isOpen={isBookingOpen} 
         onClose={() => setIsBookingOpen(false)}
+        defaultServiceType={bookingType}
+      />
+      <BookingPopup 
+        isOpen={isBookingOpen} 
+        onClose={() => setIsBookingOpen(false)}
+        defaultServiceType={bookingType}
       />
     </main>
   )

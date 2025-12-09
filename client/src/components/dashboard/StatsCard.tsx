@@ -1,60 +1,82 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
 
 interface StatsCardProps {
   title: string
-  value: string | number
-  icon?: React.ReactNode
-  color?: string
-  trend?: number
+  value: number | string
+  icon: React.ReactNode
+  color: string
   onClick?: () => void
+  trend?: {
+    value: number
+    isPositive: boolean
+  }
 }
 
-const StatsCard = ({ title, value, icon, color = 'bg-primary-500', trend, onClick }: StatsCardProps) => {
-  const CardContent = (
+const StatsCard = ({ title, value, icon, color, onClick, trend }: StatsCardProps) => {
+  return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      className={`bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 border border-gray-100 ${
-        onClick ? 'cursor-pointer' : ''
-      }`}
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       onClick={onClick}
+      className={`group relative overflow-hidden rounded-3xl cursor-pointer shadow-xl hover:shadow-2xl border-2 transition-all duration-300 ${color}`}
+      style={{ 
+        borderColor: color.includes('blue') ? 'rgba(147, 197, 253, 0.6)' :
+                    color.includes('purple') ? 'rgba(196, 181, 253, 0.6)' :
+                    color.includes('green') ? 'rgba(187, 247, 208, 0.6)' :
+                    color.includes('pink') ? 'rgba(251, 182, 206, 0.6)' :
+                    color.includes('cyan') ? 'rgba(165, 243, 252, 0.6)' :
+                    color.includes('indigo') ? 'rgba(196, 181, 253, 0.6)' :
+                    color.includes('emerald') ? 'rgba(167, 243, 208, 0.6)' :
+                    'rgba(203, 213, 225, 0.6)'
+      }}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">{title}</p>
-          <p className="text-3xl lg:text-4xl font-black text-gray-900 mb-2">{value}</p>
-          {trend !== undefined && (
-            <div className="flex items-center gap-1">
-              <ArrowTrendingUpIcon className={`h-4 w-4 ${trend >= 0 ? 'text-green-500' : 'text-red-500'}`} />
-              <span className={`text-sm font-bold ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {trend >= 0 ? '+' : ''}{trend}%
-              </span>
-              <span className="text-xs text-gray-500 ml-1">vs last month</span>
-            </div>
-          )}
-        </div>
-        {icon && (
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            className={`${color} p-4 rounded-2xl shadow-lg`}
+      {/* Subtle overlay on hover */}
+      <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all duration-300" />
+      
+      {/* Content */}
+      <div className="relative p-7 z-10">
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex-1">
+            <p className="text-gray-700 text-xs font-bold uppercase tracking-widest mb-3">{title}</p>
+            <motion.p 
+              className="text-5xl font-black mb-2 leading-none text-gray-900"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring" }}
+            >
+              {value}
+            </motion.p>
+            {trend && (
+              <div className={`flex items-center gap-1.5 text-sm font-bold mt-3 px-3 py-1.5 rounded-lg ${
+                trend.isPositive ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-red-100 text-red-800 border border-red-200'
+              }`}>
+                <span>{trend.isPositive ? '↑' : '↓'}</span>
+                <span>{Math.abs(trend.value)}%</span>
+              </div>
+            )}
+          </div>
+          <motion.div 
+            className="relative z-10"
+            whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
+            transition={{ duration: 0.6 }}
           >
-            {icon}
+            <div className="w-16 h-16 rounded-2xl bg-white/80 backdrop-blur-sm flex items-center justify-center group-hover:bg-white transition-all duration-300 shadow-lg border-2 border-white/50">
+              <div className="text-gray-800">
+                {icon}
+              </div>
+            </div>
           </motion.div>
-        )}
-      </div>
-      {onClick && (
-        <div className="pt-4 border-t border-gray-100">
-          <p className="text-xs text-primary-600 font-semibold">View Details →</p>
         </div>
-      )}
+        
+        {/* Bottom Accent Line */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-300/50 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+      </div>
     </motion.div>
   )
-
-  return CardContent
 }
 
 export default StatsCard

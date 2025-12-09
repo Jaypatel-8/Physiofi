@@ -253,14 +253,25 @@ const RegisterPage = () => {
     setIsLoading(true)
 
     try {
+      // Prepare address - ensure it's properly formatted
+      let addressData = patientFormData.address
+      if (typeof addressData === 'string' && addressData.trim() !== '') {
+        addressData = addressData.trim()
+      } else if (typeof addressData === 'object' && addressData !== null) {
+        addressData = addressData
+      } else {
+        addressData = undefined
+      }
+
       const response = await authAPI.patientRegister({
-        name: patientFormData.name,
-        email: patientFormData.email,
-        phone: patientFormData.phone,
+        full_name: patientFormData.name.trim(), // Send as full_name (required by model)
+        name: patientFormData.name.trim(), // Also send as name for backward compatibility
+        email: patientFormData.email.trim().toLowerCase(),
+        phone: patientFormData.phone.trim(),
         password: patientFormData.password,
         age: parseInt(patientFormData.age),
         gender: patientFormData.gender,
-        address: patientFormData.address
+        address: addressData
       })
 
       if (response.data.success) {
@@ -356,8 +367,8 @@ const RegisterPage = () => {
                     <UserIcon className="h-8 w-8 text-primary-600" />
                   </div>
                 ) : (
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                    <UserGroupIcon className="h-8 w-8 text-blue-600" />
+                  <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center">
+                    <UserGroupIcon className="h-8 w-8 text-secondary-600" />
                   </div>
                 )}
               </div>
@@ -400,7 +411,7 @@ const RegisterPage = () => {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              <div className="mb-4 p-3 bg-accent-50 border border-accent-200 rounded-lg text-accent-700 text-sm">
                 {error}
               </div>
             )}
@@ -716,7 +727,7 @@ const RegisterPage = () => {
                         id="hasMPT"
                         checked={doctorFormData.hasMPT}
                         onChange={(e) => setDoctorFormData(prev => ({ ...prev, hasMPT: e.target.checked }))}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                       />
                       <label htmlFor="hasMPT" className="text-sm font-semibold text-gray-700">
                         I have MPT (Master of Physiotherapy)
@@ -794,13 +805,13 @@ const RegisterPage = () => {
                         {doctorFormData.specialization.map((spec, index) => (
                           <span
                             key={index}
-                            className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium"
                           >
                             {spec}
                             <button
                               type="button"
                               onClick={() => removeSpecialization(index)}
-                              className="hover:text-blue-900"
+                              className="hover:text-primary-900"
                             >
                               <XMarkIcon className="h-4 w-4" />
                             </button>

@@ -83,7 +83,7 @@ export default function HomeVisitPage() {
   ]
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen overflow-x-hidden">
       <Header />
       <div className="pt-24"></div>
       <Breadcrumb items={[
@@ -115,7 +115,7 @@ export default function HomeVisitPage() {
             </p>
           </motion.div>
 
-          <div className="relative max-w-6xl mx-auto py-12 overflow-hidden">
+          <div className="relative max-w-6xl mx-auto py-12">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 relative z-10">
               {steps.map((step, index) => {
                 const isLast = index === steps.length - 1
@@ -143,19 +143,19 @@ export default function HomeVisitPage() {
                       className="text-center relative z-10"
                     >
                       {/* Enhanced Process Card */}
-                      <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden border-2 border-primary-100">
+                      <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden border-2 border-primary-100 h-full flex flex-col">
                         {/* Book Corner Effect */}
                         <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-primary-100"></div>
                         <div className="absolute top-0 right-0 w-0 h-0 border-l-[45px] border-l-transparent border-t-[45px] border-t-primary-50"></div>
                         
-                        <div className="relative z-10">
+                        <div className="relative z-10 flex flex-col flex-grow">
                           {/* Step Number Badge */}
                           <div className="relative mb-6">
-                            <div className="w-24 h-24 mx-auto relative">
+                            <div className="w-20 h-20 mx-auto relative">
                               {/* Outer glow ring */}
                               <div className="absolute inset-0 bg-primary-300 rounded-full opacity-20 blur-xl"></div>
                               {/* Main circle */}
-                              <div className="relative w-24 h-24 bg-primary-300 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
+                              <div className="relative w-20 h-20 bg-primary-300 rounded-full flex items-center justify-center shadow-xl border-4 border-white">
                                 <div className="text-white font-black text-2xl">{step.step}</div>
                               </div>
                               {/* Icon badge */}
@@ -163,16 +163,16 @@ export default function HomeVisitPage() {
                                 initial={{ y: 0 }}
                                 whileHover={{ y: -6, rotate: 360 }}
                                 transition={{ duration: 0.5 }}
-                                className="absolute -top-1 -right-1 w-12 h-12 bg-primary-400 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
+                                className="absolute -top-1 -right-1 w-10 h-10 bg-primary-400 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
                               >
-                                <step.icon className="h-6 w-6 text-white" strokeWidth={2.5} />
+                                <step.icon className="h-5 w-5 text-white" strokeWidth={2.5} />
                               </motion.div>
                             </div>
                           </div>
                           
                           {/* Content */}
-                          <div className="space-y-2">
-                            <h3 className="text-lg font-black text-gray-900 font-display">{step.title}</h3>
+                          <div className="space-y-2 flex-grow flex flex-col justify-center">
+                            <h3 className="text-lg font-black text-gray-900 font-display mb-2">{step.title}</h3>
                             <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
                           </div>
                         </div>
@@ -195,7 +195,7 @@ export default function HomeVisitPage() {
         imageAlt="Physiotherapy care illustration"
         title="Expert Care at Your Doorstep"
         description="Our certified physiotherapists bring professional treatment directly to your home, ensuring comfort, convenience, and personalized attention throughout your recovery journey."
-        imagePath="/images/hero/physiotherapy-care .jpg"
+        imagePath="/images/hero/physiotherapy-care.jpg"
       />
 
       <section className="py-16 bg-white">
@@ -233,6 +233,7 @@ export default function HomeVisitPage() {
       <BookingPopup 
         isOpen={isBookingOpen} 
         onClose={() => setIsBookingOpen(false)}
+        defaultServiceType={bookingType}
       />
     </main>
   )

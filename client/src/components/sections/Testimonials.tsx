@@ -1,7 +1,7 @@
 'use client'
 
+import { memo, useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
 import { 
   ChatBubbleLeftRightIcon,
   ChevronLeftIcon,
@@ -9,11 +9,12 @@ import {
   UserCircleIcon
 } from '@heroicons/react/24/outline'
 
-const Testimonials = () => {
+const Testimonials = memo(() => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
-  const testimonials = [
+  // Memoize testimonials data
+  const testimonials = useMemo(() => [
     {
       id: 1,
       name: 'Rajesh Patel',
@@ -62,24 +63,24 @@ const Testimonials = () => {
       text: 'PhysioFi is best. Really admire our transparent nature, the team guided me completely, my son having ASD. I came from Banaras for therapy here in PhysioFi, after ten session only my kid showing improvement.',
       location: 'Ahmedabad'
     }
-  ]
+  ], [])
 
-  const getInitials = (name: string) => {
+  const getInitials = useCallback((name: string) => {
     return name
       .split(' ')
       .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2)
-  }
+  }, [])
 
-  const nextTestimonial = () => {
+  const nextTestimonial = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length)
-  }
+  }, [testimonials.length])
 
-  const prevTestimonial = () => {
+  const prevTestimonial = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
-  }
+  }, [testimonials.length])
 
   useEffect(() => {
     if (isAutoPlaying) {
@@ -88,22 +89,22 @@ const Testimonials = () => {
       }, 5000)
       return () => clearInterval(interval)
     }
-  }, [isAutoPlaying, currentIndex])
+  }, [isAutoPlaying, nextTestimonial])
 
-  const handlePrevTestimonial = () => {
+  const handlePrevTestimonial = useCallback(() => {
     prevTestimonial()
     setIsAutoPlaying(false)
-  }
+  }, [prevTestimonial])
 
-  const handleNextTestimonial = () => {
+  const handleNextTestimonial = useCallback(() => {
     nextTestimonial()
     setIsAutoPlaying(false)
-  }
+  }, [nextTestimonial])
 
-  const handleDotClick = (index: number) => {
+  const handleDotClick = useCallback((index: number) => {
     setCurrentIndex(index)
     setIsAutoPlaying(false)
-  }
+  }, [])
 
   return (
     <section id="testimonials" className="py-20 bg-white relative overflow-hidden">
@@ -111,9 +112,10 @@ const Testimonials = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: '-50px' }} // Reduced margin for earlier trigger
+            transition={{ duration: 0.4 }} // Reduced duration
             className="inline-block mb-4"
           >
             <span className="bg-primary-100 text-primary-800 px-5 py-2 rounded-full text-sm font-semibold">
@@ -121,10 +123,10 @@ const Testimonials = () => {
             </span>
           </motion.div>
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ delay: 0.05, duration: 0.4 }} // Reduced delay and duration
             className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
           >
             What Our <span className="text-primary-500">Clients</span> Say
@@ -247,7 +249,7 @@ const Testimonials = () => {
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-black mb-2">100+</div>
+              <div className="text-4xl md:text-5xl font-black mb-2">70+</div>
               <div className="text-white/90 font-medium">Happy Patients</div>
             </div>
             <div className="text-center">
@@ -255,7 +257,7 @@ const Testimonials = () => {
               <div className="text-white/90 font-medium">Average Rating</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-black mb-2">98%</div>
+              <div className="text-4xl md:text-5xl font-black mb-2">98.2%</div>
               <div className="text-white/90 font-medium">Satisfaction Rate</div>
             </div>
             <div className="text-center">
@@ -267,6 +269,8 @@ const Testimonials = () => {
       </div>
     </section>
   )
-}
+})
+
+Testimonials.displayName = 'Testimonials'
 
 export default Testimonials

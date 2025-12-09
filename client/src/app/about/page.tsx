@@ -16,7 +16,9 @@ import {
   StarIcon,
   ShieldCheckIcon,
   AcademicCapIcon,
-  ClockIcon
+  ClockIcon,
+  HomeIcon,
+  VideoCameraIcon
 } from '@heroicons/react/24/outline'
 
 const AboutPage = () => {
@@ -32,7 +34,7 @@ const AboutPage = () => {
   const stats = [
     { number: "70+", label: "Patients", icon: UserGroupIcon },
     { number: "2+", label: "Years Experience", icon: CalendarDaysIcon },
-    { number: "100%", label: "Client Satisfaction", icon: TrophyIcon }
+    { number: "98.2%", label: "Client Satisfaction", icon: TrophyIcon }
   ]
 
   const teamMembers = [
@@ -88,11 +90,10 @@ const AboutPage = () => {
       color: "from-blue-100 to-cyan-100"
     },
     {
-      icon: <AcademicCapIcon className="h-12 w-12 text-gray-600" />,
+      icon: <AcademicCapIcon className="h-12 w-12" />,
       title: "Personalised Rehab Plans",
       description: "Every body is different — your treatment should be too.",
-      color: "bg-gray-50",
-      border: "border-gray-400"
+      color: "from-primary-100 to-primary-200"
     },
     {
       icon: <StarIcon className="h-12 w-12" />,
@@ -222,7 +223,7 @@ const AboutPage = () => {
                 <div className="relative z-10">
                   <h3 className="text-3xl font-black text-gray-900 mb-4 font-display">Our Vision</h3>
                   <p className="text-lg text-gray-700 leading-relaxed">
-                    To build India's most trusted physiotherapy ecosystem — a blend of home-based care, digital care, and premium physiotherapy centers.
+                    To build India&apos;s most trusted physiotherapy ecosystem — a blend of home-based care, digital care, and premium physiotherapy centers.
                   </p>
                 </div>
               </div>
@@ -250,13 +251,11 @@ const AboutPage = () => {
                 data-aos="fade-up"
                 data-aos-delay={index * 100}
                 className={`${
-                  value.border ? value.color : 'bg-primary-50'
-                } rounded-3xl p-8 text-center border-4 ${
-                  value.border || 'border-teal-400'
-                } hover:scale-110 transition-all duration-500 transform hover:-translate-y-2 backdrop-blur-sm relative overflow-hidden group`}
+                  value.color?.includes('from-') ? `bg-gradient-to-br ${value.color}` : (value.color || 'bg-primary-50')
+                } rounded-3xl p-8 text-center border-4 border-primary-300 hover:scale-110 transition-all duration-500 transform hover:-translate-y-2 backdrop-blur-sm relative overflow-hidden group`}
               >
                 <div className={`mb-6 ${
-                  value.border ? 'text-gray-600' : 'text-accent-400'
+                  value.color?.includes('from-') ? 'text-primary-600' : 'text-primary-600'
                 }`}>
                   <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto bg-white shadow-md`}>
                     {value.icon}
@@ -396,20 +395,22 @@ const AboutPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-accent-500">
+      <section className="py-20 bg-gradient-to-br from-accent-500 via-accent-600 to-accent-700">
         <div className="container-custom text-center">
           <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display">
-            Ready to Start Your <span className="text-yellow-200">Recovery</span> <span className="text-yellow-200">Journey</span>?
+            Get Started Today
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
             Join hundreds of satisfied patients who have experienced exceptional care with PhysioFi.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-accent-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-xl transition-colors duration-300">
+            <button className="bg-white text-accent-700 hover:bg-gray-50 font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center justify-center gap-2">
+              <HomeIcon className="h-5 w-5" />
               Book Consultation
             </button>
-            <button className="bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-primary-600 font-semibold py-4 px-8 rounded-xl transition-colors duration-300 shadow-md">
-              Meet Our Team
+            <button className="bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-accent-700 font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center justify-center gap-2">
+              <VideoCameraIcon className="h-5 w-5" />
+              Book Tele-Consultation
             </button>
           </div>
         </div>

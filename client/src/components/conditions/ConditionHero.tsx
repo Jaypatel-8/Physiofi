@@ -3,6 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { HomeIcon } from '@heroicons/react/24/outline'
 
 interface ConditionHeroProps {
   title: string
@@ -71,16 +72,16 @@ const ConditionHero = ({ title, subtitle, description, imageAlt = "Physiotherapy
             </p>
           </motion.div>
 
-          {/* Right Content - Image Placeholder */}
+          {/* Right Content - Image Only */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative"
           >
-            <div className="rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary-100 to-pastel-mint-100">
-              <div className="aspect-[4/3] relative">
-                {imagePath ? (
+            {imagePath ? (
+              <div className="rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary-100 to-pastel-mint-100">
+                <div className="aspect-[4/3] relative">
                   <Image
                     src={imagePath}
                     alt={imageAlt}
@@ -88,19 +89,25 @@ const ConditionHero = ({ title, subtitle, description, imageAlt = "Physiotherapy
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
                     priority
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                    }}
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center p-8">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                        <span className="text-6xl">🏥</span>
-                      </div>
-                      <p className="text-gray-600 font-medium">{imageAlt}</p>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary-100 to-pastel-mint-100">
+                <div className="aspect-[4/3] relative flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <div className="w-32 h-32 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                      <HomeIcon className="h-16 w-16 text-primary-500" />
+                    </div>
+                    <p className="text-gray-600 font-medium">{imageAlt}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

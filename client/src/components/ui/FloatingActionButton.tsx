@@ -6,8 +6,7 @@ import {
   PhoneIcon, 
   ChatBubbleLeftRightIcon,
   XMarkIcon,
-  CalendarDaysIcon,
-  VideoCameraIcon
+  CalendarDaysIcon
 } from '@heroicons/react/24/outline'
 
 const FloatingActionButton = () => {
@@ -34,11 +33,6 @@ const FloatingActionButton = () => {
     setIsOpen(false)
   }
 
-  const handleOnlineConsultation = () => {
-    const event = new CustomEvent('openBooking', { detail: { type: 'tele' } })
-    window.dispatchEvent(event)
-    setIsOpen(false)
-  }
 
   const handleWhatsApp = () => {
     window.open('https://wa.me/919082770384', '_blank')
@@ -56,12 +50,6 @@ const FloatingActionButton = () => {
       label: "Book Appointment",
       action: handleBookAppointment,
       color: "bg-primary-500 hover:bg-primary-600"
-    },
-    {
-      icon: <VideoCameraIcon className="h-6 w-6" />,
-      label: "Online Consultation",
-      action: handleOnlineConsultation,
-      color: "bg-deepTeal hover:bg-deepTeal-600"
     },
     {
       icon: <ChatBubbleLeftRightIcon className="h-6 w-6" />,
@@ -119,7 +107,7 @@ const FloatingActionButton = () => {
             <XMarkIcon className="h-6 w-6" />
           ) : (
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium">📅</span>
+              <CalendarDaysIcon className="h-5 w-5" />
               <span className="text-sm font-medium">Book Now</span>
             </div>
           )}

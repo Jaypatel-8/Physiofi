@@ -17,10 +17,13 @@ const generateToken = (userId, role) => {
 // Patient Registration
 router.post('/patient/register', async (req, res) => {
   try {
-    const { name, email, phone, password, age, gender, address } = req.body;
+    const { full_name, name, email, phone, password, age, gender, address, emergency_contact, medical_history, current_conditions } = req.body;
+
+    // Support both full_name and name for backward compatibility
+    const patientName = full_name || name;
 
     // Validation
-    if (!name || !email || !phone || !password || !age || !gender) {
+    if (!patientName || !email || !phone || !password || !age || !gender) {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields'
@@ -39,17 +42,48 @@ router.post('/patient/register', async (req, res) => {
       });
     }
 
-    // Create new patient
-    const patient = new Patient({
-      name,
-      email,
-      phone,
-      password,
-      age,
+    // Create new patient - support both old and new field names
+    // Ensure full_name is always set (required field)
+    if (!patientName || patientName.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Full name is required. Please provide either full_name or name field.'
+      });
+    }
+    
+    const patientData = {
+      full_name: patientName.trim(),
+      name: patientName.trim(), // For backward compatibility
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      password, // Will be hashed to password_hash in pre-save hook
+      age: parseInt(age),
       gender,
-      address
-    });
+      status: 'Active' // Explicitly set status to Active for new registrations
+    };
 
+    // Add optional fields
+    if (address) {
+      // If address is string, store as is; if object, convert to string
+      if (typeof address === 'string') {
+        patientData.address = address.trim();
+      } else if (typeof address === 'object' && address !== null) {
+        // Convert address object to string format
+        const addressParts = [];
+        if (address.street && address.street.trim()) addressParts.push(address.street.trim());
+        if (address.city && address.city.trim()) addressParts.push(address.city.trim());
+        if (address.state && address.state.trim()) addressParts.push(address.state.trim());
+        if (address.pincode && address.pincode.trim()) addressParts.push(address.pincode.trim());
+        if (address.country && address.country.trim()) addressParts.push(address.country.trim());
+        const addressString = addressParts.join(', ').trim();
+        patientData.address = addressString || undefined; // Only set if not empty
+      }
+    }
+    if (emergency_contact) patientData.emergency_contact = emergency_contact;
+    if (medical_history) patientData.medical_history = typeof medical_history === 'string' ? medical_history : JSON.stringify(medical_history);
+    if (current_conditions) patientData.current_conditions = typeof current_conditions === 'string' ? current_conditions : JSON.stringify(current_conditions);
+
+    const patient = new Patient(patientData);
     await patient.save();
 
     // Generate token
@@ -62,17 +96,23 @@ router.post('/patient/register', async (req, res) => {
         token,
         patient: {
           id: patient._id,
-          name: patient.name,
+          name: patient.full_name || patient.name,
           email: patient.email,
-          phone: patient.phone
+          phone: patient.phone,
+          role: 'patient'
         }
       }
     });
   } catch (error) {
-    console.error('Patient registration error:', error);
+    console.error('❌ Patient registration error:', error);
+    console.error('📍 Error Stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: error.message || 'Internal server error',
+      ...(process.env.NODE_ENV === 'development' && { 
+        error: error.message,
+        stack: error.stack
+      })
     });
   }
 });
@@ -89,33 +129,73 @@ router.post('/patient/login', async (req, res) => {
       });
     }
 
-    const patient = await Patient.findOne({ email });
+    // Case-insensitive email lookup
+    const patient = await Patient.findOne({ 
+      $or: [
+        { email: email.toLowerCase() },
+        { email: email }
+      ]
+    });
     if (!patient) {
+      console.log('Patient not found for email:', email);
       return res.status(404).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
-    if (patient.status !== 'Active') {
+    // Handle patients without status field (legacy records)
+    // Default to 'Active' if status is not set and update the record
+    if (!patient.status) {
+      patient.status = 'Active';
+    }
+    
+    const patientStatus = patient.status;
+    if (patientStatus !== 'Active') {
       return res.status(400).json({
         success: false,
-        message: 'Account is inactive'
+        message: 'Account is inactive. Please contact support.'
       });
     }
 
     // Verify password
+    // Check if password_hash exists
+    if (!patient.password_hash && !patient.password) {
+      console.error('Patient has no password_hash or password:', patient._id);
+      return res.status(400).json({
+        success: false,
+        message: 'Account setup incomplete. Please reset your password.'
+      });
+    }
+    
     const isPasswordValid = await patient.comparePassword(password);
     if (!isPasswordValid) {
+      console.log('Password validation failed for patient:', patient._id, 'Has password_hash:', !!patient.password_hash);
       return res.status(400).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
-    // Update last login
+    // Update last login and ensure status is set
     patient.lastLogin = new Date();
-    await patient.save();
+    if (!patient.status) {
+      patient.status = 'Active';
+    }
+    // Ensure password_hash exists before saving
+    if (!patient.password_hash && patient.password) {
+      // This should have been set in pre-save hook, but handle edge case
+      const bcrypt = require('bcryptjs');
+      const salt = await bcrypt.genSalt(10);
+      patient.password_hash = await bcrypt.hash(patient.password, salt);
+      patient.password = undefined;
+    }
+    try {
+      await patient.save();
+    } catch (saveError) {
+      console.error('Error saving patient:', saveError);
+      // If save fails, still allow login but log the error
+    }
 
     // Generate token
     const token = generateToken(patient._id, 'patient');
@@ -127,9 +207,10 @@ router.post('/patient/login', async (req, res) => {
         token,
         patient: {
           id: patient._id,
-          name: patient.name,
+          name: patient.full_name || patient.name,
           email: patient.email,
-          phone: patient.phone
+          phone: patient.phone,
+          role: 'patient'
         }
       }
     });
@@ -241,30 +322,50 @@ router.post('/patient/reset-password', async (req, res) => {
 router.post('/doctor/register', async (req, res) => {
   try {
     const {
+      full_name,
       name,
       email,
       phone,
       password,
       specialization,
-      occupation,
-      qualifications,
-      experience,
+      license_no,
       license,
+      qualifications,
+      experience_years,
+      experience,
+      clinic_address,
+      consultation_fees,
+      availability_schedule,
+      occupation,
       address,
       bio
     } = req.body;
 
+    // Support both full_name and name for backward compatibility
+    const doctorName = full_name || name;
+    const doctorLicense = license_no || license;
+    const doctorExperience = experience_years || experience;
+
     // Validation
-    if (!name || !email || !phone || !password || !specialization || !license) {
+    if (!doctorName || !email || !phone || !password || !specialization || !doctorLicense) {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields'
       });
     }
 
+    // Validate specialization enum
+    const validSpecializations = ['Ortho', 'Neuro', 'Pedia', 'Sports', 'General'];
+    if (!validSpecializations.includes(specialization)) {
+      return res.status(400).json({
+        success: false,
+        message: `Specialization must be one of: ${validSpecializations.join(', ')}`
+      });
+    }
+
     // Check if doctor already exists
     const existingDoctor = await Doctor.findOne({
-      $or: [{ email }, { license }]
+      $or: [{ email }, { license_no: doctorLicense }, { license: doctorLicense }]
     });
 
     if (existingDoctor) {
@@ -274,21 +375,46 @@ router.post('/doctor/register', async (req, res) => {
       });
     }
 
-    // Create new doctor
-    const doctor = new Doctor({
-      name,
+    // Create new doctor - support both old and new field names
+    const doctorData = {
+      full_name: doctorName,
+      name: doctorName, // For backward compatibility
       email,
       phone,
-      password,
+      password, // Will be hashed to password_hash in pre-save hook
       specialization,
-      occupation,
-      qualifications,
-      experience,
-      license,
-      address,
-      bio
-    });
+      license_no: doctorLicense,
+      license: doctorLicense, // For backward compatibility
+      experience_years: doctorExperience || 0,
+      experience: doctorExperience || 0, // For backward compatibility
+      consultation_fees: consultation_fees || 0,
+      status: 'Inactive', // New doctors need admin approval - set to Inactive initially
+      isVerified: false // Doctors need verification
+    };
 
+    // Add optional fields
+    if (qualifications) {
+      doctorData.qualifications = typeof qualifications === 'string' 
+        ? qualifications 
+        : JSON.stringify(qualifications);
+    }
+    if (clinic_address) {
+      doctorData.clinic_address = clinic_address;
+    } else if (address) {
+      // If address is object, convert to string
+      doctorData.clinic_address = typeof address === 'string' 
+        ? address 
+        : `${address.street || ''}, ${address.city || ''}, ${address.state || ''}, ${address.pincode || ''}`.replace(/^,\s*|,\s*$/g, '');
+    }
+    if (availability_schedule) {
+      doctorData.availability_schedule = typeof availability_schedule === 'object' 
+        ? availability_schedule 
+        : JSON.parse(availability_schedule);
+    }
+    if (occupation) doctorData.occupation = occupation;
+    if (bio) doctorData.bio = bio;
+
+    const doctor = new Doctor(doctorData);
     await doctor.save();
 
     res.status(201).json({
@@ -296,15 +422,16 @@ router.post('/doctor/register', async (req, res) => {
       message: 'Doctor registered successfully. Awaiting admin approval.',
       data: {
         doctorId: doctor._id,
-        name: doctor.name,
-        specialization: doctor.specialization
+        name: doctor.full_name || doctor.name,
+        specialization: doctor.specialization,
+        role: 'doctor'
       }
     });
   } catch (error) {
     console.error('Doctor registration error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: error.message || 'Internal server error'
     });
   }
 });
@@ -321,15 +448,25 @@ router.post('/doctor/login', async (req, res) => {
       });
     }
 
-    const doctor = await Doctor.findOne({ email });
+    // Case-insensitive email lookup
+    const doctor = await Doctor.findOne({ 
+      $or: [
+        { email: email.toLowerCase() },
+        { email: email }
+      ]
+    });
     if (!doctor) {
+      console.log('Doctor not found for email:', email);
       return res.status(404).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
-    if (doctor.status !== 'Active') {
+    // Handle doctors without status field (legacy records)
+    // Default to 'Active' if status is not set
+    const doctorStatus = doctor.status || 'Active';
+    if (doctorStatus !== 'Active') {
       return res.status(400).json({
         success: false,
         message: 'Account is inactive or pending approval'
@@ -337,8 +474,18 @@ router.post('/doctor/login', async (req, res) => {
     }
 
     // Verify password
+    // Check if password_hash exists
+    if (!doctor.password_hash && !doctor.password) {
+      console.error('Doctor has no password_hash or password:', doctor._id);
+      return res.status(400).json({
+        success: false,
+        message: 'Account setup incomplete. Please reset your password.'
+      });
+    }
+    
     const isPasswordValid = await doctor.comparePassword(password);
     if (!isPasswordValid) {
+      console.log('Password validation failed for doctor:', doctor._id, 'Has password_hash:', !!doctor.password_hash);
       return res.status(400).json({
         success: false,
         message: 'Invalid email or password'
@@ -359,10 +506,11 @@ router.post('/doctor/login', async (req, res) => {
         token,
         doctor: {
           id: doctor._id,
-          name: doctor.name,
+          name: doctor.full_name || doctor.name,
           email: doctor.email,
           phone: doctor.phone,
-          specialization: doctor.specialization
+          specialization: doctor.specialization,
+          role: 'doctor'
         }
       }
     });
@@ -476,16 +624,25 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    const admin = await Admin.findOne({ email });
+    // Case-insensitive email lookup
+    const admin = await Admin.findOne({ 
+      $or: [
+        { email: email.toLowerCase() },
+        { email: email }
+      ]
+    });
     if (!admin) {
-      await Admin.findOneAndUpdate({ email }, { $inc: { loginAttempts: 1 } });
+      console.log('Admin not found for email:', email);
       return res.status(404).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
-    if (admin.status !== 'Active') {
+    // Handle admins without status field (legacy records)
+    // Default to 'Active' if status is not set
+    const adminStatus = admin.status || 'Active';
+    if (adminStatus !== 'Active') {
       return res.status(400).json({
         success: false,
         message: 'Account is inactive'
@@ -524,7 +681,7 @@ router.post('/admin/login', async (req, res) => {
         token,
         admin: {
           id: admin._id,
-          name: admin.name,
+          name: admin.full_name || admin.name,
           email: admin.email,
           phone: admin.phone,
           role: admin.role
@@ -626,6 +783,57 @@ router.post('/admin/reset-password', async (req, res) => {
       success: false,
       message: 'Internal server error'
     });
+  }
+});
+
+// Get current user (protected route)
+// Middleware to verify JWT token (inline for this route)
+const verifyToken = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '') || 
+                req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: 'Access denied. No token provided.'
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid or expired token.'
+    });
+  }
+};
+
+router.get('/me', verifyToken, async (req, res) => {
+  try {
+    let user;
+    if (req.user.role === 'patient') {
+      user = await Patient.findById(req.user.userId).select('-password_hash -password -resetPasswordToken -resetPasswordExpires');
+    } else if (req.user.role === 'doctor') {
+      user = await Doctor.findById(req.user.userId).select('-password_hash -password -resetPasswordToken -resetPasswordExpires');
+    } else if (req.user.role === 'admin') {
+      user = await Admin.findById(req.user.userId).select('-password_hash -password -resetPasswordToken -resetPasswordExpires');
+    }
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Ensure role is included in response
+    const userData = user.toObject ? user.toObject() : user;
+    userData.role = req.user.role; // Ensure role from token is included
+
+    res.json({ success: true, data: userData });
+  } catch (error) {
+    console.error('Get current user error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
