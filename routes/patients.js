@@ -76,15 +76,15 @@ router.put('/profile', isPatient, async (req, res) => {
       patient.email = email.toLowerCase().trim();
     }
     if (phone) {
-      // Validate phone format
-      const cleanPhone = phone.replace(/\D/g, '');
-      if (cleanPhone.length !== 10) {
+      const cleanPhone = String(phone).replace(/\D/g, '');
+      const digitsOnly = cleanPhone.length > 10 ? cleanPhone.slice(-10) : cleanPhone;
+      if (digitsOnly.length !== 10) {
         return res.status(400).json({
           success: false,
           message: 'Phone number must be 10 digits'
         });
       }
-      patient.phone = cleanPhone;
+      patient.phone = digitsOnly;
     }
     if (age !== undefined) {
       const ageNum = parseInt(age);
@@ -127,9 +127,16 @@ router.put('/profile', isPatient, async (req, res) => {
     });
   } catch (error) {
     console.error('Update patient profile error:', error);
+    if (error.name === 'ValidationError') {
+      const msg = Object.values(error.errors || {}).map(e => e.message).join(' ') || error.message;
+      return res.status(400).json({ success: false, message: msg });
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, message: 'Email already in use' });
+    }
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: error.message || 'Internal server error'
     });
   }
 });

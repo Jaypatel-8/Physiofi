@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   HomeIcon,
@@ -22,6 +23,7 @@ import {
   MegaphoneIcon,
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
+import UserAvatar from './UserAvatar'
 
 type Role = 'doctor' | 'admin'
 
@@ -63,10 +65,16 @@ export default function DashboardSidebar({ role }: { role: Role }) {
 
   const NavContent = () => (
     <div className="flex flex-col h-full">
-      <div className="p-5 border-b border-gray-100">
+      <div className="p-4 border-b border-gray-100">
         <Link href={role === 'doctor' ? '/doctor/dashboard' : '/admin/dashboard'} className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
-          <span className="text-lg font-bold text-primary-600">PhysioFi</span>
-          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest hidden sm:block">
+          <Image
+            src="/Physiofi Logo(1).png"
+            alt="PhysioFi"
+            width={112}
+            height={40}
+            className="object-contain h-8 w-auto"
+          />
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest hidden sm:inline">
             {role === 'doctor' ? 'Doctor' : 'Admin'}
           </span>
         </Link>
@@ -92,10 +100,23 @@ export default function DashboardSidebar({ role }: { role: Role }) {
           )
         })}
       </nav>
-      <div className="p-4 border-t border-gray-100 space-y-1.5">
-        <div className="px-3.5 py-1.5 text-xs text-gray-400">
-          <span className="font-medium text-gray-600">{displayName}</span>
-        </div>
+      <div className="p-4 border-t border-gray-100 space-y-2">
+        {role === 'doctor' ? (
+          <Link
+            href="/doctor/profile"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-gray-50/80 hover:bg-gray-100 transition-colors"
+            title="View profile"
+          >
+            <UserAvatar name={user?.name} size="sm" />
+            <span className="text-sm font-medium text-gray-700 truncate">{displayName}</span>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-gray-50/80">
+            <UserAvatar name={user?.name} size="sm" />
+            <span className="text-sm font-medium text-gray-700 truncate">{displayName}</span>
+          </div>
+        )}
         <button
           type="button"
           onClick={() => { setMobileOpen(false); logout(); window.location.replace('/'); }}

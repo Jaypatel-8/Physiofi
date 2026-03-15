@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Cog6ToothIcon, EyeIcon, EyeSlashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
 import Header from '@/components/layout/Header'
@@ -95,6 +96,16 @@ export default function AdminLoginPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-xl p-8 border border-primary-200/50"
           >
+            <Link href="/" className="block mb-6">
+              <Image
+                src="/Physiofi Logo(1).png"
+                alt="PhysioFi"
+                width={120}
+                height={44}
+                className="object-contain"
+                priority
+              />
+            </Link>
             <Link
               href="/login"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-primary-600 mb-6 font-medium"

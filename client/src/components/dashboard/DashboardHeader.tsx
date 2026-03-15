@@ -1,7 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { User } from '@/types/auth'
+import UserAvatar from './UserAvatar'
 
 interface DashboardHeaderProps {
   title?: string
@@ -35,6 +37,8 @@ const DashboardHeader = ({ title, subtitle, user, greeting, variant = 'default' 
     return 'Dashboard'
   }
 
+  const profileHref = user?.role === 'patient' ? '/patient/profile' : user?.role === 'doctor' ? '/doctor/profile' : null
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -8 }}
@@ -47,17 +51,45 @@ const DashboardHeader = ({ title, subtitle, user, greeting, variant = 'default' 
     >
       <div className={isCompact ? 'relative z-10' : 'container-custom max-w-7xl mx-auto relative z-10'}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div>
-            <p className={`mb-1.5 ${isCompact ? 'text-gray-400 text-[11px] font-medium uppercase tracking-widest' : 'text-primary-600 text-xs font-semibold uppercase tracking-widest mb-2'}`}>
-              {getTitle()}
-            </p>
-            <h1 className={`tracking-tight mb-1 ${isCompact ? 'text-2xl md:text-3xl font-semibold text-gray-900' : 'text-3xl md:text-4xl font-extrabold text-gray-900'}`}>
-              {getGreeting()}, <span className={isCompact ? 'text-primary-600 font-medium' : 'text-primary-600'}>{getUserName()}</span>
-            </h1>
-            {subtitle && (
-              <p className={`max-w-xl leading-relaxed mt-0.5 ${isCompact ? 'text-gray-500 text-sm' : 'text-gray-600 text-sm md:text-base mt-1'}`}>
-                {subtitle}
-              </p>
+          <div className="flex items-start gap-4">
+            {profileHref ? (
+              <Link
+                href={profileHref}
+                className="flex items-start gap-4 rounded-xl hover:bg-white/50 -m-2 p-2 transition-colors"
+                title="View profile"
+              >
+                <UserAvatar name={user?.name} size={isCompact ? 'md' : 'lg'} className="mt-0.5 shrink-0" />
+                <div>
+                  <p className={`mb-1 ${isCompact ? 'text-gray-400 text-[11px] font-medium uppercase tracking-widest' : 'text-primary-600 text-xs font-semibold uppercase tracking-widest mb-1.5'}`}>
+                    {getTitle()}
+                  </p>
+                  <h1 className={`tracking-tight mb-0.5 ${isCompact ? 'text-2xl md:text-3xl font-semibold text-gray-900' : 'text-3xl md:text-4xl font-extrabold text-gray-900'}`}>
+                    {getGreeting()}, <span className={isCompact ? 'text-primary-600 font-medium' : 'text-primary-600'}>{getUserName()}</span>
+                  </h1>
+                  {subtitle && (
+                    <p className={`max-w-xl leading-relaxed ${isCompact ? 'text-gray-500 text-sm' : 'text-gray-600 text-sm md:text-base mt-0.5'}`}>
+                      {subtitle}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            ) : (
+              <>
+                <UserAvatar name={user?.name} size={isCompact ? 'md' : 'lg'} className="mt-0.5 shrink-0" />
+                <div>
+                  <p className={`mb-1 ${isCompact ? 'text-gray-400 text-[11px] font-medium uppercase tracking-widest' : 'text-primary-600 text-xs font-semibold uppercase tracking-widest mb-1.5'}`}>
+                    {getTitle()}
+                  </p>
+                  <h1 className={`tracking-tight mb-0.5 ${isCompact ? 'text-2xl md:text-3xl font-semibold text-gray-900' : 'text-3xl md:text-4xl font-extrabold text-gray-900'}`}>
+                    {getGreeting()}, <span className={isCompact ? 'text-primary-600 font-medium' : 'text-primary-600'}>{getUserName()}</span>
+                  </h1>
+                  {subtitle && (
+                    <p className={`max-w-xl leading-relaxed ${isCompact ? 'text-gray-500 text-sm' : 'text-gray-600 text-sm md:text-base mt-0.5'}`}>
+                      {subtitle}
+                    </p>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>

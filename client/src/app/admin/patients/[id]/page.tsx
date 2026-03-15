@@ -219,7 +219,7 @@ const AdminPatientDetail = () => {
                 <DocumentTextIcon className="h-6 w-6 text-primary-600" />
                 Recent Session Notes &amp; Treatment
               </h3>
-              <p className="text-sm text-gray-600 mb-4">What treatment is being provided (from session notes). Trackable over time.</p>
+              <p className="text-sm text-gray-600 mb-4">Session notes written for this patient by their doctor(s). Treatment and plan data are trackable over time.</p>
               {sessionNotes.length > 0 ? (
                 <div className="space-y-4 max-h-80 overflow-y-auto">
                   {sessionNotes.slice(0, 10).map((note: any) => (

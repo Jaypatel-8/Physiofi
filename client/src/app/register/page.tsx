@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { 
   UserIcon,
@@ -430,6 +431,16 @@ const RegisterPage = () => {
             className="bg-white rounded-2xl shadow-xl p-8"
           >
             <div className="text-center mb-8">
+              <Link href="/" className="inline-block mb-6">
+                <Image
+                  src="/Physiofi Logo(1).png"
+                  alt="PhysioFi"
+                  width={140}
+                  height={52}
+                  className="object-contain mx-auto"
+                  priority
+                />
+              </Link>
               <div className="flex justify-center mb-4">
                 {registerType === 'patient' ? (
                   <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">

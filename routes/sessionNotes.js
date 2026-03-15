@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { isPatient, isDoctor, isAdminOrDoctor } = require('../middleware/rbac');
+const { isPatient, isDoctor, isAdminOrDoctor, isAuthenticated } = require('../middleware/rbac');
 const SessionNote = require('../models/SessionNote');
 const Appointment = require('../models/Appointment');
 
@@ -54,8 +54,8 @@ router.get('/my-notes', isPatient, async (req, res) => {
   }
 });
 
-// Get single session note
-router.get('/:id', isAdminOrDoctor, async (req, res) => {
+// Get single session note (doctor/admin: any; patient: own only)
+router.get('/:id', isAuthenticated, async (req, res) => {
   try {
     const note = await SessionNote.findById(req.params.id)
       .populate('patient', 'full_name name email phone')
@@ -69,7 +69,7 @@ router.get('/:id', isAdminOrDoctor, async (req, res) => {
       });
     }
 
-    // Check if patient is accessing their own note
+    // Patient may only access their own note
     if (req.user.role === 'patient' && note.patient._id.toString() !== req.user.userId) {
       return res.status(403).json({
         success: false,

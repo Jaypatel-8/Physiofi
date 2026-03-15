@@ -146,18 +146,42 @@ router.put('/profile', isDoctor, async (req, res) => {
       });
     }
 
-    // Update fields
-    if (name) doctor.name = name;
+    // Update fields - Doctor schema: specialization is String (enum), qualifications is String
+    if (name) {
+      doctor.name = name;
+      doctor.full_name = name;
+    }
     if (phone) doctor.phone = phone;
-    if (email) doctor.email = email;
-    if (specialization !== undefined) {
-      // Handle both string and array
-      doctor.specialization = Array.isArray(specialization) ? specialization : [specialization];
+    if (email) {
+      const emailVal = email.toLowerCase().trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+        return res.status(400).json({ success: false, message: 'Invalid email format' });
+      }
+      doctor.email = emailVal;
+    }
+    if (specialization !== undefined && specialization !== null && specialization !== '') {
+      const specVal = Array.isArray(specialization) ? specialization[0] : specialization;
+      const allowed = ['Ortho', 'Neuro', 'Pedia', 'Sports', 'General'];
+      if (allowed.includes(String(specVal))) {
+        doctor.specialization = String(specVal);
+      }
     }
     if (occupation) doctor.occupation = occupation;
-    if (qualifications) doctor.qualifications = qualifications;
-    if (experience !== undefined) doctor.experience = experience;
-    if (education) doctor.qualifications = [{ degree: education, institution: '', year: null }];
+    if (qualifications) doctor.qualifications = typeof qualifications === 'string' ? qualifications : JSON.stringify(qualifications);
+    if (experience !== undefined && experience !== null && experience !== '') {
+      const expNum = parseInt(experience);
+      if (!isNaN(expNum) && expNum >= 0) {
+        doctor.experience = expNum;
+        doctor.experience_years = expNum;
+      }
+    }
+    if (education) {
+      doctor.qualifications = typeof education === 'string' ? education : String(education);
+      if (!doctor.qualificationsArray || !Array.isArray(doctor.qualificationsArray)) {
+        doctor.qualificationsArray = [];
+      }
+      doctor.qualificationsArray[0] = { degree: String(education), institution: '', year: null };
+    }
     if (address) doctor.address = address;
     if (bio) doctor.bio = bio;
     if (availability) doctor.availability = availability;
@@ -172,9 +196,16 @@ router.put('/profile', isDoctor, async (req, res) => {
     });
   } catch (error) {
     console.error('Update doctor profile error:', error);
+    if (error.name === 'ValidationError') {
+      const msg = Object.values(error.errors || {}).map(e => e.message).join(' ') || error.message;
+      return res.status(400).json({ success: false, message: msg });
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, message: 'Email or license already in use' });
+    }
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: error.message || 'Internal server error'
     });
   }
 });

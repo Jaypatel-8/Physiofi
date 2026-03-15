@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { isPatient, isDoctor, isAdminOrDoctor } = require('../middleware/rbac');
+const { isPatient, isDoctor, isAdminOrDoctor, isAuthenticated } = require('../middleware/rbac');
 const ExercisePlan = require('../models/ExercisePlan');
 const Patient = require('../models/Patient');
 const Appointment = require('../models/Appointment');
@@ -59,8 +59,8 @@ router.get('/my-plans', isPatient, async (req, res) => {
   }
 });
 
-// Get single exercise plan
-router.get('/:id', isAdminOrDoctor, async (req, res) => {
+// Get single exercise plan (doctor/admin: any; patient: own only)
+router.get('/:id', isAuthenticated, async (req, res) => {
   try {
     const plan = await ExercisePlan.findById(req.params.id)
       .populate('patient', 'full_name name email phone')
@@ -74,7 +74,7 @@ router.get('/:id', isAdminOrDoctor, async (req, res) => {
       });
     }
 
-    // Check if patient is accessing their own plan
+    // Patient may only access their own plan
     if (req.user.role === 'patient' && plan.patient._id.toString() !== req.user.userId) {
       return res.status(403).json({
         success: false,

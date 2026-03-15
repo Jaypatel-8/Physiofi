@@ -237,17 +237,22 @@ const SessionNotesPage = () => {
           aria-modal="true"
           aria-labelledby="session-note-modal-title"
           aria-describedby="session-note-modal-desc"
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto min-h-full py-6"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-lg p-6 max-w-3xl w-full my-8 border border-gray-200"
+            className="bg-white rounded-xl shadow-lg border border-gray-200 max-w-2xl w-full my-auto max-h-[90vh] flex flex-col"
           >
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between p-4 pb-2 border-b border-gray-200 shrink-0">
               <div>
-                <h2 id="session-note-modal-title" className="text-xl font-bold text-gray-900">Create Session Note</h2>
+                <h2 id="session-note-modal-title" className="text-lg font-bold text-gray-900">Create Session Note</h2>
                 <p id="session-note-modal-desc" className="text-sm text-gray-600 mt-0.5">SOAP format: Subjective, Objective, Assessment, Plan</p>
+                {formData.appointmentId && (() => {
+                  const apt = appointments.find(a => (a._id || a.id) === formData.appointmentId)
+                  const name = apt?.patient?.name || apt?.patient?.full_name || 'Patient'
+                  return <p className="text-xs text-primary-600 font-medium mt-1">For patient: {name}</p>
+                })()}
               </div>
               <button
                 type="button"
@@ -259,7 +264,8 @@ const SessionNotesPage = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="space-y-5" noValidate>
+            <form onSubmit={handleCreate} className="flex flex-col flex-1 min-h-0" noValidate>
+            <div className="p-4 overflow-y-auto flex-1 space-y-5">
               <section aria-labelledby="session-note-appointment-heading" className="space-y-4">
                 <h3 id="session-note-appointment-heading" className="text-sm font-bold text-gray-800 border-b border-gray-200 pb-2">Appointment &amp; Date</h3>
                 <div>
@@ -391,18 +397,19 @@ const SessionNotesPage = () => {
                   />
                 </div>
               </section>
+            </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 p-4 border-t border-gray-200 bg-gray-50/80 shrink-0 rounded-b-xl">
                 <button
                   type="submit"
-                  className="flex-1 px-5 py-3 bg-primary-600 text-white rounded-xl text-base font-semibold hover:bg-primary-700 transition-colors focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                  className="flex-1 px-5 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 transition-colors focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
                   Create Note
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl text-base font-semibold hover:bg-gray-200 transition-colors focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                  className="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-300 transition-colors focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                 >
                   Cancel
                 </button>

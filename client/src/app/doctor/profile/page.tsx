@@ -40,12 +40,12 @@ const DoctorProfile = () => {
         const data = response.data.data.doctor || response.data.data
         setProfile(data)
         setFormData({
-          name: data.name || '',
+          name: data.name || data.full_name || '',
           email: data.email || '',
           phone: data.phone || data.mobile || '',
-          specialization: data.specialization?.[0] || '',
-          experience: data.experience || '',
-          education: data.education || ''
+          specialization: Array.isArray(data.specialization) ? data.specialization[0] : (data.specialization || ''),
+          experience: data.experience ?? data.experience_years ?? '',
+          education: data.education || data.qualifications || ''
         })
       }
     } catch (error) {

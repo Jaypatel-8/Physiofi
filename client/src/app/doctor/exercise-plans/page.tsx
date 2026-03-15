@@ -308,19 +308,24 @@ const ExercisePlansPage = () => {
           aria-modal="true"
           aria-labelledby="exercise-plan-modal-title"
           aria-describedby="exercise-plan-modal-desc"
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto min-h-full py-6"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl p-6 max-w-4xl w-full my-8"
+            className="bg-white rounded-2xl shadow-2xl border border-gray-200 max-w-3xl w-full my-auto max-h-[90vh] flex flex-col"
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between p-4 pb-2 border-b border-gray-200 shrink-0">
               <div>
-                <h2 id="exercise-plan-modal-title" className="text-2xl font-black text-gray-900">
+                <h2 id="exercise-plan-modal-title" className="text-xl font-bold text-gray-900">
                   {isEditOpen ? 'Edit Exercise Plan' : 'Create Exercise Plan'}
                 </h2>
                 <p id="exercise-plan-modal-desc" className="text-sm text-gray-600 mt-0.5">Assign exercises and track patient progress</p>
+                {formData.patientId && (() => {
+                  const p = patients.find(px => (px._id || px.id) === formData.patientId)
+                  const name = p?.name || p?.full_name || 'Patient'
+                  return <p className="text-xs text-primary-600 font-medium mt-1">For patient: {name}</p>
+                })()}
               </div>
               <button
                 type="button"
@@ -337,7 +342,8 @@ const ExercisePlansPage = () => {
               </button>
             </div>
 
-            <form onSubmit={isEditOpen ? handleUpdate : handleCreate} className="space-y-5" noValidate>
+            <form onSubmit={isEditOpen ? handleUpdate : handleCreate} className="flex flex-col flex-1 min-h-0" noValidate>
+            <div className="p-4 overflow-y-auto flex-1 space-y-5">
               <section aria-labelledby="exercise-plan-details-heading" className="space-y-4">
                 <h3 id="exercise-plan-details-heading" className="text-sm font-bold text-gray-800 border-b border-gray-200 pb-2">Plan Details</h3>
               <div className="grid md:grid-cols-2 gap-4">
@@ -530,11 +536,12 @@ const ExercisePlansPage = () => {
                   ))}
                 </div>
               </section>
+            </div>
 
-              <div className="flex gap-4 pt-4">
+              <div className="flex gap-4 p-4 border-t border-gray-200 bg-gray-50/80 shrink-0 rounded-b-2xl">
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-primary-500 text-white rounded-lg font-semibold hover:bg-primary-600 transition-colors"
+                  className="flex-1 px-5 py-2.5 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 transition-colors"
                 >
                   {isEditOpen ? 'Update' : 'Create'} Plan
                 </button>
@@ -546,7 +553,7 @@ const ExercisePlansPage = () => {
                     setSelectedPlan(null)
                     resetForm()
                   }}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  className="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300 transition-colors"
                 >
                   Cancel
                 </button>

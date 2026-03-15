@@ -167,6 +167,23 @@ export const patientAPI = {
 
   recordPaymentForAppointment: (data: { appointmentId: string; amount: number; payment_method: string; transaction_id?: string }) =>
     api.post('/payments/record-for-appointment', data),
+
+  // Session notes (for this patient only – written by doctor)
+  getSessionNotes: () =>
+    api.get('/session-notes/my-notes'),
+
+  getSessionNote: (id: string) =>
+    api.get(`/session-notes/${id}`),
+
+  // Exercise plans (for this patient only – assigned by doctor)
+  getExercisePlans: (params?: { status?: string }) =>
+    api.get('/exercise-plans/my-plans', { params }),
+
+  getExercisePlan: (id: string) =>
+    api.get(`/exercise-plans/${id}`),
+
+  updateExerciseProgress: (planId: string, data: { exercise_name: string; repetitions_completed: number; sets_completed: number; notes?: string }) =>
+    api.post(`/exercise-plans/${planId}/progress`, data),
 }
 
 // Doctor API

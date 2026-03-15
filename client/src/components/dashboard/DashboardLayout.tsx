@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
 import NotificationBell from '@/components/ui/NotificationBell'
+import UserAvatar from '@/components/dashboard/UserAvatar'
 
 type Role = 'patient' | 'doctor' | 'admin'
 
@@ -15,6 +16,11 @@ const DASHBOARD_INDEX: Record<Role, string> = {
   patient: '/patient/dashboard',
   doctor: '/doctor/dashboard',
   admin: '/admin/dashboard',
+}
+
+const PROFILE_HREF: Partial<Record<Role, string>> = {
+  patient: '/patient/profile',
+  doctor: '/doctor/profile',
 }
 
 interface DashboardLayoutProps {
@@ -51,9 +57,21 @@ export default function DashboardLayout({ role, children }: DashboardLayoutProps
             )}
             <div className="flex items-center gap-3">
               <NotificationBell />
-              <span className="text-sm text-gray-500 hidden sm:inline">
-                <span className="font-medium text-gray-700">{displayName}</span>
-              </span>
+              {PROFILE_HREF[role] ? (
+                <Link
+                  href={PROFILE_HREF[role]!}
+                  className="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200 rounded-sm hover:bg-gray-50 py-1 pr-2 -my-1 transition-colors"
+                  title="View profile"
+                >
+                  <UserAvatar name={user?.name} size="sm" />
+                  <span className="text-sm font-medium text-gray-700">{displayName}</span>
+                </Link>
+              ) : (
+                <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200">
+                  <UserAvatar name={user?.name} size="sm" />
+                  <span className="text-sm font-medium text-gray-700">{displayName}</span>
+                </div>
+              )}
             </div>
           </header>
           <main className="flex-1 p-4 lg:p-6">
@@ -80,9 +98,16 @@ export default function DashboardLayout({ role, children }: DashboardLayoutProps
                 <ArrowLeftIcon className="h-4 w-4" />
                 Back to Dashboard
               </Link>
-              <span className="text-gray-700 text-sm font-medium">
-                Hi, <span className="text-primary-600 font-semibold">{displayName}</span>
-              </span>
+              <Link
+                href="/patient/profile"
+                className="flex items-center gap-2 rounded-lg py-1 pr-2 -my-1 hover:bg-white/60 transition-colors"
+                title="View profile"
+              >
+                <UserAvatar name={user?.name} size="sm" />
+                <span className="text-gray-700 text-sm font-medium">
+                  Hi, <span className="text-primary-600 font-semibold">{displayName}</span>
+                </span>
+              </Link>
             </div>
           </div>
         )}

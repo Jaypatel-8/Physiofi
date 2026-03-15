@@ -139,9 +139,10 @@ const DoctorAvailability = () => {
     setDateAvailabilities(updated)
   }
 
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardSubPageHeader title="Update Availability" subtitle="Set your working hours and specific date availability" />
       <div className="max-w-4xl mx-auto space-y-6">
@@ -434,7 +435,7 @@ const DoctorAvailability = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
