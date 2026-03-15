@@ -50,6 +50,7 @@ const DoctorPatients = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardSubPageHeader title="My Patients" subtitle="View and manage your patient list" />
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
@@ -81,6 +82,7 @@ const DoctorPatients = () => {
         )}
       </div>
     </div>
+    </>
   )
 }
 

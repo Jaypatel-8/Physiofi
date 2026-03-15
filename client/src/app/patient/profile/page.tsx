@@ -103,6 +103,7 @@ const PatientProfile = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardSubPageHeader title="My Profile" subtitle="Manage your personal information" />
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto border border-gray-100">
@@ -238,6 +239,7 @@ const PatientProfile = () => {
           )}
         </div>
     </div>
+    </>
   )
 }
 

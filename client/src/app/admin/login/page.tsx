@@ -87,6 +87,7 @@ export default function AdminLoginPage() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
       <Header />
       <main className="pt-24 pb-16">
@@ -188,5 +189,6 @@ export default function AdminLoginPage() {
       </main>
       <Footer />
     </div>
+    </>
   )
 }

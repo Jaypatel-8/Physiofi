@@ -79,6 +79,7 @@ const PatientTreatment = () => {
     : treatmentPlans.filter(tp => tp.status === filter)
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50">
       <Header />
       <DashboardHeader user={user} />
@@ -208,6 +209,7 @@ const PatientTreatment = () => {
       </div>
       <Footer />
     </div>
+    </>
   )
 }
 

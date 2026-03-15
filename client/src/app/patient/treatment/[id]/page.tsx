@@ -109,6 +109,7 @@ export default function PatientTreatmentDetailPage() {
       : 'bg-gray-100 text-gray-700'
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50">
       <Header />
       <DashboardHeader user={user} />
@@ -219,5 +220,6 @@ export default function PatientTreatmentDetailPage() {
       </div>
       <Footer />
     </div>
+    </>
   )
 }

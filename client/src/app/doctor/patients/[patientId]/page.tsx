@@ -222,6 +222,7 @@ const PatientDetail = () => {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="pt-16 lg:pt-20">
@@ -547,6 +548,7 @@ const PatientDetail = () => {
       )}
       <Footer />
     </div>
+    </>
   )
 }
 

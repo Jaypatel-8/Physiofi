@@ -94,6 +94,7 @@ const ExercisePlansPage = () => {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <Header />
       <div className="pt-16 lg:pt-20">
@@ -327,6 +328,7 @@ const ExercisePlansPage = () => {
 
       <Footer />
     </div>
+    </>
   )
 }
 

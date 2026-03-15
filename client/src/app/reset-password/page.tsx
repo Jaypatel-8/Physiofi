@@ -87,6 +87,7 @@ export default function ResetPasswordPage() {
   const invalidLink = !token || !type
 
   return (
+    <>
     <div className="min-h-screen flex flex-col bg-pastel-mesh">
       <Header />
       <main className="flex-1 pt-24 pb-16 px-4">
@@ -193,5 +194,6 @@ export default function ResetPasswordPage() {
       </main>
       <Footer />
     </div>
+    </>
   )
 }
