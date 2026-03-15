@@ -67,6 +67,8 @@ module.exports = {
           200: '#80c0ff',
           300: '#4da7ff',
           400: '#1a8eff',
+          600: '#0c6bb8',
+          700: '#08508a',
         },
         'pastel-mint': {
           50: '#e6faf5',
@@ -74,6 +76,8 @@ module.exports = {
           200: '#80e6cb',
           300: '#4ddcb6',
           400: '#1ad2a1',
+          600: '#0f9b6d',
+          700: '#0b7352',
         },
         'pastel-lavender': {
           50: '#f0e6ff',
@@ -81,6 +85,8 @@ module.exports = {
           200: '#c280ff',
           300: '#ab4dff',
           400: '#941aff',
+          600: '#6b12b8',
+          700: '#510d8a',
         },
         'pastel-peach': {
           50: '#fff0e6',
@@ -88,6 +94,8 @@ module.exports = {
           200: '#ffc280',
           300: '#ffab4d',
           400: '#ff941a',
+          600: '#c26b0c',
+          700: '#8a4d08',
         },
         'pastel-sky': {
           50: '#e6f5ff',
@@ -102,6 +110,8 @@ module.exports = {
           200: '#c2cb80',
           300: '#abb64d',
           400: '#94a11a',
+          600: '#6b7a12',
+          700: '#4d580d',
         },
         // Legacy support
         teal: {
@@ -145,6 +155,23 @@ module.exports = {
         background: {
           DEFAULT: '#F8FAF9',
         },
+        // Premium border – attractive teal-sage for cards/sections
+        premium: {
+          DEFAULT: 'rgba(19,165,129,0.18)',
+          hover: 'rgba(19,165,129,0.35)',
+          light: 'rgba(19,165,129,0.08)',
+        },
+        // Best pastel card palette – soft, premium, teal-harmonious (use bg-card-1/2/3)
+        card: {
+          1: '#f2faf8', // soft mint white
+          2: '#e5f4ef', // soft seafoam
+          3: '#e6f4f5', // soft aqua
+        },
+        // Pastel tints for icons (softer than card)
+        pastel: {
+          icon: '#eef8f5', // icon wrapper default
+          iconHover: '#e0f2ec',
+        },
         text: {
           DEFAULT: '#1E1E1E',
           muted: '#707070',
@@ -178,6 +205,9 @@ module.exports = {
         'bounce-slow': 'bounce 2s infinite',
         'pulse-slow': 'pulse 3s infinite',
         'float': 'float 3s ease-in-out infinite',
+        'float-slow': 'floatSlow 8s ease-in-out infinite',
+        'float-slower': 'floatSlower 12s ease-in-out infinite',
+        'gradient-shift': 'gradientShift 15s ease infinite',
       },
       keyframes: {
         fadeIn: {
@@ -204,11 +234,39 @@ module.exports = {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-10px)' },
         },
+        floatSlow: {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '33%': { transform: 'translate(20px, -15px) scale(1.05)' },
+          '66%': { transform: 'translate(-10px, 10px) scale(0.98)' },
+        },
+        floatSlower: {
+          '0%, 100%': { transform: 'translate(0, 0)' },
+          '50%': { transform: 'translate(-15px, -20px)' },
+        },
+        gradientShift: {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.7' },
+        },
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'hero-pattern': "url('/images/hero-pattern.svg')",
+        'gradient-premium': 'linear-gradient(135deg, #0f8a6a 0%, #13a581 50%, #177076 100%)',
+        'gradient-premium-soft': 'linear-gradient(180deg, rgba(19,165,129,0.06) 0%, rgba(23,112,118,0.04) 100%)',
+      },
+      boxShadow: {
+        'premium': '0 4px 12px rgba(0,0,0,0.06), 0 16px 32px rgba(0,0,0,0.08)',
+        'premium-lg': '0 8px 24px rgba(0,0,0,0.08), 0 32px 64px rgba(0,0,0,0.1)',
+        'premium-soft': '0 2px 8px rgba(0,0,0,0.04)',
+        'inner-soft': 'inset 0 1px 0 0 rgba(255,255,255,0.6)',
+        'accent': '0 4px 20px rgba(19,165,129,0.25)',
+        'accent-lg': '0 12px 32px rgba(19,165,129,0.3)',
+        'card': '0 1px 3px rgba(0,0,0,0.04), 0 20px 40px -12px rgba(0,0,0,0.12)',
+        'card-hover': '0 4px 12px rgba(0,0,0,0.06), 0 28px 56px -12px rgba(0,0,0,0.14)',
+        'premium-card': '0 2px 8px rgba(0,0,0,0.04), 0 24px 48px -16px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.02)',
+        'premium-card-hover': '0 8px 24px rgba(0,0,0,0.06), 0 32px 64px -16px rgba(0,0,0,0.14), 0 0 0 1px rgba(19,165,129,0.08)',
+        'card-hover-glow': '0 0 0 2px rgba(19,165,129,0.2), 0 16px 48px -12px rgba(19,165,129,0.12), 0 28px 56px -16px rgba(0,0,0,0.1)',
       },
     },
   },

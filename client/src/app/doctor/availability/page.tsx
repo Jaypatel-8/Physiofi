@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  ArrowLeftIcon, 
   ClockIcon, 
   CheckCircleIcon,
   CalendarIcon,
@@ -14,8 +13,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { doctorAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
 
 interface DateAvailability {
@@ -141,33 +139,20 @@ const DoctorAvailability = () => {
     setDateAvailabilities(updated)
   }
 
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-secondary-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/doctor/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Dashboard</span>
-          </Link>
-          <h1 className="text-4xl font-black mb-2 text-white">Update Availability</h1>
-          <p className="text-white/90">Set your working hours and specific date availability</p>
-        </div>
-      </div>
-
-      <div className="container-custom py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
+      <DashboardSubPageHeader title="Update Availability" subtitle="Set your working hours and specific date availability" />
+      <div className="max-w-4xl mx-auto space-y-6">
           {/* Weekly Availability */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100"
+            className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
           >
-            <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
-              <CalendarIcon className="h-6 w-6 text-primary-600" />
+            <h2 className="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-primary-600" />
               Weekly Schedule
             </h2>
             <div className="space-y-4">
@@ -423,7 +408,7 @@ const DoctorAvailability = () => {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-5 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSaving ? (
                 <>
@@ -442,15 +427,13 @@ const DoctorAvailability = () => {
             </button>
             <Link
               href="/doctor/dashboard"
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+              className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors"
             >
               Cancel
             </Link>
           </div>
         </div>
       </div>
-      </div>
-      <Footer />
     </div>
   )
 }

@@ -36,12 +36,18 @@ router.put('/profile', isPatient, async (req, res) => {
 
     const {
       name,
+      full_name,
+      email,
+      phone,
       age,
       gender,
       address,
       emergencyContact,
+      emergency_contact,
       medicalHistory,
+      medical_history,
       currentConditions,
+      current_conditions,
       preferences
     } = req.body;
 
@@ -53,16 +59,63 @@ router.put('/profile', isPatient, async (req, res) => {
       });
     }
 
-    // Update fields
-    if (name) patient.name = name;
-    if (email) patient.email = email;
-    if (phone) patient.phone = phone;
-    if (age !== undefined) patient.age = age;
-    if (gender) patient.gender = gender;
+    // Update fields - support both old and new field names
+    if (name || full_name) {
+      const patientName = name || full_name;
+      patient.name = patientName;
+      patient.full_name = patientName;
+    }
+    if (email) {
+      // Validate email format
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email format'
+        });
+      }
+      patient.email = email.toLowerCase().trim();
+    }
+    if (phone) {
+      // Validate phone format
+      const cleanPhone = phone.replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number must be 10 digits'
+        });
+      }
+      patient.phone = cleanPhone;
+    }
+    if (age !== undefined) {
+      const ageNum = parseInt(age);
+      if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+        return res.status(400).json({
+          success: false,
+          message: 'Age must be a valid number between 0 and 120'
+        });
+      }
+      patient.age = ageNum;
+    }
+    if (gender) {
+      const validGenders = ['Male', 'Female', 'Other'];
+      if (!validGenders.includes(gender)) {
+        return res.status(400).json({
+          success: false,
+          message: `Gender must be one of: ${validGenders.join(', ')}`
+        });
+      }
+      patient.gender = gender;
+    }
     if (address) patient.address = address;
-    if (emergencyContact) patient.emergencyContact = emergencyContact;
-    if (medicalHistory) patient.medicalHistory = medicalHistory;
-    if (currentConditions) patient.currentConditions = currentConditions;
+    if (emergencyContact || emergency_contact) {
+      patient.emergency_contact = emergencyContact || emergency_contact;
+    }
+    if (medicalHistory || medical_history) {
+      patient.medical_history = medicalHistory || medical_history;
+    }
+    if (currentConditions || current_conditions) {
+      patient.current_conditions = currentConditions || current_conditions;
+    }
     if (preferences) patient.preferences = preferences;
 
     await patient.save();

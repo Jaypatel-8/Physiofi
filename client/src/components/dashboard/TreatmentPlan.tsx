@@ -16,46 +16,44 @@ const TreatmentPlan = ({ plans }: TreatmentPlanProps) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-pink-50/90 to-pink-100/70 backdrop-blur-sm rounded-3xl shadow-xl p-8 border-2 border-pink-200/60"
+      className="site-card bg-pastel-lavender-50 border-pastel-lavender-200/50 rounded-xl p-6"
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-xl font-black text-gray-800 mb-2 bg-gradient-to-r from-pink-600 to-pink-800 bg-clip-text text-transparent">
-            Active Treatment Plans
-          </h3>
-          <p className="text-sm text-gray-700">Track your recovery progress</p>
+          <h3 className="text-base font-bold text-gray-900">Active Treatment Plans</h3>
+          <p className="text-sm text-gray-500 mt-0.5">Track your recovery progress</p>
         </div>
-        <div className="w-12 h-12 bg-gradient-to-br from-pink-200 to-pink-300 rounded-xl flex items-center justify-center shadow-sm">
-          <HeartIcon className="h-6 w-6 text-pink-700" />
+        <div className="w-10 h-10 bg-pastel-lavender-100 rounded-xl flex items-center justify-center text-pastel-lavender-600">
+          <HeartIcon className="h-5 w-5" />
         </div>
       </div>
-      <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+      <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-1">
         {plans.length > 0 ? (
           plans.map((plan, index) => {
             const progress = getProgressPercentage(plan.sessionsCompleted || 0, plan.totalSessions || 1)
             return (
               <motion.div
                 key={plan.id || index}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="group relative p-5 bg-white/80 rounded-2xl border-2 border-pink-200/50 hover:border-pink-300 hover:shadow-lg transition-all duration-300"
+                transition={{ delay: index * 0.05 }}
+                className="site-card p-4 border-primary-200/40"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <h4 className="font-bold text-gray-800 mb-1 group-hover:text-pink-700 transition-colors">
+                    <h4 className="site-card-title text-gray-800 mb-1 group-hover:text-pink-700 transition-colors">
                       {plan.condition || plan.title || 'Treatment Plan'}
                     </h4>
                     {plan.description && (
                       <p className="text-sm text-gray-700 mb-3 line-clamp-2">{plan.description}</p>
                     )}
                   </div>
-                  <span className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                    plan.status === 'Active' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
-                    plan.status === 'Completed' ? 'bg-pink-100 text-pink-800 border border-pink-200' :
-                    'bg-gray-100 text-gray-800 border border-gray-200'
+                  <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
+                    plan.status === 'Active' ? 'bg-pastel-mint-100 text-pastel-mint-700 border border-pastel-mint-200' :
+                    plan.status === 'Completed' ? 'bg-pastel-lavender-100 text-pastel-lavender-700 border border-pastel-lavender-200' :
+                    'bg-gray-100 text-gray-600 border border-gray-200'
                   }`}>
                     {plan.status || 'Active'}
                   </span>
@@ -63,16 +61,16 @@ const TreatmentPlan = ({ plans }: TreatmentPlanProps) => {
                 
                 {/* Progress Bar */}
                 <div className="mb-3">
-                  <div className="flex items-center justify-between text-xs text-gray-700 mb-2">
-                    <span className="font-medium">Progress</span>
-                    <span className="font-bold text-pink-700">{progress}%</span>
+                  <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                    <span>Progress</span>
+                    <span className="font-semibold text-primary-600">{progress}%</span>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
-                      transition={{ delay: index * 0.1 + 0.3, duration: 0.8, ease: "easeOut" }}
-                      className="h-full bg-gradient-to-r from-pink-400 to-pink-500 rounded-full"
+                      transition={{ delay: index * 0.05 + 0.2, duration: 0.5, ease: "easeOut" }}
+                      className="h-full bg-primary-500 rounded-full"
                     />
                   </div>
                   <div className="flex items-center justify-between text-xs text-gray-600 mt-1">

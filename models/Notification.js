@@ -25,7 +25,11 @@ const notificationSchema = new mongoose.Schema({
       'reschedule_request',
       'reschedule_accepted',
       'reschedule_declined',
-      'appointment_status_change'
+      'appointment_status_change',
+      'doctor_approval',
+      'admin_message_to_doctor',
+      'admin_announcement',
+      'payment_reminder'
     ],
     required: true
   },
@@ -82,6 +86,11 @@ notificationSchema.statics.createAppointmentNotification = async function(
   status,
   doctorData
 ) {
+  // Return null if userId is not provided
+  if (!userId) {
+    return null;
+  }
+
   const appointmentType = appointmentData.type === 'Home Visit' ? 'Home Visit' : appointmentData.type === 'Online Consultation' ? 'Tele Consultation' : 'Clinic Visit';
   
   let type, title, message, priority;
@@ -106,37 +115,52 @@ notificationSchema.statics.createAppointmentNotification = async function(
 
   switch(status) {
     case 'Pending':
+      // Appointment request notifications ONLY for doctors and admins
       type = 'appointment_request';
-      if (userModel === 'Doctor') {
+      if (userModel === 'Doctor' || userModel === 'Admin') {
         title = `New ${appointmentType} Appointment Request`;
         message = `${patientData.name || 'Patient'} (${patientData.phone || 'N/A'}) has requested a ${appointmentType.toLowerCase()} appointment on ${formatDate(appointmentData.appointmentDate)} at ${formatTime(appointmentData.appointmentTime)}. Symptoms: ${(appointmentData.symptoms || []).join(', ') || 'None'}`;
+        priority = 'high';
       } else {
-        title = `Appointment Requested - ${appointmentType}`;
-        message = `Your ${appointmentType.toLowerCase()} appointment with Dr. ${doctorData?.name || 'Doctor'} has been requested for ${formatDate(appointmentData.appointmentDate)} at ${formatTime(appointmentData.appointmentTime)}. Status: Pending confirmation.`;
+        // Patients don't get appointment_request notifications
+        // They'll get appointment_confirmed when doctor accepts
+        return null; // Don't create notification for patients on request
       }
-      priority = 'high';
       break;
     case 'Confirmed':
+      // Confirmed notifications ONLY for patients (doctor already knows they confirmed it)
       type = 'appointment_confirmed';
-      if (userModel === 'Doctor') {
-        title = `Appointment Confirmed - ${appointmentType}`;
-        message = `Appointment with ${patientData.name || 'Patient'} confirmed for ${formatDate(appointmentData.appointmentDate)} at ${formatTime(appointmentData.appointmentTime)}. Type: ${appointmentType}`;
-      } else {
+      if (userModel === 'Patient') {
         title = `Appointment Confirmed - ${appointmentType}`;
         message = `Your ${appointmentType.toLowerCase()} appointment with Dr. ${doctorData?.name || 'Doctor'} is confirmed for ${formatDate(appointmentData.appointmentDate)} at ${formatTime(appointmentData.appointmentTime)}.`;
+        priority = 'medium';
+      } else {
+        // Doctors/Admins don't need confirmation notification (they're the ones confirming)
+        return null; // Don't create notification for doctors/admins on confirmation
       }
-      priority = 'medium';
       break;
     case 'Cancelled':
+      // Cancelled notifications for both patient and doctor
       type = 'appointment_cancelled';
-      title = `Appointment Cancelled - ${appointmentType}`;
-      message = `Your ${appointmentType.toLowerCase()} appointment on ${formatDate(appointmentData.appointmentDate)} at ${appointmentData.appointmentTime || 'N/A'} has been cancelled`;
+      if (userModel === 'Patient') {
+        title = `Appointment Cancelled - ${appointmentType}`;
+        message = `Your ${appointmentType.toLowerCase()} appointment on ${formatDate(appointmentData.appointmentDate)} at ${appointmentData.appointmentTime || 'N/A'} has been cancelled`;
+      } else {
+        title = `Appointment Cancelled - ${appointmentType}`;
+        message = `Appointment with ${patientData.name || 'Patient'} on ${formatDate(appointmentData.appointmentDate)} at ${appointmentData.appointmentTime || 'N/A'} has been cancelled`;
+      }
       priority = 'medium';
       break;
     case 'Rescheduled':
+      // Rescheduled notifications for both patient and doctor
       type = 'appointment_rescheduled';
-      title = `Appointment Rescheduled - ${appointmentType}`;
-      message = `Your ${appointmentType.toLowerCase()} appointment has been rescheduled to ${formatDate(appointmentData.appointmentDate)} at ${appointmentData.appointmentTime || 'N/A'}`;
+      if (userModel === 'Patient') {
+        title = `Appointment Rescheduled - ${appointmentType}`;
+        message = `Your ${appointmentType.toLowerCase()} appointment has been rescheduled to ${formatDate(appointmentData.appointmentDate)} at ${appointmentData.appointmentTime || 'N/A'}`;
+      } else {
+        title = `Appointment Rescheduled - ${appointmentType}`;
+        message = `Appointment with ${patientData.name || 'Patient'} has been rescheduled to ${formatDate(appointmentData.appointmentDate)} at ${appointmentData.appointmentTime || 'N/A'}`;
+      }
       priority = 'medium';
       break;
     case 'In Progress':

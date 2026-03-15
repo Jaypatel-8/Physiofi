@@ -127,7 +127,7 @@ const Testimonials = memo(() => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
             transition={{ delay: 0.05, duration: 0.4 }} // Reduced delay and duration
-            className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
+            className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-display leading-tight"
           >
             What Our <span className="text-primary-500">Clients</span> Say
             <span className="block">About <span className="text-primary-500">Us</span></span>
@@ -249,19 +249,19 @@ const Testimonials = memo(() => {
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-black mb-2">70+</div>
+              <div className="text-4xl md:text-5xl font-bold font-display mb-2">70+</div>
               <div className="text-white/90 font-medium">Happy Patients</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-black mb-2">5.0</div>
+              <div className="text-4xl md:text-5xl font-bold font-display mb-2">5.0</div>
               <div className="text-white/90 font-medium">Average Rating</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-black mb-2">98.2%</div>
+              <div className="text-4xl md:text-5xl font-bold font-display mb-2">98.2%</div>
               <div className="text-white/90 font-medium">Satisfaction Rate</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-black mb-2">2+</div>
+              <div className="text-4xl md:text-5xl font-bold font-display mb-2">2+</div>
               <div className="text-white/90 font-medium">Years Experience</div>
             </div>
           </div>

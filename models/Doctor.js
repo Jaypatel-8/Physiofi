@@ -233,7 +233,9 @@ const doctorSchema = new mongoose.Schema({
   isVerified: {
     type: Boolean,
     default: false
-  }
+  },
+  loginAttempts: { type: Number, default: 0 },
+  lockUntil: Date
 }, {
   timestamps: true
 });
@@ -254,6 +256,22 @@ doctorSchema.virtual('fullAddress').get(function() {
   
   return parts.join(', ');
 });
+
+// Lockout: increment failed attempts; lock 2 hours after 5 attempts
+doctorSchema.methods.incLoginAttempts = function() {
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({ $unset: { lockUntil: 1 }, $set: { loginAttempts: 1 } });
+  }
+  const updates = { $inc: { loginAttempts: 1 } };
+  if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
+    updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 };
+  }
+  return this.updateOne(updates);
+};
+
+doctorSchema.methods.resetLoginAttempts = function() {
+  return this.updateOne({ $unset: { loginAttempts: 1, lockUntil: 1 } });
+};
 
 // Method to update rating
 doctorSchema.methods.updateRating = function(newRating) {

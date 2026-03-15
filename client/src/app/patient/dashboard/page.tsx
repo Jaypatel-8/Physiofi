@@ -29,8 +29,6 @@ import ProgressTracking from '@/components/dashboard/ProgressTracking'
 import QuickLinkCard from '@/components/dashboard/QuickLinkCard'
 import NotificationCard from '@/components/dashboard/NotificationCard'
 import { StatsCardSkeleton, CardSkeleton, QuickLinkSkeleton } from '@/components/dashboard/SkeletonLoader'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import BookingPopup from '@/components/ui/BookingPopup'
 import toast from 'react-hot-toast'
 
@@ -220,11 +218,9 @@ const PatientDashboard = () => {
   // Use the same structure for both SSR and client-side to prevent hydration mismatch
   if (typeof window === 'undefined' || !mounted || loading || isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50/40 via-purple-50/30 to-pink-50/40">
-        <Header />
-        <div className="pt-16 lg:pt-20">
-          <DashboardHeader subtitle="Loading your dashboard..." user={null} />
-          <div className="container-custom py-10">
+      <div className="space-y-6">
+        <DashboardHeader subtitle="Loading your dashboard..." user={user} />
+        <div className="py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
               {[1, 2, 3, 4].map((i) => (
                 <StatsCardSkeleton key={i} />
@@ -239,110 +235,95 @@ const PatientDashboard = () => {
                 <CardSkeleton />
               </div>
             </div>
-          </div>
         </div>
-        <Footer />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-primary-50/30 to-secondary-50/20">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-        <DashboardHeader 
-          subtitle="Track your appointments, treatments, and recovery progress all in one place"
+    <>
+    <div className="space-y-6">
+      <DashboardHeader
+          subtitle="Track your appointments, treatments, and recovery progress"
           user={user}
         />
 
-        <div className="container-custom py-10">
-        {/* Primary CTA Buttons - Ultra Modern Design */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-12 flex flex-col sm:flex-row gap-4"
+          className="mb-8 flex flex-wrap gap-3"
         >
           <button
             onClick={() => setIsBookingOpen(true)}
-            className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 transition-all duration-300 shadow-2xl hover:shadow-primary-500/50 transform hover:scale-[1.02] overflow-hidden"
+            className="inline-flex items-center gap-2 bg-primary-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <PlusIcon className="h-6 w-6 relative z-10 group-hover:rotate-90 transition-transform duration-300" />
-            <span className="relative z-10">Book Appointment</span>
-            <ArrowRightIcon className="h-5 w-5 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
+            <PlusIcon className="h-5 w-5" />
+            Book Appointment
           </button>
           <button
-            onClick={() => {
-              setIsBookingOpen(true)
-            }}
-            className="group relative inline-flex items-center justify-center gap-3 bg-white/90 backdrop-blur-sm text-primary-700 border-2 border-primary-200 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-white hover:border-primary-400 hover:shadow-xl transition-all duration-300 shadow-lg transform hover:scale-[1.02]"
+            onClick={() => setIsBookingOpen(true)}
+            className="inline-flex items-center gap-2 bg-white text-primary-700 font-semibold px-6 py-3 rounded-xl border border-primary-200 hover:bg-primary-50 transition-colors"
           >
-            <VideoCameraIcon className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-            <span>Book Tele-Consultation</span>
+            <VideoCameraIcon className="h-5 w-5" />
+            Tele-Consultation
           </button>
         </motion.div>
 
-        {/* Stats Grid - Ultra Modern Cards with Pastel Colors */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatsCard
             title="Total Appointments"
             value={stats.totalAppointments}
-            icon={<CalendarDaysIcon className="h-7 w-7" />}
-            color="bg-blue-200"
+            icon={<CalendarDaysIcon className="h-6 w-6" />}
+            color=""
+            index={0}
             onClick={() => router.push('/patient/appointments')}
           />
           <StatsCard
             title="Upcoming"
             value={stats.upcomingAppointments}
-            icon={<ClockIcon className="h-7 w-7" />}
-            color="bg-purple-200"
+            icon={<ClockIcon className="h-6 w-6" />}
+            color=""
+            index={1}
             onClick={() => router.push('/patient/appointments?filter=upcoming')}
           />
           <StatsCard
             title="Completed"
             value={stats.completedAppointments}
-            icon={<CheckCircleIcon className="h-7 w-7" />}
-            color="bg-green-200"
+            icon={<CheckCircleIcon className="h-6 w-6" />}
+            color=""
+            index={2}
             onClick={() => router.push('/patient/appointments?filter=completed')}
           />
           <StatsCard
             title="Active Treatments"
             value={stats.activeTreatments || treatmentPlans.length}
-            icon={<HeartIcon className="h-7 w-7" />}
-            color="bg-pink-200"
+            icon={<HeartIcon className="h-6 w-6" />}
+            color=""
+            index={3}
             onClick={() => router.push('/patient/treatment')}
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Upcoming Appointments */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative bg-gradient-to-br from-blue-50/90 to-blue-100/70 backdrop-blur-sm rounded-3xl shadow-xl p-8 border-2 border-blue-200/60 hover:border-blue-300 hover:shadow-blue-300/30 transition-all duration-300 overflow-hidden"
+              className="bg-primary-50 rounded-2xl border border-primary-200/40 p-6"
             >
-              {/* Decorative gradient background */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-200/40 to-transparent rounded-full blur-3xl -z-0"></div>
-              
-              <div className="relative z-10 flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-1.5 h-8 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full"></div>
-                    <h2 className="text-3xl font-black text-gray-800 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent">Upcoming Appointments</h2>
-                  </div>
-                  <p className="text-sm text-gray-700 font-medium ml-4">Your next scheduled sessions</p>
+                  <h2 className="text-lg font-bold text-gray-900">Upcoming Appointments</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">Your next scheduled sessions</p>
                 </div>
-                <Link 
-                  href="/patient/appointments" 
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-100 text-blue-800 hover:bg-blue-200 font-semibold text-sm group transition-all duration-300 border border-blue-200"
+                <Link
+                  href="/patient/appointments"
+                  className="flex items-center gap-1.5 text-primary-600 font-medium text-sm hover:text-primary-700"
                 >
-                  View All
-                  <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  View all <ArrowRightIcon className="h-4 w-4" />
                 </Link>
               </div>
-              <div className="relative z-10 space-y-4">
+              <div className="relative z-10 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar pr-2">
                 {upcomingAppointments.length > 0 ? (
                   upcomingAppointments.map((appointment, index) => (
                     <motion.div
@@ -358,101 +339,70 @@ const PatientDashboard = () => {
                     </motion.div>
                   ))
                 ) : (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-20"
-                  >
-                    <div className="relative w-32 h-32 mx-auto mb-6">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full animate-pulse"></div>
-                      <div className="absolute inset-3 bg-white rounded-full flex items-center justify-center shadow-lg">
-                        <CalendarDaysIcon className="h-16 w-16 text-blue-600" />
-                      </div>
+                  <div className="text-center py-12">
+                    <div className="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4 text-primary-600">
+                      <CalendarDaysIcon className="h-7 w-7" />
                     </div>
-                    <h3 className="text-xl font-black text-gray-800 mb-2">No upcoming appointments</h3>
-                    <p className="text-gray-700 mb-8 text-sm">Schedule your first appointment to get started</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">No upcoming appointments</h3>
+                    <p className="text-sm text-gray-500 mb-4">Schedule your first appointment to get started</p>
                     <button
                       onClick={() => setIsBookingOpen(true)}
-                      className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white px-8 py-4 rounded-xl font-bold hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                      className="inline-flex items-center gap-2 bg-primary-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-primary-700 transition-colors text-sm"
                     >
-                      <PlusIcon className="h-5 w-5" />
-                      Book Your First Appointment
+                      <PlusIcon className="h-4 w-4" /> Book appointment
                     </button>
-                  </motion.div>
+                  </div>
                 )}
               </div>
             </motion.div>
           </div>
 
-          {/* Quick Links & Notifications */}
           <div className="space-y-6">
-            {/* Quick Links */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="relative bg-gradient-to-br from-purple-50/90 to-purple-100/70 backdrop-blur-sm rounded-3xl shadow-xl p-6 border-2 border-purple-200/60 overflow-hidden"
+              transition={{ delay: 0.1 }}
+              className="bg-pastel-blue-50 rounded-2xl border border-pastel-blue-200/50 p-5"
             >
-              {/* Decorative gradient */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-purple-200/40 to-transparent rounded-full blur-3xl -z-0"></div>
-              
-              <div className="relative z-10">
-                <h3 className="text-xl font-black text-gray-800 mb-6 flex items-center gap-3">
-                  <div className="w-1.5 h-8 bg-gradient-to-b from-purple-400 to-purple-600 rounded-full"></div>
-                  <span>Quick Links</span>
-                </h3>
-                <div className="space-y-3">
-                  <Link
-                    href="/patient/profile"
-                    className="group flex items-center gap-4 p-4 rounded-2xl hover:bg-gradient-to-r hover:from-blue-50 hover:via-blue-100/50 hover:to-transparent transition-all border-2 border-blue-200/50 hover:border-blue-300 hover:shadow-lg bg-white/60"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl flex items-center justify-center group-hover:from-blue-500 group-hover:to-blue-600 transition-all duration-300 shadow-md group-hover:shadow-lg">
-                      <UserCircleIcon className="h-6 w-6 text-blue-700 group-hover:text-white transition-colors" />
-                    </div>
-                    <span className="font-bold text-gray-800 group-hover:text-blue-700 flex-1">My Profile</span>
-                    <ArrowRightIcon className="h-5 w-5 text-gray-500 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-                  </Link>
-                  <Link
-                    href="/patient/treatment"
-                    className="group flex items-center gap-4 p-4 rounded-2xl hover:bg-gradient-to-r hover:from-pink-50 hover:via-pink-100/50 hover:to-transparent transition-all border-2 border-pink-200/50 hover:border-pink-300 hover:shadow-lg bg-white/60"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-pink-200 to-pink-300 rounded-xl flex items-center justify-center group-hover:from-pink-500 group-hover:to-pink-600 transition-all duration-300 shadow-md group-hover:shadow-lg">
-                      <HeartIcon className="h-6 w-6 text-pink-700 group-hover:text-white transition-colors" />
-                    </div>
-                    <span className="font-bold text-gray-800 group-hover:text-pink-700 flex-1">Treatment Plans</span>
-                    <ArrowRightIcon className="h-5 w-5 text-gray-500 group-hover:text-pink-600 group-hover:translate-x-1 transition-all" />
-                  </Link>
-                  <Link
-                    href="/patient/appointments"
-                    className="group flex items-center gap-4 p-4 rounded-2xl hover:bg-gradient-to-r hover:from-green-50 hover:via-green-100/50 hover:to-transparent transition-all border-2 border-green-200/50 hover:border-green-300 hover:shadow-lg bg-white/60"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-200 to-green-300 rounded-xl flex items-center justify-center group-hover:from-green-500 group-hover:to-green-600 transition-all duration-300 shadow-md group-hover:shadow-lg">
-                      <CalendarDaysIcon className="h-6 w-6 text-green-700 group-hover:text-white transition-colors" />
-                    </div>
-                    <span className="font-bold text-gray-800 group-hover:text-green-700 flex-1">All Appointments</span>
-                    <ArrowRightIcon className="h-5 w-5 text-gray-500 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
-                  </Link>
-                </div>
+              <h3 className="text-base font-bold text-gray-900 mb-4">Quick Links</h3>
+              <div className="space-y-2">
+                <Link href="/patient/profile" className="flex items-center gap-3 p-3 rounded-xl bg-white/80 border border-primary-200/40 hover:border-primary-300 transition-colors">
+                  <div className="w-9 h-9 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
+                    <UserCircleIcon className="h-5 w-5" />
+                  </div>
+                  <span className="font-medium text-gray-900">My Profile</span>
+                  <ArrowRightIcon className="h-4 w-4 text-gray-400 ml-auto" />
+                </Link>
+                <Link href="/patient/treatment" className="flex items-center gap-3 p-3 rounded-xl bg-white/80 border border-primary-200/40 hover:border-primary-300 transition-colors">
+                  <div className="w-9 h-9 bg-pastel-mint-100 rounded-lg flex items-center justify-center text-pastel-mint-600">
+                    <HeartIcon className="h-5 w-5" />
+                  </div>
+                  <span className="font-medium text-gray-900">Treatment Plans</span>
+                  <ArrowRightIcon className="h-4 w-4 text-gray-400 ml-auto" />
+                </Link>
+                <Link href="/patient/appointments" className="flex items-center gap-3 p-3 rounded-xl bg-white/80 border border-primary-200/40 hover:border-primary-300 transition-colors">
+                  <div className="w-9 h-9 bg-pastel-lavender-100 rounded-lg flex items-center justify-center text-pastel-lavender-600">
+                    <CalendarDaysIcon className="h-5 w-5" />
+                  </div>
+                  <span className="font-medium text-gray-900">All Appointments</span>
+                  <ArrowRightIcon className="h-4 w-4 text-gray-400 ml-auto" />
+                </Link>
               </div>
             </motion.div>
 
-            {/* Notifications */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-gradient-to-br from-amber-50/90 to-amber-100/70 backdrop-blur-sm rounded-3xl shadow-xl p-6 border-2 border-amber-200/60"
+              transition={{ delay: 0.15 }}
+              className="bg-pastel-sage-50 rounded-2xl border border-pastel-sage-200/50 p-5"
             >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-black text-gray-800 flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full"></span>
-                  Notifications
-                </h3>
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-200 to-amber-300 rounded-xl flex items-center justify-center shadow-sm">
-                  <BellIcon className="h-5 w-5 text-amber-700" />
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-gray-900">Notifications</h3>
+                <div className="w-8 h-8 bg-pastel-sage-100 rounded-lg flex items-center justify-center text-pastel-sage-600">
+                  <BellIcon className="h-4 w-4" />
                 </div>
               </div>
-              <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
                 {notifications.length > 0 ? (
                   notifications.map((notification, index) => (
                     <NotificationCard
@@ -462,68 +412,24 @@ const PatientDashboard = () => {
                     />
                   ))
                 ) : (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-8"
-                  >
-                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <BellIcon className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <p className="text-sm text-gray-500 font-medium">No new notifications</p>
-                    <p className="text-xs text-gray-400 mt-1">You&apos;re all caught up!</p>
-                  </motion.div>
+                  <div className="text-center py-6">
+                    <p className="text-sm text-gray-500">No new notifications</p>
+                    <p className="text-xs text-gray-400 mt-0.5">You&apos;re all caught up</p>
+                  </div>
                 )}
               </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Quick Links Grid */}
-        <div className="mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
-            <h2 className="text-2xl font-black text-gray-800 mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Quick Access
-            </h2>
-            <p className="text-sm text-gray-700">Access your health information quickly</p>
-          </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <QuickLinkCard
-              href="/patient/medical-records"
-              icon={<DocumentTextIcon className="h-6 w-6" />}
-              title="Medical Records"
-              description="View & upload"
-              color="from-blue-300 to-blue-400"
-              delay={0.1}
-            />
-            <QuickLinkCard
-              href="/patient/prescriptions"
-              icon={<ClipboardDocumentListIcon className="h-6 w-6" />}
-              title="Prescriptions"
-              description="View all"
-              color="from-purple-300 to-purple-400"
-              delay={0.2}
-            />
-            <QuickLinkCard
-              href="/patient/exercise-plans"
-              icon={<HeartIcon className="h-6 w-6" />}
-              title="Exercise Plans"
-              description="Track progress"
-              color="from-pink-300 to-pink-400"
-              delay={0.3}
-            />
-            <QuickLinkCard
-              href="/patient/payments"
-              icon={<ChartBarIcon className="h-6 w-6" />}
-              title="Payments"
-              description="View history"
-              color="from-green-300 to-green-400"
-              delay={0.4}
-            />
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Access</h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <QuickLinkCard href="/patient/medical-records" icon={<DocumentTextIcon className="h-5 w-5" />} title="Medical Records" description="View & upload" color="" index={0} delay={0.05} />
+            <QuickLinkCard href="/patient/session-notes" icon={<DocumentTextIcon className="h-5 w-5" />} title="Session Notes" description="Treatment notes" color="" index={1} delay={0.07} />
+            <QuickLinkCard href="/patient/prescriptions" icon={<ClipboardDocumentListIcon className="h-5 w-5" />} title="Prescriptions" description="View all" color="" index={2} delay={0.1} />
+            <QuickLinkCard href="/patient/exercise-plans" icon={<HeartIcon className="h-5 w-5" />} title="Exercise Plans" description="Track progress" color="" index={3} delay={0.15} />
+            <QuickLinkCard href="/patient/payments" icon={<ChartBarIcon className="h-5 w-5" />} title="Payments" description="View history" color="" index={4} delay={0.2} />
           </div>
         </div>
 
@@ -532,7 +438,6 @@ const PatientDashboard = () => {
           <TreatmentPlan plans={treatmentPlans} />
           <ProgressTracking progress={stats.recoveryProgress || 0} />
         </div>
-        </div>
       </div>
       
       <BookingPopup 
@@ -540,8 +445,7 @@ const PatientDashboard = () => {
         onClose={() => setIsBookingOpen(false)}
         onBookingSuccess={handleBookingSuccess}
       />
-      <Footer />
-    </div>
+    </>
   )
 }
 

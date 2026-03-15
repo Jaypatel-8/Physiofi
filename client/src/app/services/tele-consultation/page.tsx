@@ -88,13 +88,62 @@ export default function TeleConsultationPage() {
       
       <ConditionHero
         title="Tele-Consultation Physiotherapy"
-        description="Virtual physiotherapy sessions for posture correction, mild pain, ergonomic issues, fitness guidance, and remote follow-ups."
+        description="Virtual physiotherapy sessions for posture correction, mild pain, ergonomic issues, fitness guidance, and remote follow-ups. Connect with our expert physiotherapists from anywhere through phone consultations and receive personalized exercise plans."
         imageAlt="Tele-consultation physiotherapy service"
-        imagePath="/images/hero/tele-consultation.jpg"
+        imagePath="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=70"
       />
 
+      {/* Additional Content Section */}
+      <section className="py-16 bg-gradient-to-br from-secondary-50 to-pastel-blue-50">
+        <div className="container-custom">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <h2 className="text-4xl font-black text-gray-900 font-display">
+                Expert Care <span className="text-primary-500">From Anywhere</span>
+              </h2>
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Our tele-consultation service brings professional physiotherapy care directly to you, no matter where you are. Through phone consultations, our certified physiotherapists provide comprehensive assessments, personalized exercise guidance, and ongoing support for your recovery journey.
+              </p>
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Perfect for busy professionals, individuals with mobility challenges, or those who prefer the convenience of remote consultations. Receive the same quality care and attention as in-person sessions, tailored to your specific needs and schedule.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {['Posture Correction', 'Pain Management', 'Ergonomic Guidance', 'Fitness Programs', 'Remote Follow-ups'].map((tag, idx) => (
+                  <span key={idx} className="bg-card-1 px-4 py-2 rounded-full text-sm font-medium text-primary-700 border border-premium">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+                <div className="aspect-[4/3] bg-gradient-to-br from-secondary-200 to-pastel-blue-200 flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <div className="w-32 h-32 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                      <PhoneIcon className="h-16 w-16 text-secondary-600" />
+                    </div>
+                    <h3 className="text-2xl font-black text-gray-900 mb-2">Phone Consultation</h3>
+                    <p className="text-gray-700">Expert guidance at your convenience</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Tele Process Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-pastel-mesh">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -118,22 +167,14 @@ export default function TeleConsultationPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-gradient-to-br from-secondary-50 to-pastel-blue-50 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+                className={`card-hover-premium rounded-2xl p-6 ${['bg-card-1', 'bg-card-2', 'bg-card-3', 'bg-card-1', 'bg-card-2'][index]}`}
               >
-                {/* Book Corner Effect */}
-                <div className="absolute top-0 right-0 w-0 h-0 border-l-[40px] border-l-transparent border-t-[40px] border-t-gray-200 opacity-60"></div>
-                <div className="absolute top-0 right-0 w-0 h-0 border-l-[35px] border-l-transparent border-t-[35px] border-t-gray-100 opacity-80"></div>
-                
-                <div className="relative z-10">
-                  <div className="w-16 h-16 bg-secondary-300 rounded-2xl flex items-center justify-center mb-4 shadow-xl">
-                    <span className="text-2xl font-black text-white">{step.step}</span>
-                  </div>
-                  <div className="text-secondary-500 mb-3">
-                    <step.icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-xl font-black text-gray-900 mb-3 font-display">{step.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 text-primary-600 font-semibold flex items-center justify-center mb-4">
+                  {step.step}
                 </div>
+                <step.icon className="h-6 w-6 text-primary-500 mb-3" strokeWidth={1.5} />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-display tracking-tight">{step.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{step.description}</p>
               </motion.div>
             ))}
           </div>
@@ -149,10 +190,10 @@ export default function TeleConsultationPage() {
         imageAlt="Tele-consultation physiotherapy illustration"
         title="Expert Care from Anywhere"
         description="Connect with our certified physiotherapists from the comfort of your home. Receive professional assessment, guided exercises, and personalized treatment plans through phone consultations."
-        imagePath="/images/hero/tele-consultation.jpg"
+        imagePath="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=70"
       />
 
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-pastel-mesh">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -187,11 +228,6 @@ export default function TeleConsultationPage() {
       <WhyChooseSection />
       <CTASection />
       <Footer />
-      <BookingPopup 
-        isOpen={isBookingOpen} 
-        onClose={() => setIsBookingOpen(false)}
-        defaultServiceType={bookingType}
-      />
       <BookingPopup 
         isOpen={isBookingOpen} 
         onClose={() => setIsBookingOpen(false)}

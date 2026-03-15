@@ -10,11 +10,21 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
 
+const conditionCardPalette = [
+  { bg: 'bg-primary-50', iconBg: 'bg-primary-100', iconColor: 'text-primary-600' },
+  { bg: 'bg-pastel-blue-50', iconBg: 'bg-pastel-blue-100', iconColor: 'text-pastel-blue-600' },
+  { bg: 'bg-pastel-mint-50', iconBg: 'bg-pastel-mint-100', iconColor: 'text-pastel-mint-600' },
+  { bg: 'bg-pastel-lavender-50', iconBg: 'bg-pastel-lavender-100', iconColor: 'text-pastel-lavender-600' },
+  { bg: 'bg-pastel-peach-50', iconBg: 'bg-pastel-peach-100', iconColor: 'text-pastel-peach-600' },
+  { bg: 'bg-pastel-sage-50', iconBg: 'bg-pastel-sage-100', iconColor: 'text-pastel-sage-600' },
+]
+const cardStyle = (index: number) => conditionCardPalette[index % conditionCardPalette.length]
+
 const About = memo(() => {
   const stats = [
-    { number: "70+", label: "Patients", icon: UserGroupIcon, color: "primary" },
-    { number: "2+", label: "Years Experience", icon: TrophyIcon, color: "secondary" },
-    { number: "98.2%", label: "Client Satisfaction", icon: CalendarDaysIcon, color: "tertiary" }
+    { number: "70+", label: "Patients", icon: UserGroupIcon },
+    { number: "2+", label: "Years Experience", icon: TrophyIcon },
+    { number: "98.2%", label: "Client Satisfaction", icon: CalendarDaysIcon }
   ]
 
   const whyChooseUs = [
@@ -45,88 +55,74 @@ const About = memo(() => {
   ]
 
   return (
-    <section id="about" className="py-20 bg-white relative overflow-hidden">
+    <section id="about" className="py-32 section-alt relative overflow-hidden">
       <div className="container-custom relative z-10">
-        {/* Header - Modern Typography */}
-        <div className="text-center mb-16">
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-            className="inline-block mb-4"
+        <div className="text-center mb-20">
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-primary-600 text-sm font-medium tracking-[0.2em] uppercase mb-4"
           >
-            <span className="bg-primary-100 text-primary-800 px-5 py-2 rounded-full text-sm font-semibold">
-              About PhysioFi
-            </span>
-        </motion.div>
+            About PhysioFi
+          </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
+            transition={{ delay: 0.05 }}
+            className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 font-display leading-tight tracking-tight"
           >
-            We Are The Best
-            <span className="block text-primary-500">For Your Recovery</span>
+            Built for your recovery
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-xl text-gray-600 max-w-2xl mx-auto font-light"
+            transition={{ delay: 0.1 }}
+            className="text-gray-500 max-w-xl mx-auto text-lg"
           >
-            Empowering recovery, restoring mobility, improving quality of life
+            Empowering recovery, mobility, and quality of life
           </motion.p>
         </div>
 
-        {/* Stats Section - Smaller Design */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 max-w-4xl mx-auto">
           {stats.map((stat, index) => {
-            const colorClasses = {
-              primary: { bg: 'bg-primary-50', text: 'text-primary-700', iconBg: 'bg-primary-100 border-primary-300' },
-              secondary: { bg: 'bg-pastel-blue-50', text: 'text-pastel-blue-400', iconBg: 'bg-pastel-blue-100 border-pastel-blue-300' },
-              tertiary: { bg: 'bg-pastel-mint-50', text: 'text-pastel-mint-400', iconBg: 'bg-pastel-mint-100 border-pastel-mint-300' }
-            }
-            const color = colorClasses[stat.color as keyof typeof colorClasses]
-            
+            const style = cardStyle(index)
             return (
-              <motion.div
-                key={index} 
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, type: "spring" }}
-                whileHover={{ y: -4, scale: 1.02 }}
-                className={`text-center ${color.bg} rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col`}
-              >
-                <div className={`w-12 h-12 ${color.iconBg} border-2 rounded-xl flex items-center justify-center mx-auto mb-3`}>
-                  <stat.icon className={`h-6 w-6 ${color.text}`} />
-                </div>
-                <div className={`text-2xl font-black mb-2 ${color.text}`}>{stat.number}</div>
-                <div className="text-gray-700 font-semibold text-sm uppercase tracking-wide">{stat.label}</div>
-              </motion.div>
-            )
-          })}
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08 }}
+              className={`group relative text-center ${style.bg} card-hover-premium border border-primary-200/40 rounded-2xl p-6 flex flex-col overflow-hidden`}
+            >
+              <div className={`w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center ${style.iconBg} ${style.iconColor}`}>
+                <stat.icon className="h-5 w-5" strokeWidth={1.5} />
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1 tracking-tight">{stat.number}</div>
+              <div className="text-gray-500 font-medium text-xs uppercase tracking-widest">{stat.label}</div>
+            </motion.div>
+          )})}
         </div>
 
-        {/* Founder Section - Rounded Design with Mild Colors */}
-        <div className="bg-gradient-to-br from-primary-50 via-pastel-mint-50 to-pastel-sky-50 rounded-tl-[80px] rounded-br-[80px] rounded-tr-3xl rounded-bl-3xl p-12 mb-16 border border-primary-100/50 shadow-lg">
+        <div className="bg-primary-50 rounded-2xl p-12 mb-20 border border-primary-200/40 shadow-sm">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="inline-block bg-primary-100/60 backdrop-blur-sm rounded-full px-6 py-3 mb-6"
+                className="inline-block bg-primary-50 text-primary-700 rounded-full px-5 py-2 mb-6 text-sm font-semibold"
               >
-                <span className="text-base font-bold text-primary-800">👑 Founder & Director</span>
+                Founder & Director
               </motion.div>
               <motion.h3
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-4xl font-black mb-6 font-display text-gray-900"
+                className="text-4xl font-bold mb-6 font-display text-gray-900"
               >
                 Dr. Shruti Singh (PT)
               </motion.h3>
@@ -174,114 +170,93 @@ const About = memo(() => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                className="flex flex-wrap gap-3"
+                className="flex flex-wrap gap-2"
               >
                 {['Pediatric Care', 'Sports Rehab', 'Post-Surgery Recovery', 'Neurological Care', 'Geriatric Care'].map((tag, idx) => (
-                  <span key={idx} className="bg-primary-100/60 backdrop-blur-sm rounded-full px-5 py-2 text-sm font-semibold text-primary-800">
+                  <span key={idx} className="bg-primary-50 text-primary-700 rounded-full px-4 py-1.5 text-sm font-medium">
                     {tag}
                   </span>
                 ))}
               </motion.div>
             </div>
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="bg-white/80 backdrop-blur-sm rounded-3xl p-10 text-center relative overflow-hidden border border-primary-100/50 shadow-md"
+              className="bg-pastel-mint-50 card-hover-premium border border-primary-200/40 rounded-2xl p-10 text-center"
             >
-              {/* Book Corner Effect */}
-              <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-primary-100/40"></div>
-              <div className="absolute top-0 right-0 w-0 h-0 border-l-[45px] border-l-transparent border-t-[45px] border-t-primary-50/60"></div>
-              
-              <div className="w-40 h-40 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl relative z-10">
-                <HeartIcon className="h-20 w-20 text-primary-600" />
+              <div className="w-20 h-20 rounded-xl bg-pastel-mint-100 flex items-center justify-center mx-auto mb-6 text-pastel-mint-600">
+                <HeartIcon className="h-10 w-10" strokeWidth={1.5} />
               </div>
-              <h4 className="text-3xl font-black mb-4 font-display relative z-10 text-gray-900">Hands-On Leadership</h4>
-              <p className="text-gray-700 text-lg leading-relaxed relative z-10">
-                Shruti personally oversees every patient case, ensuring personalized care and attention to detail that sets <span className="text-primary-600 font-semibold">PhysioFi</span> apart.
+              <h4 className="text-xl font-semibold mb-3 font-display text-gray-900 tracking-tight">Hands-on leadership</h4>
+              <p className="text-gray-500 leading-relaxed text-sm">
+                Shruti personally oversees every patient case, ensuring personalized care that sets <span className="text-primary-600 font-medium">PhysioFi</span> apart.
               </p>
-        </motion.div>
+            </motion.div>
           </div>
         </div>
 
         {/* Features Grid */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-          className="grid grid-cols-2 gap-4 mb-16"
+            className="grid grid-cols-2 gap-4 mb-16"
           >
             {[
-              { icon: HeartIcon, title: "Compassionate Care", desc: "Personalized attention", bg: "bg-primary-50", text: "text-primary-700", iconBg: "bg-primary-100 border-primary-300" },
-            { icon: CheckCircleIcon, title: "Expert Team", desc: "Led by Dr. Shruti Singh", bg: "bg-primary-50", text: "text-primary-700", iconBg: "bg-primary-100 border-primary-300" },
-              { icon: UserGroupIcon, title: "Home & Online", desc: "Flexible options", bg: "bg-pastel-peach-50", text: "text-pastel-peach-400", iconBg: "bg-pastel-peach-100 border-pastel-peach-300" },
-              { icon: TrophyIcon, title: "Proven Results", desc: "70+ happy patients", bg: "bg-pastel-sage-50", text: "text-pastel-sage-400", iconBg: "bg-pastel-sage-100 border-pastel-sage-300" }
+              { icon: HeartIcon, title: "Compassionate Care", desc: "Personalized attention" },
+              { icon: CheckCircleIcon, title: "Expert Team", desc: "Led by Dr. Shruti Singh" },
+              { icon: UserGroupIcon, title: "Home & Online", desc: "Flexible options" },
+              { icon: TrophyIcon, title: "Proven Results", desc: "70+ happy patients" }
             ].map((item, index) => {
+              const style = cardStyle(index)
               return (
-                <div
-                  key={index}
-                  className={`${item.bg} rounded-xl p-6 h-full text-center shadow-md hover:shadow-lg transition-all duration-300 flex flex-col`}
-                >
-                  <div className="flex flex-col h-full">
-                    <div className={`w-14 h-14 ${item.iconBg} border-2 rounded-xl flex items-center justify-center mx-auto mb-4`}>
-                      <item.icon className={`h-7 w-7 ${item.text}`} />
-                    </div>
-                    <h4 className="text-lg font-black text-gray-900 mb-3 font-display">{item.title}</h4>
-                    <p className="text-sm text-gray-600 font-medium leading-relaxed flex-grow">{item.desc}</p>
-                  </div>
+              <div
+                key={index}
+                className={`group relative ${style.bg} card-hover-premium border border-primary-200/40 rounded-2xl p-6 flex flex-col text-center overflow-hidden`}
+              >
+                <div className={`w-10 h-10 rounded-xl mx-auto mb-4 flex items-center justify-center ${style.iconBg} ${style.iconColor}`}>
+                  <item.icon className="h-6 w-6" strokeWidth={1.5} />
                 </div>
+                <h4 className="text-base font-semibold text-gray-900 mb-2 font-display tracking-tight">{item.title}</h4>
+                <p className="text-sm text-gray-500 flex-grow">{item.desc}</p>
+              </div>
               )
             })}
           </motion.div>
 
-        {/* Why Choose Us Section - Book Design */}
-        <div className="bg-gradient-to-br from-pastel-sky-50 via-pastel-peach-50 to-pastel-sage-50 rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl p-12 shadow-xl">
-          <div className="text-center mb-12">
-            <h3 className="text-4xl font-black text-gray-900 mb-4 font-display">
-              By Bridging Gaps We Make Sure Your <span className="text-primary-500">Recovery</span> Will <span className="text-primary-500">Blossom</span>
+        <div className="bg-pastel-blue-50 rounded-2xl border border-primary-200/40 p-12 shadow-sm">
+          <div className="text-center mb-10">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-3 font-display tracking-tight max-w-2xl mx-auto">
+              Bridging gaps so your recovery can blossom
             </h3>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
-              By serving patients we are building happy families which will contribute in spreading awareness 
-              in society & by uplifting society's attitude towards physiotherapy we are opening new windows 
+            <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed text-sm">
+              By serving patients we are building happy families which will contribute in spreading awareness
+              in society & by uplifting society's attitude towards physiotherapy we are opening new windows
               for inclusion which will contribute in nation building
             </p>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {whyChooseUs.map((feature, index) => {
-              const colors = [
-                { bg: 'bg-primary-50', text: 'text-primary-700', iconBg: 'bg-primary-100 border-primary-300' },
-                { bg: 'bg-pastel-blue-50', text: 'text-pastel-blue-400', iconBg: 'bg-pastel-blue-100 border-pastel-blue-300' },
-                { bg: 'bg-pastel-mint-50', text: 'text-pastel-mint-400', iconBg: 'bg-pastel-mint-100 border-pastel-mint-300' },
-                { bg: 'bg-primary-50', text: 'text-primary-700', iconBg: 'bg-primary-100 border-primary-300' },
-                { bg: 'bg-pastel-peach-50', text: 'text-pastel-peach-400', iconBg: 'bg-pastel-peach-100 border-pastel-peach-300' },
-                { bg: 'bg-pastel-sage-50', text: 'text-pastel-sage-400', iconBg: 'bg-pastel-sage-100 border-pastel-sage-300' }
-              ]
-              const color = colors[index % colors.length]
-              
+              const style = cardStyle(index)
               return (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ delay: index * 0.08 }}
                 viewport={{ once: true }}
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  className={`${color.bg} rounded-xl p-6 h-full shadow-md transition-all duration-300 hover:shadow-lg flex flex-col`}
-                >
-                  <div className="flex items-start space-x-4 flex-grow">
-                    <div className={`w-14 h-14 ${color.iconBg} border-2 rounded-xl flex items-center justify-center flex-shrink-0`}>
-                      <CheckCircleIcon className={`h-7 w-7 ${color.text}`} />
-                  </div>
-                    <div className="flex-grow">
-                      <h4 className={`text-lg font-black ${color.text} mb-3 font-display`}>{feature.title}</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">{feature.description}</p>
-                  </div>
+                className={`group relative ${style.bg} card-hover-premium border border-primary-200/40 rounded-2xl p-6 flex items-start gap-4 overflow-hidden`}
+              >
+                <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center ${style.iconBg} ${style.iconColor}`}>
+                  <CheckCircleIcon className="h-5 w-5" strokeWidth={1.5} />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-base font-semibold text-gray-900 mb-2 font-display tracking-tight">{feature.title}</h4>
+                  <p className="text-sm text-gray-500 leading-relaxed">{feature.description}</p>
                 </div>
               </motion.div>
-              )
-            })}
+            )})}
           </div>
         </div>
       </div>

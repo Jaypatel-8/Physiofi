@@ -17,8 +17,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { adminAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -29,16 +28,17 @@ const AdminAppointmentDetail = () => {
   const { user, loading } = useAuth()
   const [appointment, setAppointment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [sendingReminder, setSendingReminder] = useState(false)
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
+      if (!user || user.role !== 'admin') {
+        router.replace('/admin/login')
         return
       }
       loadAppointment()
     }
-  }, [user, loading, appointmentId])
+  }, [user, loading, appointmentId, router])
 
   const loadAppointment = async () => {
     try {
@@ -76,15 +76,12 @@ const AdminAppointmentDetail = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="Appointment Details" subtitle="Loading..." />
+        <div className="site-card p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots">
+            <div></div><div></div><div></div><div></div>
           </div>
-          <p className="text-gray-600">Loading appointment details...</p>
         </div>
       </div>
     )
@@ -95,38 +92,30 @@ const AdminAppointmentDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-green-600 to-green-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/admin/appointments" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Appointments</span>
-          </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-black mb-2">Appointment Details</h1>
-              <p className="text-white/90">Complete appointment information</p>
-            </div>
-            <span className={`px-4 py-2 rounded-full text-sm font-bold border-2 ${getStatusColor(appointment.status)}`}>
-              {appointment.status || 'Pending'}
-            </span>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <Link href="/admin/appointments" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600">
+        <ArrowLeftIcon className="h-4 w-4" />
+        Back to Appointments
+      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <DashboardSubPageHeader
+          title="Appointment Details"
+          subtitle="Complete appointment information"
+        />
+        <span className={`px-3 py-1.5 rounded-xl text-sm font-semibold border ${getStatusColor(appointment.status)}`}>
+          {appointment.status || 'Pending'}
+        </span>
       </div>
-
-      <div className="container-custom py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Patient Information */}
-            {appointment.patient && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
-              >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Patient Information */}
+          {appointment.patient && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="site-card p-6"
+            >
                 <h2 className="text-2xl font-black text-gray-900 mb-6">Patient Information</h2>
                 <div className="flex items-start gap-6">
                   <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
@@ -163,7 +152,7 @@ const AdminAppointmentDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h2 className="text-2xl font-black text-gray-900 mb-6">Doctor Information</h2>
                 <div className="flex items-start gap-6">
@@ -193,7 +182,7 @@ const AdminAppointmentDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+              className="site-card p-6"
             >
               <h2 className="text-2xl font-black text-gray-900 mb-6">Appointment Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -251,7 +240,7 @@ const AdminAppointmentDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h2 className="text-2xl font-black text-gray-900 mb-6">Medical Information</h2>
                 {appointment.symptoms?.length > 0 && (
@@ -283,10 +272,31 @@ const AdminAppointmentDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+              className="site-card p-6"
             >
               <h3 className="text-lg font-black text-gray-900 mb-4">Actions</h3>
               <div className="space-y-3">
+                {(appointment.payment?.status !== 'Paid') && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setSendingReminder(true)
+                      try {
+                        const { adminAPI } = await import('@/lib/api')
+                        await adminAPI.sendPaymentReminder(appointmentId)
+                        toast.success('Payment reminder sent to patient')
+                      } catch (e: any) {
+                        toast.error(e.response?.data?.message || 'Failed to send reminder')
+                      } finally {
+                        setSendingReminder(false)
+                      }
+                    }}
+                    disabled={sendingReminder}
+                    className="block w-full px-4 py-3 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 disabled:opacity-50 text-center"
+                  >
+                    {sendingReminder ? 'Sending...' : 'Send payment reminder'}
+                  </button>
+                )}
                 <Link
                   href={`/admin/patients/${appointment.patient?._id || appointment.patient?.id}`}
                   className="block w-full px-4 py-3 bg-primary-500 text-white rounded-xl font-semibold hover:bg-primary-600 transition-colors text-center"
@@ -314,7 +324,7 @@ const AdminAppointmentDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-lg font-black text-gray-900 mb-4">Payment</h3>
                 <div className="space-y-3">
@@ -342,8 +352,6 @@ const AdminAppointmentDetail = () => {
           </div>
         </div>
       </div>
-      </div>
-      <Footer />
     </div>
   )
 }

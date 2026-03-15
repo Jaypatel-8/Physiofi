@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { 
-  ArrowLeftIcon, 
   CalendarDaysIcon,
   ClockIcon,
   UserIcon,
@@ -16,8 +15,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { patientAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardPageWrapper from '@/components/dashboard/DashboardPageWrapper'
 import BookingPopup from '@/components/ui/BookingPopup'
 import toast from 'react-hot-toast'
 
@@ -115,32 +113,20 @@ const AppointmentsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white py-12">
-          <div className="container-custom">
-            <Link href="/patient/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-              <ArrowLeftIcon className="h-5 w-5" />
-              <span className="font-medium">Back to Dashboard</span>
-            </Link>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-black mb-2">My Appointments</h1>
-                <p className="text-white/90">View and manage your appointments</p>
-              </div>
-              <button
-                onClick={() => setIsBookingOpen(true)}
-                className="flex items-center gap-2 bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors"
-              >
-                <CalendarDaysIcon className="h-5 w-5" />
-                Book Appointment
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="container-custom py-8">
+    <DashboardPageWrapper
+      title="My Appointments"
+      subtitle="View and manage your appointments"
+      action={
+        <button
+          onClick={() => setIsBookingOpen(true)}
+          className="flex items-center gap-2 bg-primary-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary-700 transition-colors text-sm"
+        >
+          <CalendarDaysIcon className="h-5 w-5" />
+          Book Appointment
+        </button>
+      }
+    >
+      <div className="space-y-6">
           {/* Filters */}
           <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
             {(['all', 'upcoming', 'completed', 'cancelled'] as const).map((f) => (
@@ -252,8 +238,6 @@ const AppointmentsPage = () => {
               </button>
             </div>
           )}
-        </div>
-      </div>
 
       {/* Booking Popup */}
       <BookingPopup 
@@ -321,12 +305,13 @@ const AppointmentsPage = () => {
         </div>
       )}
 
-      <Footer />
-    </div>
+      </div>
+    </DashboardPageWrapper>
   )
 }
 
 export default AppointmentsPage
+
 
 
 

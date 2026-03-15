@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeftIcon, CalendarDaysIcon } from '@heroicons/react/24/outline'
+import { CalendarDaysIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { adminAPI } from '@/lib/api'
 import AppointmentCard from '@/components/dashboard/AppointmentCard'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 
 const AdminAppointments = () => {
   const router = useRouter()
@@ -21,13 +19,13 @@ const AdminAppointments = () => {
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
+      if (!user || user.role !== 'admin') {
+        router.replace('/admin/login')
         return
       }
       loadAppointments()
     }
-  }, [user, loading, filter])
+  }, [user, loading, filter, router])
 
   const loadAppointments = async () => {
     try {
@@ -38,7 +36,7 @@ const AdminAppointments = () => {
       } else if (filter === 'completed') {
         params.status = 'Completed'
       }
-      
+
       const response = await adminAPI.getAppointments(params)
       if (response.data.success) {
         setAppointments(response.data.data.appointments || response.data.data || [])
@@ -52,62 +50,45 @@ const AdminAppointments = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="All Appointments" subtitle="Loading..." />
+        <div className="site-card p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots">
+            <div></div><div></div><div></div><div></div>
           </div>
-          <p className="text-gray-600">Loading appointments...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-green-600 to-green-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Dashboard</span>
-          </Link>
-          <h1 className="text-4xl font-black mb-2">All Appointments</h1>
-          <p className="text-white/90">View and manage all appointments</p>
-        </div>
+    <div className="space-y-6">
+      <DashboardSubPageHeader
+        title="All Appointments"
+        subtitle="View and manage all appointments"
+      />
+      <div className="site-card p-6">
+        {appointments.length > 0 ? (
+          <div className="space-y-4">
+            {appointments.map((appointment) => (
+              <AppointmentCard
+                key={appointment._id || appointment.id}
+                appointment={appointment}
+                showPatient={true}
+                showDoctor={true}
+                onView={() => router.push(`/admin/appointments/${appointment._id || appointment.id}`)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <CalendarDaysIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600 text-lg">No appointments found</p>
+          </div>
+        )}
       </div>
-
-      <div className="container-custom py-8">
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          {appointments.length > 0 ? (
-            <div className="space-y-4">
-              {appointments.map((appointment) => (
-                <AppointmentCard
-                  key={appointment._id || appointment.id}
-                  appointment={appointment}
-                  showPatient={true}
-                  showDoctor={true}
-                  onView={() => router.push(`/admin/appointments/${appointment._id || appointment.id}`)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <CalendarDaysIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">No appointments found</p>
-            </div>
-          )}
-        </div>
-      </div>
-      </div>
-      <Footer />
     </div>
   )
 }
 
 export default AdminAppointments
-

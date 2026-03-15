@@ -31,13 +31,33 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (process.env.NODE_ENV === 'development') {
+      if (error.response?.status !== 401 && error.response?.status !== 403) {
+        if (error.response) {
+          console.error('API Error:', {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            url: error.config?.url,
+            message: error.response.data?.message || error.message
+          })
+        } else if (error.request) {
+          console.error('Network Error:', 'No response from server', error.config?.url)
+        } else {
+          console.error('Request Error:', error.message)
+        }
+      }
+    }
+    
     // Don't automatically redirect on 401 - let the auth provider handle it
     // This prevents conflicts with the auth context
     if (error.response?.status === 401) {
       // Only clear storage if we're not already on login page
       if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
         // Let the auth provider handle logout to avoid race conditions
-        console.warn('401 Unauthorized - Auth provider will handle logout')
+        // Only warn in development
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('401 Unauthorized - Auth provider will handle logout')
+        }
       }
     }
     return Promise.reject(error)
@@ -141,6 +161,12 @@ export const patientAPI = {
   
   addTreatmentPlanNote: (id: string, note: string) => 
     api.post(`/patients/treatment-plans/${id}/notes`, { note }),
+
+  getMyPayments: () =>
+    api.get('/payments/my-payments'),
+
+  recordPaymentForAppointment: (data: { appointmentId: string; amount: number; payment_method: string; transaction_id?: string }) =>
+    api.post('/payments/record-for-appointment', data),
 }
 
 // Doctor API
@@ -206,6 +232,11 @@ export const doctorAPI = {
   
   updateAvailability: (data: any) => 
     api.patch('/doctors/availability', data),
+  
+  getAvailabilitySlots: (doctorId: string, date: string, serviceType: string) =>
+    api.get(`/doctors/${doctorId}/availability-slots`, {
+      params: { date, serviceType }
+    }),
   
   // Analytics
   getAnalytics: (period?: string) => 
@@ -344,9 +375,21 @@ export const appointmentAPI = {
 
 // Admin API
 export const adminAPI = {
-  getDashboard: () => 
+  getDashboard: () =>
     api.get('/admin/dashboard'),
-  
+
+  getNotifications: (params?: any) =>
+    api.get('/notifications', { params }),
+
+  getUnreadCount: () =>
+    api.get('/notifications/unread-count'),
+
+  markNotificationAsRead: (id: string) =>
+    api.patch(`/notifications/${id}/read`),
+
+  markAllNotificationsAsRead: () =>
+    api.patch('/notifications/read-all'),
+
   // Patients
   getPatients: (params?: any) => 
     api.get('/admin/patients', { params }),
@@ -373,8 +416,10 @@ export const adminAPI = {
   deleteDoctor: (id: string) => 
     api.delete(`/admin/doctors/${id}`),
   
-  approveDoctor: (id: string, isApproved: boolean, reason?: string) => 
-    api.put(`/admin/doctors/${id}/approve`, { isApproved, reason }),
+  approveDoctor: (id: string, isApproved: boolean, reason?: string, messageToDoctor?: string) =>
+    api.put(`/admin/doctors/${id}/approve`, { isApproved, reason, messageToDoctor }),
+  sendMessageToDoctor: (id: string, message: string) =>
+    api.post(`/admin/doctors/${id}/message`, { message }),
   
   // Appointments
   getAppointments: (params?: any) => 
@@ -388,6 +433,18 @@ export const adminAPI = {
   
   deleteAppointment: (id: string) => 
     api.delete(`/admin/appointments/${id}`),
+
+  getDoctorAvailabilitySlots: (doctorId: string, date: string, serviceType: string) =>
+    api.get(`/admin/doctors/${doctorId}/availability-slots`, { params: { date, serviceType } }),
+
+  assignAppointment: (data: { patientId: string; doctorId: string; appointmentDate: string; appointmentTime: string; type: string; symptoms?: string[]; address?: any; service?: any; medicalHistory?: string }) =>
+    api.post('/admin/appointments/assign', data),
+
+  sendPaymentReminder: (appointmentId: string, message?: string) =>
+    api.post(`/admin/appointments/${appointmentId}/send-payment-reminder`, { message }),
+
+  broadcastNotification: (data: { title: string; message: string; audience: 'all' | 'doctors' | 'patients' }) =>
+    api.post('/admin/notifications/broadcast', data),
   
   // Analytics
   getAnalytics: (period?: string) => 

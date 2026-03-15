@@ -60,6 +60,63 @@ router.get('/my-payments', isPatient, async (req, res) => {
   }
 });
 
+// Patient records payment for their own appointment (make payment)
+router.post('/record-for-appointment', isPatient, async (req, res) => {
+  try {
+    const { appointmentId, amount, payment_method, transaction_id } = req.body;
+    if (!appointmentId || amount == null || !payment_method) {
+      return res.status(400).json({
+        success: false,
+        message: 'appointmentId, amount, and payment_method are required'
+      });
+    }
+    const validMethods = ['Cash', 'Card', 'UPI', 'Net Banking', 'Wallet'];
+    if (!validMethods.includes(payment_method)) {
+      return res.status(400).json({
+        success: false,
+        message: `payment_method must be one of: ${validMethods.join(', ')}`
+      });
+    }
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
+    }
+    const patientId = req.user.userId;
+    if (appointment.patient.toString() !== patientId) {
+      return res.status(403).json({ success: false, message: 'You can only record payment for your own appointments' });
+    }
+    const payment = new Payment({
+      patient: patientId,
+      appointment: appointmentId,
+      amount: Number(amount),
+      payment_method,
+      payment_status: 'Paid',
+      transaction_id: transaction_id || null,
+      paid_at: new Date()
+    });
+    await payment.save();
+    appointment.payment = {
+      amount: Number(amount),
+      status: 'Paid',
+      method: payment_method,
+      transactionId: transaction_id || null,
+      paidAt: new Date()
+    };
+    await appointment.save();
+    res.status(201).json({
+      success: true,
+      message: 'Payment recorded successfully',
+      data: { payment, appointment }
+    });
+  } catch (error) {
+    console.error('Record payment for appointment error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Internal server error'
+    });
+  }
+});
+
 // Get single payment
 router.get('/:id', isAdminOrDoctor, async (req, res) => {
   try {
@@ -247,6 +304,7 @@ router.get('/stats/overview', isAdmin, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

@@ -115,13 +115,75 @@ const isAdminOrDoctor = rbac(['admin', 'doctor']);
  */
 const isAuthenticated = rbac(['patient', 'doctor', 'admin']);
 
+/**
+ * Simple token verification middleware (used by notifications and other routes)
+ */
+const verifyToken = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access denied. No token provided.'
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    req.user = decoded;
+
+    // Verify user still exists in database
+    let user;
+    if (decoded.role === 'patient') {
+      user = await Patient.findById(decoded.userId).select('-password -password_hash');
+    } else if (decoded.role === 'doctor') {
+      user = await Doctor.findById(decoded.userId).select('-password -password_hash');
+    } else if (decoded.role === 'admin') {
+      user = await Admin.findById(decoded.userId).select('-password -password_hash');
+    }
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found. Please login again.'
+      });
+    }
+
+    req.userData = user;
+    next();
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token.'
+      });
+    }
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Token expired. Please login again.'
+      });
+    }
+    console.error('❌ Token Verification Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      ...(process.env.NODE_ENV === 'development' && { 
+        error: error.message,
+        stack: error.stack
+      })
+    });
+  }
+};
+
 module.exports = {
   rbac,
   isPatient,
   isDoctor,
   isAdmin,
   isAdminOrDoctor,
-  isAuthenticated
+  isAuthenticated,
+  verifyToken
 };
 
 

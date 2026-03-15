@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { 
   ArrowLeftIcon, 
@@ -15,8 +14,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { adminAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
 
 const AdminPatientsPage = () => {
@@ -41,7 +39,7 @@ const AdminPatientsPage = () => {
   useEffect(() => {
     if (!loading) {
       if (!user || user.role !== 'admin') {
-        router.replace('/login')
+        router.replace('/admin/login')
         return
       }
       loadPatients()
@@ -117,90 +115,73 @@ const AdminPatientsPage = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="Patient Management" subtitle="Loading..." />
+        <div className="site-card p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots">
+            <div></div><div></div><div></div><div></div>
           </div>
-          <p className="text-gray-600">Loading patients...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white py-12">
-          <div className="container-custom">
-            <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-              <ArrowLeftIcon className="h-5 w-5" />
-              <span className="font-medium">Back to Dashboard</span>
-            </Link>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-black mb-2">Patient Management</h1>
-                <p className="text-white/90">Manage all registered patients</p>
-              </div>
-            </div>
-          </div>
+    <div className="space-y-6">
+      <DashboardSubPageHeader
+        title="Patient Management"
+        subtitle="Manage all registered patients"
+      />
+      {/* Search */}
+      <div className="site-card p-4">
+        <div className="relative">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search patients by name, email, or phone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 text-sm"
+          />
         </div>
+      </div>
 
-        <div className="container-custom py-8">
-          {/* Search */}
-          <div className="mb-6">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search patients by name, email, or phone..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-            </div>
-          </div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="site-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-0.5">Total Patients</p>
+          <p className="text-xl site-card-title">{patients.length}</p>
+        </div>
+        <div className="site-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-0.5">Active</p>
+          <p className="text-xl site-card-title text-green-600">
+            {patients.filter(p => p.status === 'Active').length}
+          </p>
+        </div>
+        <div className="site-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-0.5">Inactive</p>
+          <p className="text-xl site-card-title text-gray-600">
+            {patients.filter(p => p.status === 'Inactive').length}
+          </p>
+        </div>
+        <div className="site-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-0.5">New This Month</p>
+          <p className="text-xl site-card-title text-primary-600">
+            {patients.filter(p => {
+              const created = new Date(p.createdAt || p.created_at)
+              const now = new Date()
+              return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear()
+            }).length}
+          </p>
+        </div>
+      </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600 mb-1">Total Patients</p>
-              <p className="text-2xl font-black text-gray-900">{patients.length}</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600 mb-1">Active</p>
-              <p className="text-2xl font-black text-green-600">
-                {patients.filter(p => p.status === 'Active').length}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600 mb-1">Inactive</p>
-              <p className="text-2xl font-black text-gray-600">
-                {patients.filter(p => p.status === 'Inactive').length}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600 mb-1">New This Month</p>
-              <p className="text-2xl font-black text-primary-600">
-                {patients.filter(p => {
-                  const created = new Date(p.createdAt || p.created_at)
-                  const now = new Date()
-                  return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear()
-                }).length}
-              </p>
-            </div>
-          </div>
-
-          {/* Patients Table */}
-          {filteredPatients.length > 0 ? (
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      {/* Patients Table */}
+      {filteredPatients.length > 0 ? (
+            <div className="site-card overflow-hidden p-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-primary-50">
+                  <thead className="bg-gray-50 border-b border-gray-100">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Name</th>
                       <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Email</th>
@@ -287,18 +268,16 @@ const AdminPatientsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-2xl shadow-xl border border-gray-100">
+            <div className="site-card text-center py-16">
               <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <UserGroupIcon className="h-12 w-12 text-primary-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">No Patients Found</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No Patients Found</h3>
+              <p className="text-gray-600 text-sm">
                 {searchTerm ? 'Try a different search term' : 'No patients registered yet'}
               </p>
             </div>
           )}
-        </div>
-      </div>
 
       {/* View Modal */}
       {isViewOpen && selectedPatient && (
@@ -482,7 +461,6 @@ const AdminPatientsPage = () => {
         </div>
       )}
 
-      <Footer />
     </div>
   )
 }

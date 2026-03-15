@@ -3,6 +3,7 @@ const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const Appointment = require('../models/Appointment');
 const Admin = require('../models/Admin');
+const Notification = require('../models/Notification');
 const { isAdmin } = require('../middleware/rbac');
 const router = express.Router();
 
@@ -339,10 +340,10 @@ router.delete('/doctors/:id', isAdmin, async (req, res) => {
   }
 });
 
-// Approve doctor
+// Approve doctor (and optionally send message; system notification only)
 router.put('/doctors/:id/approve', isAdmin, async (req, res) => {
   try {
-    const { isApproved, reason } = req.body;
+    const { isApproved, reason, messageToDoctor } = req.body;
     const doctor = await Doctor.findById(req.params.id);
 
     if (!doctor) {
@@ -360,6 +361,30 @@ router.put('/doctors/:id/approve', isAdmin, async (req, res) => {
 
     await doctor.save();
 
+    // System notification only (no email) - notify doctor
+    if (isApproved) {
+      await Notification.create({
+        user: doctor._id,
+        userModel: 'Doctor',
+        type: 'doctor_approval',
+        title: 'Registration approved',
+        message: 'Your registration has been verified. Your profile is now visible to patients and you can receive bookings.',
+        data: {},
+        priority: 'high'
+      });
+    }
+    if (messageToDoctor && String(messageToDoctor).trim()) {
+      await Notification.create({
+        user: doctor._id,
+        userModel: 'Doctor',
+        type: 'admin_message_to_doctor',
+        title: 'Message from admin',
+        message: String(messageToDoctor).trim(),
+        data: { from: 'admin_review' },
+        priority: 'high'
+      });
+    }
+
     res.json({
       success: true,
       message: `Doctor ${isApproved ? 'approved' : 'rejected'} successfully`,
@@ -371,6 +396,305 @@ router.put('/doctors/:id/approve', isAdmin, async (req, res) => {
       success: false,
       message: 'Internal server error'
     });
+  }
+});
+
+// Send message to doctor (system notification only) - e.g. request documents or info
+router.post('/doctors/:id/message', isAdmin, async (req, res) => {
+  try {
+    const { message } = req.body;
+    const doctor = await Doctor.findById(req.params.id);
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found'
+      });
+    }
+    if (!message || !String(message).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message is required'
+      });
+    }
+
+    await Notification.create({
+      user: doctor._id,
+      userModel: 'Doctor',
+      type: 'admin_message_to_doctor',
+      title: 'Message from admin',
+      message: String(message).trim(),
+      data: { from: 'admin_review' },
+      priority: 'high'
+    });
+
+    res.json({
+      success: true,
+      message: 'Message sent to doctor. They will see it in their notifications.'
+    });
+  } catch (error) {
+    console.error('Send message to doctor error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Get doctor availability slots (for admin assign flow) - date YYYY-MM-DD, serviceType: Home Visit | Online Consultation | Clinic Visit
+router.get('/doctors/:id/availability-slots', isAdmin, async (req, res) => {
+  try {
+    const doctorId = req.params.id;
+    const { date, serviceType } = req.query;
+    if (!date || !serviceType) {
+      return res.status(400).json({
+        success: false,
+        message: 'Query date and serviceType are required'
+      });
+    }
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: 'Doctor not found' });
+    }
+    if (doctor.status !== 'Active') {
+      return res.status(400).json({ success: false, message: 'Doctor is not available' });
+    }
+    const appointmentDate = new Date(date);
+    const dayName = appointmentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const dateStr = appointmentDate.toISOString().split('T')[0];
+    const appointmentType = serviceType; // already one of enum values
+
+    let availableSlots = [];
+    const dateSpecific = doctor.dateSpecificAvailability?.find(da => {
+      const daStr = da.date instanceof Date ? da.date.toISOString().split('T')[0] : da.date;
+      return daStr === dateStr;
+    });
+    const generateTimeSlots = (startTime, endTime, intervalMinutes = 60) => {
+      const slots = [];
+      const [sh, sm] = startTime.split(':').map(Number);
+      const [eh, em] = endTime.split(':').map(Number);
+      let h = sh, m = sm;
+      while (h < eh || (h === eh && m < em)) {
+        slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+        m += intervalMinutes;
+        if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
+      }
+      return slots;
+    };
+    if (dateSpecific && dateSpecific.available) {
+      availableSlots = generateTimeSlots(dateSpecific.start, dateSpecific.end, 60);
+    } else {
+      const daySchedule = doctor.availability[dayName] || [];
+      const relevant = daySchedule.filter(slot => slot.type === appointmentType);
+      relevant.forEach(slot => {
+        availableSlots = availableSlots.concat(generateTimeSlots(slot.start, slot.end, 60));
+      });
+      availableSlots = [...new Set(availableSlots)].sort();
+    }
+    const existingAppointments = await Appointment.find({
+      doctor: doctorId,
+      appointmentDate: { $gte: new Date(dateStr + 'T00:00:00'), $lt: new Date(dateStr + 'T23:59:59') },
+      status: { $in: ['Pending', 'Confirmed', 'Scheduled'] }
+    });
+    const bookedSlots = existingAppointments.map(a => a.appointmentTime);
+    availableSlots = availableSlots.filter(slot => !bookedSlots.includes(slot));
+
+    res.json({
+      success: true,
+      data: { doctorId, date: dateStr, serviceType: appointmentType, availableSlots, bookedSlots }
+    });
+  } catch (error) {
+    console.error('Admin availability slots error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Admin assign patient to doctor (create appointment as per doctor availability)
+router.post('/appointments/assign', isAdmin, async (req, res) => {
+  try {
+    const { patientId, doctorId, appointmentDate, appointmentTime, type, symptoms, address, service, medicalHistory } = req.body;
+    if (!patientId || !doctorId || !appointmentDate || !appointmentTime || !type) {
+      return res.status(400).json({
+        success: false,
+        message: 'patientId, doctorId, appointmentDate, appointmentTime, and type are required'
+      });
+    }
+    const validTypes = ['Home Visit', 'Online Consultation', 'Clinic Visit'];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({ success: false, message: 'Invalid type. Use: Home Visit, Online Consultation, Clinic Visit' });
+    }
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      return res.status(404).json({ success: false, message: 'Patient not found' });
+    }
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: 'Doctor not found' });
+    }
+    if ((doctor.status || 'Active') !== 'Active') {
+      return res.status(400).json({ success: false, message: 'Doctor is not available for appointments' });
+    }
+    const appointmentDateObj = new Date(appointmentDate);
+    if (isNaN(appointmentDateObj.getTime())) {
+      return res.status(400).json({ success: false, message: 'Invalid appointment date' });
+    }
+    const dayName = appointmentDateObj.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    if (doctor.isAvailable && typeof doctor.isAvailable === 'function') {
+      const isAvailable = doctor.isAvailable(dayName, appointmentTime, type, appointmentDateObj);
+      if (!isAvailable) {
+        return res.status(400).json({
+          success: false,
+          message: 'Doctor is not available at this date/time/type. Check availability and try another slot.'
+        });
+      }
+    }
+    const startOfDay = new Date(appointmentDateObj);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(appointmentDateObj);
+    endOfDay.setHours(23, 59, 59, 999);
+    const conflicting = await Appointment.findOne({
+      doctor: doctorId,
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay },
+      appointmentTime,
+      status: { $in: ['Pending', 'Confirmed', 'Scheduled'] }
+    });
+    if (conflicting) {
+      return res.status(400).json({
+        success: false,
+        message: 'This slot is already booked. Please choose another time.'
+      });
+    }
+    const appointmentData = {
+      patient: patientId,
+      doctor: doctorId,
+      appointmentDate: appointmentDateObj,
+      appointmentTime,
+      type,
+      status: 'Confirmed',
+      symptoms: symptoms || [],
+      notes: { admin: 'Assigned by admin' }
+    };
+    if (address && (address.street || address.city)) appointmentData.address = address;
+    if (service) appointmentData.service = service;
+    if (medicalHistory) appointmentData.medicalHistory = medicalHistory;
+    const appointment = new Appointment(appointmentData);
+    await appointment.save();
+    await appointment.populate('patient', 'name email phone age gender');
+    await appointment.populate('doctor', 'name specialization email phone');
+    const patientName = patient.name || patient.full_name || 'Patient';
+    const doctorName = doctor.name || 'Doctor';
+    const dateStr = appointmentDateObj.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    try {
+      await Notification.create({
+        user: doctorId,
+        userModel: 'Doctor',
+        type: 'appointment_request',
+        title: 'Appointment assigned by admin',
+        message: `Admin assigned ${patientName} to you on ${dateStr} at ${appointmentTime} (${type}).`,
+        data: {},
+        appointment: appointment._id,
+        priority: 'high'
+      });
+      await Notification.create({
+        user: patientId,
+        userModel: 'Patient',
+        type: 'appointment_confirmed',
+        title: `Appointment confirmed – ${type}`,
+        message: `Your appointment with Dr. ${doctorName} is confirmed for ${dateStr} at ${appointmentTime}.`,
+        data: {},
+        appointment: appointment._id,
+        priority: 'medium'
+      });
+    } catch (e) {
+      console.error('Assign appointment notifications error:', e);
+    }
+    res.status(201).json({
+      success: true,
+      message: 'Appointment assigned successfully',
+      data: appointment
+    });
+  } catch (error) {
+    console.error('Admin assign appointment error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+  }
+});
+
+// Send payment reminder to patient for an appointment
+router.post('/appointments/:id/send-payment-reminder', isAdmin, async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id).populate('patient', 'name email').populate('doctor', 'name');
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
+    }
+    const patientId = appointment.patient._id || appointment.patient;
+    const customMessage = req.body.message || null;
+    const amount = appointment.payment?.amount != null ? appointment.payment.amount : null;
+    const title = 'Payment reminder';
+    const message = customMessage || (amount != null
+      ? `Please complete your payment of ₹${amount} for your appointment with Dr. ${appointment.doctor?.name || 'Doctor'}.`
+      : `Please complete payment for your appointment with Dr. ${appointment.doctor?.name || 'Doctor'}.`);
+    await Notification.create({
+      user: patientId,
+      userModel: 'Patient',
+      type: 'payment_reminder',
+      title,
+      message,
+      data: { appointmentId: appointment._id, amount: amount || 0 },
+      appointment: appointment._id,
+      priority: 'high'
+    });
+    res.json({
+      success: true,
+      message: 'Payment reminder sent to patient. They will see it in their dashboard.'
+    });
+  } catch (error) {
+    console.error('Send payment reminder error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Broadcast message/notification to doctors and/or patients (admin announcement)
+router.post('/notifications/broadcast', isAdmin, async (req, res) => {
+  try {
+    const { title, message, audience } = req.body; // audience: 'all' | 'doctors' | 'patients'
+    if (!title || !message || !audience) {
+      return res.status(400).json({
+        success: false,
+        message: 'title, message, and audience (all | doctors | patients) are required'
+      });
+    }
+    const allowed = ['all', 'doctors', 'patients'];
+    if (!allowed.includes(audience)) {
+      return res.status(400).json({ success: false, message: 'audience must be all, doctors, or patients' });
+    }
+    const toNotify = [];
+    if (audience === 'doctors' || audience === 'all') {
+      const doctors = await Doctor.find({}).select('_id').lean();
+      doctors.forEach(d => toNotify.push({ user: d._id, userModel: 'Doctor' }));
+    }
+    if (audience === 'patients' || audience === 'all') {
+      const patients = await Patient.find({}).select('_id').lean();
+      patients.forEach(p => toNotify.push({ user: p._id, userModel: 'Patient' }));
+    }
+    for (const { user, userModel } of toNotify) {
+      await Notification.create({
+        user,
+        userModel,
+        type: 'admin_announcement',
+        title: String(title).trim(),
+        message: String(message).trim(),
+        data: {},
+        priority: 'medium'
+      });
+    }
+    res.json({
+      success: true,
+      message: `Broadcast sent to ${audience}. ${toNotify.length} user(s) notified.`,
+      data: { count: toNotify.length, audience }
+    });
+  } catch (error) {
+    console.error('Broadcast notification error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 

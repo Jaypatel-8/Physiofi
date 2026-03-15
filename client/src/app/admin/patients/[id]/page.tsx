@@ -11,12 +11,13 @@ import {
   PhoneIcon,
   MapPinIcon,
   CalendarDaysIcon,
-  HeartIcon
+  HeartIcon,
+  DocumentTextIcon,
+  ClipboardDocumentCheckIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { adminAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
 
 const AdminPatientDetail = () => {
@@ -25,17 +26,19 @@ const AdminPatientDetail = () => {
   const patientId = params.id as string
   const { user, loading } = useAuth()
   const [patient, setPatient] = useState<any>(null)
+  const [sessionNotes, setSessionNotes] = useState<any[]>([])
+  const [exercisePlans, setExercisePlans] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
+      if (!user || user.role !== 'admin') {
+        router.replace('/admin/login')
         return
       }
       loadPatient()
     }
-  }, [user, loading, patientId])
+  }, [user, loading, patientId, router])
 
   const loadPatient = async () => {
     try {
@@ -43,6 +46,7 @@ const AdminPatientDetail = () => {
       const response = await adminAPI.getPatient(patientId)
       if (response.data.success) {
         setPatient(response.data.data)
+        await loadPatientSessionNotesAndPlans(patientId)
       } else {
         toast.error('Patient not found')
         router.push('/admin/patients')
@@ -56,17 +60,31 @@ const AdminPatientDetail = () => {
     }
   }
 
+  const loadPatientSessionNotesAndPlans = async (pid: string) => {
+    try {
+      const [notesRes, plansRes] = await Promise.all([
+        adminAPI.getSessionNotes({ patientId: pid }).catch(() => ({ data: { success: false, data: { notes: [] } } })),
+        adminAPI.getExercisePlans({ patientId: pid }).catch(() => ({ data: { success: false, data: { plans: [] } } }))
+      ])
+      if (notesRes.data.success && notesRes.data.data?.notes) {
+        setSessionNotes(notesRes.data.data.notes)
+      }
+      if (plansRes.data.success && plansRes.data.data?.plans) {
+        setExercisePlans(plansRes.data.data.plans)
+      }
+    } catch (e) {
+      console.error('Error loading session notes/exercise plans:', e)
+    }
+  }
+
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="Patient Details" subtitle="Loading..." />
+        <div className="site-card p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots">
+            <div></div><div></div><div></div><div></div>
           </div>
-          <p className="text-gray-600">Loading patient details...</p>
         </div>
       </div>
     )
@@ -77,30 +95,24 @@ const AdminPatientDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-primary-600 to-primary-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/admin/patients" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Patients</span>
-          </Link>
-          <h1 className="text-4xl font-black mb-2">Patient Details</h1>
-          <p className="text-white/90">Complete patient information and history</p>
-        </div>
-      </div>
-
-      <div className="container-custom py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Basic Information */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
-            >
+    <div className="space-y-6">
+      <Link href="/admin/patients" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600">
+        <ArrowLeftIcon className="h-4 w-4" />
+        Back to Patients
+      </Link>
+      <DashboardSubPageHeader
+        title="Patient Details"
+        subtitle={patient.name || patient.full_name || 'Complete patient information'}
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Basic Information */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="site-card p-6"
+          >
               <div className="flex items-start gap-6 mb-6">
                 <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
                   <UserCircleIcon className="h-14 w-14 text-white" />
@@ -135,7 +147,7 @@ const AdminPatientDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-xl font-black text-gray-900 mb-4">Address</h3>
                 <p className="text-gray-600">
@@ -150,7 +162,7 @@ const AdminPatientDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-xl font-black text-gray-900 mb-4">Emergency Contact</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -176,7 +188,7 @@ const AdminPatientDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-xl font-black text-gray-900 mb-4">Medical History</h3>
                 <div className="space-y-3">
@@ -196,13 +208,85 @@ const AdminPatientDetail = () => {
               </motion.div>
             )}
 
+            {/* Recent Session Notes / Treatment (trackable) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="site-card p-6"
+            >
+              <h3 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
+                <DocumentTextIcon className="h-6 w-6 text-primary-600" />
+                Recent Session Notes &amp; Treatment
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">What treatment is being provided (from session notes). Trackable over time.</p>
+              {sessionNotes.length > 0 ? (
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {sessionNotes.slice(0, 10).map((note: any) => (
+                    <div key={note._id || note.id} className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+                        <span>{new Date(note.session_date || note.createdAt).toLocaleDateString()}</span>
+                        {note.doctor?.name && <span>Dr. {note.doctor.name}</span>}
+                      </div>
+                      {note.treatment_provided && (
+                        <p className="text-gray-800 font-medium mb-1">Treatment: {note.treatment_provided}</p>
+                      )}
+                      {note.plan && <p className="text-gray-700 text-sm">Plan: {note.plan}</p>}
+                      {note.assessment && <p className="text-gray-600 text-sm">Assessment: {note.assessment}</p>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No session notes yet for this patient.</p>
+              )}
+            </motion.div>
+
+            {/* Active Exercise Plans (trackable) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.38 }}
+              className="site-card p-6"
+            >
+              <h3 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
+                <ClipboardDocumentCheckIcon className="h-6 w-6 text-primary-600" />
+                Active Exercise Plans
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">Current exercise plans assigned to this patient. Trackable and visible to patient.</p>
+              {exercisePlans.length > 0 ? (
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {exercisePlans.map((plan: any) => (
+                    <div key={plan._id || plan.id} className="p-4 bg-primary-50/50 rounded-xl border border-primary-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-gray-900">{plan.plan_name || 'Exercise Plan'}</span>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                          plan.status === 'Active' ? 'bg-green-100 text-green-700' :
+                          plan.status === 'Completed' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {plan.status || 'Active'}
+                        </span>
+                      </div>
+                      {plan.condition && <p className="text-sm text-gray-700 mb-1">Condition: {plan.condition}</p>}
+                      <p className="text-xs text-gray-500">
+                        Started {new Date(plan.start_date || plan.createdAt).toLocaleDateString()}
+                        {plan.end_date && ` – End ${new Date(plan.end_date).toLocaleDateString()}`}
+                      </p>
+                      {plan.doctor?.name && <p className="text-xs text-gray-500 mt-1">By Dr. {plan.doctor.name}</p>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No exercise plans assigned yet.</p>
+              )}
+            </motion.div>
+
             {/* Current Conditions */}
             {patient.currentConditions?.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-xl font-black text-gray-900 mb-4">Current Conditions</h3>
                 <div className="space-y-3">
@@ -233,7 +317,7 @@ const AdminPatientDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+              className="site-card p-6"
             >
               <h3 className="text-lg font-black text-gray-900 mb-4">Statistics</h3>
               <div className="space-y-4">
@@ -261,7 +345,7 @@ const AdminPatientDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+              className="site-card p-6"
             >
               <h3 className="text-lg font-black text-gray-900 mb-4">Actions</h3>
               <div className="space-y-3">
@@ -282,8 +366,6 @@ const AdminPatientDetail = () => {
           </div>
         </div>
       </div>
-      </div>
-      <Footer />
     </div>
   )
 }

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { 
-  ArrowLeftIcon, 
   DocumentTextIcon,
   PlusIcon,
   CalendarIcon,
@@ -16,8 +15,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { doctorAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
 
 const PrescriptionsPage = () => {
@@ -170,32 +168,20 @@ const PrescriptionsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white py-12">
-          <div className="container-custom">
-            <Link href="/doctor/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-              <ArrowLeftIcon className="h-5 w-5" />
-              <span className="font-medium">Back to Dashboard</span>
-            </Link>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-black mb-2">Prescriptions</h1>
-                <p className="text-white/90">Create and manage patient prescriptions</p>
-              </div>
-              <button
-                onClick={() => setIsCreateOpen(true)}
-                className="flex items-center gap-2 bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors"
-              >
-                <PlusIcon className="h-5 w-5" />
-                Create Prescription
-              </button>
-            </div>
-          </div>
-        </div>
+    <>
+      <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <DashboardSubPageHeader title="Prescriptions" subtitle="Create and manage patient prescriptions" />
+        <button
+          onClick={() => setIsCreateOpen(true)}
+          className="shrink-0 flex items-center gap-2 bg-primary-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary-700 transition-colors"
+        >
+          <PlusIcon className="h-5 w-5" />
+          Create Prescription
+        </button>
+      </div>
 
-        <div className="container-custom py-8">
+      <div>
           {prescriptions.length > 0 ? (
             <div className="space-y-6">
               {prescriptions.map((prescription, index) => (
@@ -507,13 +493,12 @@ const PrescriptionsPage = () => {
           </motion.div>
         </div>
       )}
-
-      <Footer />
-    </div>
+    </>
   )
 }
 
 export default PrescriptionsPage
+
 
 
 

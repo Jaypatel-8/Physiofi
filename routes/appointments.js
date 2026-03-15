@@ -218,9 +218,9 @@ router.post('/', isPatient, async (req, res) => {
           specialization: doctor?.specialization || []
         };
 
-        // Notify doctor about new appointment request
+        // Notify doctor about new appointment request (ONLY doctor/admin see requests)
         try {
-          await Notification.createAppointmentNotification(
+          const doctorNotification = await Notification.createAppointmentNotification(
             doctorId,
             'Doctor',
             appointment._id,
@@ -229,23 +229,34 @@ router.post('/', isPatient, async (req, res) => {
             appointment.status || 'Pending',
             doctorData
           );
+          // Only create if notification was created (not null)
+          if (!doctorNotification) {
+            console.warn('Doctor notification not created (may be filtered by role)');
+          }
         } catch (doctorNotifError) {
           console.error('Error creating doctor notification:', doctorNotifError);
         }
         
-        // Notify patient about booked appointment
-        try {
-          await Notification.createAppointmentNotification(
-            req.user.userId,
-            'Patient',
-            appointment._id,
-            patientData,
-            appointmentData,
-            appointment.status || 'Pending',
-            doctorData
-          );
-        } catch (patientNotifError) {
-          console.error('Error creating patient notification:', patientNotifError);
+        // Notify patient about booked appointment (ONLY if status is Confirmed)
+        // Patients don't see "Pending" requests, only confirmations
+        if (appointment.status === 'Confirmed') {
+          try {
+            const patientNotification = await Notification.createAppointmentNotification(
+              req.user.userId,
+              'Patient',
+              appointment._id,
+              patientData,
+              appointmentData,
+              appointment.status,
+              doctorData
+            );
+            // Only create if notification was created (not null)
+            if (!patientNotification) {
+              console.warn('Patient notification not created (may be filtered by role)');
+            }
+          } catch (patientNotifError) {
+            console.error('Error creating patient notification:', patientNotifError);
+          }
         }
       }
     } catch (notificationError) {
@@ -260,9 +271,14 @@ router.post('/', isPatient, async (req, res) => {
     });
   } catch (error) {
     console.error('Create appointment error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: error.message || 'Internal server error',
+      ...(process.env.NODE_ENV === 'development' && { 
+        error: error.message,
+        stack: error.stack
+      })
     });
   }
 });

@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeftIcon, UserCircleIcon, PencilIcon } from '@heroicons/react/24/outline'
+import { UserCircleIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { patientAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
 
 const PatientProfile = () => {
@@ -95,37 +93,19 @@ const PatientProfile = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-          <p className="text-gray-600">Loading profile...</p>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="My Profile" subtitle="Loading..." />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots"><div></div><div></div><div></div><div></div></div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-primary-600 to-primary-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/patient/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Dashboard</span>
-          </Link>
-          <h1 className="text-4xl font-black mb-2">My Profile</h1>
-          <p className="text-white/90">Manage your personal information</p>
-        </div>
-      </div>
-
-      <div className="container-custom py-8">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
+    <div className="space-y-6">
+      <DashboardSubPageHeader title="My Profile" subtitle="Manage your personal information" />
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
@@ -257,14 +237,12 @@ const PatientProfile = () => {
             </div>
           )}
         </div>
-      </div>
-      </div>
-      <Footer />
     </div>
   )
 }
 
 export default PatientProfile
+
 
 
 

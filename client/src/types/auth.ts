@@ -4,6 +4,7 @@ export interface User {
   mobile: string
   email?: string
   role: 'patient' | 'doctor' | 'admin'
+  status?: string
   isVerified?: boolean
   isApproved?: boolean
   permissions?: string[]

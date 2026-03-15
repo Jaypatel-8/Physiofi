@@ -18,90 +18,101 @@ const Contact = () => {
     message: ''
   })
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {}
+    
+    if (!formData.name || formData.name.trim().length < 2) {
+      errors.name = 'Name must be at least 2 characters'
+    }
+    
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address'
+    }
+    
+    if (!formData.phone || !/^[0-9]{10}$/.test(formData.phone.replace(/\D/g, ''))) {
+      errors.phone = 'Please enter a valid 10-digit phone number'
+    }
+    
+    if (formData.message && formData.message.trim().length < 10) {
+      errors.message = 'Message must be at least 10 characters'
+    }
+    
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
-    setFormData({ name: '', email: '', phone: '', message: '' })
+    if (validateForm()) {
+      setFormData({ name: '', email: '', phone: '', message: '' })
+      setValidationErrors({})
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     })
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
+    }
   }
+
+  const conditionCardPalette = [
+    { bg: 'bg-primary-50', iconBg: 'bg-primary-100', iconColor: 'text-primary-600' },
+    { bg: 'bg-pastel-blue-50', iconBg: 'bg-pastel-blue-100', iconColor: 'text-pastel-blue-600' },
+    { bg: 'bg-pastel-mint-50', iconBg: 'bg-pastel-mint-100', iconColor: 'text-pastel-mint-600' },
+    { bg: 'bg-pastel-lavender-50', iconBg: 'bg-pastel-lavender-100', iconColor: 'text-pastel-lavender-600' },
+    { bg: 'bg-pastel-peach-50', iconBg: 'bg-pastel-peach-100', iconColor: 'text-pastel-peach-600' },
+    { bg: 'bg-pastel-sage-50', iconBg: 'bg-pastel-sage-100', iconColor: 'text-pastel-sage-600' },
+  ]
+  const cardStyle = (index: number) => conditionCardPalette[index % conditionCardPalette.length]
 
   const contactInfo = [
-    {
-      icon: PhoneIcon,
-      title: "Phone",
-      details: ["+91 9082770384"],
-      description: "Call us for immediate assistance",
-      color: "primary"
-    },
-    {
-      icon: EnvelopeIcon,
-      title: "Email",
-      details: ["contact@physiofi.com"],
-      description: "Send us an email anytime",
-      color: "secondary"
-    },
-    {
-      icon: MapPinIcon,
-      title: "Locations",
-      details: ["Ahmedabad", "Mumbai"],
-      description: "We serve in these cities",
-      color: "tertiary"
-    },
-    {
-      icon: ClockIcon,
-      title: "Hours",
-      details: ["Mon-Sat: 8AM-8PM", "Sunday: 9AM-6PM", "Emergency: 24/7"],
-      description: "We're here when you need us",
-      color: "accent"
-    }
+    { icon: PhoneIcon, title: "Phone", details: ["+91 9082770384"], description: "Call us for immediate assistance" },
+    { icon: EnvelopeIcon, title: "Email", details: ["contact@physiofi.com"], description: "Send us an email anytime" },
+    { icon: MapPinIcon, title: "Locations", details: ["Ahmedabad", "Mumbai"], description: "We serve in these cities" },
+    { icon: ClockIcon, title: "Hours", details: ["Mon-Sat: 8AM-8PM", "Sunday: 9AM-6PM", "Emergency: 24/7"], description: "We're here when you need us" }
   ]
 
-  const colorClasses = {
-    primary: { bg: 'bg-primary-50', text: 'text-primary-700', iconBg: 'bg-primary-300' },
-    secondary: { bg: 'bg-pastel-blue-50', text: 'text-pastel-blue-400', iconBg: 'bg-pastel-blue-300' },
-    tertiary: { bg: 'bg-pastel-mint-50', text: 'text-pastel-mint-400', iconBg: 'bg-pastel-mint-300' },
-    accent: { bg: 'bg-pastel-lavender-50', text: 'text-pastel-lavender-400', iconBg: 'bg-pastel-lavender-300' }
-  }
-
   return (
-    <section id="contact" className="py-20 bg-white relative overflow-hidden">
+    <section id="contact" className="py-32 bg-pastel-mesh relative overflow-hidden">
       <div className="container-custom relative z-10">
-        {/* Header - Modern Typography */}
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+        <div className="text-center mb-20">
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-block mb-4"
+            className="text-primary-600 text-sm font-medium tracking-[0.2em] uppercase mb-4"
           >
-            <span className="bg-pastel-sage-100 text-pastel-sage-400 px-5 py-2 rounded-full text-sm font-semibold">
-              Contact Us
-            </span>
-          </motion.div>
+            Contact
+          </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
+            transition={{ delay: 0.05 }}
+            className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 font-display leading-tight tracking-tight"
           >
-            Get In Touch
-            <span className="block"><span className="text-primary-500">With</span> <span className="text-primary-500">Us</span> <span className="text-primary-500">Today</span></span>
+            Get in touch
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-xl text-gray-600 max-w-xl mx-auto font-light"
+            transition={{ delay: 0.1 }}
+            className="text-gray-500 max-w-xl mx-auto text-lg"
           >
-            Have questions about our services? Need to book an appointment? We're here to help you.
+            We're here to help with appointments and questions
           </motion.p>
         </div>
 
@@ -115,91 +126,68 @@ const Contact = () => {
             className="space-y-6"
           >
             <div>
-              <h3 className="text-3xl font-black text-gray-900 mb-4 font-display">
-                Contact Information
+              <h3 className="text-xl font-semibold text-gray-900 mb-2 font-display tracking-tight">
+                Contact information
               </h3>
-              <p className="text-lg text-gray-600 mb-8 font-light">
-                Get in touch with us through any of the following methods. We're always ready to help you with your physiotherapy needs.
+              <p className="text-gray-500 mb-8 text-sm">
+                Reach us by phone, email, or visit
               </p>
             </div>
 
             <div className="space-y-4">
               {contactInfo.map((info, index) => {
-                const color = colorClasses[info.color as keyof typeof colorClasses]
-                const isRightSide = index % 2 === 1
-                
+                const style = cardStyle(index)
                 return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ y: -5, scale: 1.02 }}
-                    className={`flex items-start space-x-5 ${color.bg} rounded-3xl p-6 h-full shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden ${
-                      isRightSide ? 'rounded-tr-[50px] rounded-br-[50px]' : ''
-                    }`}
-                  >
-                    {/* Book Corner Effect */}
-                    <div className="absolute top-0 right-0 w-0 h-0 border-l-[40px] border-l-transparent border-t-[40px] border-t-gray-200 opacity-60"></div>
-                    <div className="absolute top-0 right-0 w-0 h-0 border-l-[35px] border-l-transparent border-t-[35px] border-t-gray-100 opacity-80"></div>
-                    <div className="absolute top-0 right-0 w-0 h-0 border-l-[30px] border-l-transparent border-t-[30px] border-t-white opacity-90"></div>
-                    
-                    <div className={`w-16 h-16 ${color.iconBg} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-xl relative z-10`}>
-                      <info.icon className="h-8 w-8 text-white" />
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.08 }}
+                  className={`group relative flex items-start gap-4 ${style.bg} card-hover-premium border border-primary-200/40 rounded-2xl p-6 overflow-hidden`}
+                >
+                  <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${style.iconBg} ${style.iconColor}`}>
+                    <info.icon className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-base font-semibold text-gray-900 mb-2 font-display tracking-tight">{info.title}</h4>
+                    <div className="space-y-0.5 mb-2">
+                      {info.details.map((detail, idx) => (
+                        <p key={idx} className="text-gray-700 font-medium">{detail}</p>
+                      ))}
                     </div>
-                    <div className="relative z-10 flex-grow">
-                      <h4 className="text-xl font-black text-gray-900 mb-3 font-display">{info.title}</h4>
-                      <div className="space-y-1 mb-2">
-                        {info.details.map((detail, idx) => (
-                          <p key={idx} className="text-gray-700 font-medium">{detail}</p>
-                        ))}
-                      </div>
-                      <p className="text-sm text-gray-600 font-light">{info.description}</p>
-                    </div>
-                  </motion.div>
-                )
-              })}
+                    <p className="text-sm text-gray-500">{info.description}</p>
+                  </div>
+                </motion.div>
+              )})}
             </div>
 
-            {/* Emergency Contact - Book Design */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-pastel-peach-50 to-pastel-sage-50 rounded-tl-[40px] rounded-br-[40px] rounded-tr-2xl rounded-bl-2xl p-8 shadow-xl relative overflow-hidden"
+              className="bg-card-2 rounded-2xl p-6 border border-premium shadow-sm"
             >
-              {/* Book Corner Effect */}
-              <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-pastel-peach-200 opacity-60"></div>
-              <div className="absolute top-0 right-0 w-0 h-0 border-l-[45px] border-l-transparent border-t-[45px] border-t-pastel-peach-100 opacity-80"></div>
-              <div className="absolute top-0 right-0 w-0 h-0 border-l-[40px] border-l-transparent border-t-[40px] border-t-white opacity-90"></div>
-              
-              <div className="flex items-center space-x-4 mb-4 relative z-10">
-                <div className="w-14 h-14 bg-pastel-peach-300 rounded-xl flex items-center justify-center shadow-lg">
-                  <PhoneIcon className="h-7 w-7 text-white" />
+              <div className="flex items-center gap-4 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-primary-500/10 flex items-center justify-center text-primary-600">
+                  <PhoneIcon className="h-5 w-5" strokeWidth={1.5} />
                 </div>
-                <h4 className="font-black text-gray-900 text-xl font-display">Emergency Contact</h4>
+                <h4 className="font-semibold text-gray-900 font-display tracking-tight">Emergency</h4>
               </div>
-              <p className="text-gray-900 font-black text-2xl mb-2 relative z-10">+91 9082770384</p>
-              <p className="text-gray-700 font-medium relative z-10">Available 24/7 for emergency physiotherapy needs</p>
+              <p className="text-gray-900 font-semibold text-lg mb-1">+91 9082770384</p>
+              <p className="text-gray-500 text-sm">24/7 for emergencies</p>
             </motion.div>
           </motion.div>
 
           {/* Contact Form - Book Design */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-white rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl p-10 shadow-2xl relative overflow-hidden"
+            className="bg-primary-50 rounded-2xl p-10 border border-primary-200/40 shadow-sm"
           >
-            {/* Book Corner Effect */}
-            <div className="absolute top-0 right-0 w-0 h-0 border-l-[60px] border-l-transparent border-t-[60px] border-t-gray-200 opacity-50"></div>
-            <div className="absolute top-0 right-0 w-0 h-0 border-l-[55px] border-l-transparent border-t-[55px] border-t-gray-100 opacity-70"></div>
-            <div className="absolute top-0 right-0 w-0 h-0 border-l-[50px] border-l-transparent border-t-[50px] border-t-white opacity-90"></div>
-            
-            <h3 className="text-3xl font-black text-gray-900 mb-8 font-display relative z-10">
-              Send us a Message
+            <h3 className="text-xl font-semibold text-gray-900 mb-6 font-display tracking-tight">
+              Send a message
             </h3>
             
             <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
@@ -214,9 +202,14 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-all duration-300 text-lg"
+                  className={`w-full px-5 py-4 border-2 rounded-xl focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-lg ${
+                    validationErrors.name ? 'border-red-300 focus:border-red-300' : 'border-gray-200 focus:border-primary-300'
+                  }`}
                   placeholder="Enter your full name"
                 />
+                {validationErrors.name && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
+                )}
               </div>
 
               <div>
@@ -230,9 +223,14 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-all duration-300 text-lg"
+                  className={`w-full px-5 py-4 border-2 rounded-xl focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-lg ${
+                    validationErrors.email ? 'border-red-300 focus:border-red-300' : 'border-gray-200 focus:border-primary-300'
+                  }`}
                   placeholder="Enter your email address"
                 />
+                {validationErrors.email && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                )}
               </div>
 
               <div>
@@ -246,9 +244,14 @@ const Contact = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   required
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-all duration-300 text-lg"
+                  className={`w-full px-5 py-4 border-2 rounded-xl focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-lg ${
+                    validationErrors.phone ? 'border-red-300 focus:border-red-300' : 'border-gray-200 focus:border-primary-300'
+                  }`}
                   placeholder="Enter your phone number"
                 />
+                {validationErrors.phone && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.phone}</p>
+                )}
               </div>
 
               <div>
@@ -261,14 +264,19 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300 text-lg resize-none"
+                  className={`w-full px-5 py-4 border-2 rounded-xl focus:ring-2 focus:ring-primary-500 transition-all duration-300 text-lg resize-none ${
+                    validationErrors.message ? 'border-red-300 focus:border-red-300' : 'border-gray-200 focus:border-primary-500'
+                  }`}
                   placeholder="Tell us about your needs or ask any questions..."
                 />
+                {validationErrors.message && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.message}</p>
+                )}
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-primary-300 text-white font-black text-lg py-5 rounded-xl hover:bg-primary-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-0.5 active:scale-[0.98]"
+                className="w-full bg-primary-600 text-white font-semibold text-lg py-5 rounded-xl hover:bg-primary-700 transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Send Message
               </button>

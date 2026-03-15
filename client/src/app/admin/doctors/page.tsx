@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { 
   ArrowLeftIcon, 
@@ -16,8 +15,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { adminAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
 
 const AdminDoctorsPage = () => {
@@ -29,6 +27,11 @@ const AdminDoctorsPage = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null)
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isApproveOpen, setIsApproveOpen] = useState(false)
+  const [doctorToApprove, setDoctorToApprove] = useState<any>(null)
+  const [approveMessage, setApproveMessage] = useState('')
+  const [messageToDoctor, setMessageToDoctor] = useState('')
+  const [sendingMessage, setSendingMessage] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -40,7 +43,7 @@ const AdminDoctorsPage = () => {
   useEffect(() => {
     if (!loading) {
       if (!user || user.role !== 'admin') {
-        router.replace('/login')
+        router.replace('/admin/login')
         return
       }
       loadDoctors()
@@ -62,13 +65,40 @@ const AdminDoctorsPage = () => {
     }
   }
 
-  const handleApprove = async (id: string, isApproved: boolean) => {
+  const handleApproveClick = (doctor: any) => {
+    setDoctorToApprove(doctor)
+    setApproveMessage('')
+    setIsApproveOpen(true)
+  }
+
+  const handleApproveConfirm = async () => {
+    if (!doctorToApprove) return
     try {
-      await adminAPI.approveDoctor(id, isApproved)
-      toast.success(`Doctor ${isApproved ? 'approved' : 'rejected'} successfully`)
+      await adminAPI.approveDoctor(doctorToApprove._id || doctorToApprove.id, true, undefined, approveMessage.trim() || undefined)
+      toast.success('Doctor approved. They will be notified in the system.')
+      setIsApproveOpen(false)
+      setDoctorToApprove(null)
+      setApproveMessage('')
       loadDoctors()
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update doctor status')
+    }
+  }
+
+  const handleSendMessageToDoctor = async () => {
+    if (!selectedDoctor || !messageToDoctor.trim()) {
+      toast.error('Please enter a message')
+      return
+    }
+    try {
+      setSendingMessage(true)
+      await adminAPI.sendMessageToDoctor(selectedDoctor._id || selectedDoctor.id, messageToDoctor.trim())
+      toast.success('Message sent. Doctor will see it in their notifications.')
+      setMessageToDoctor('')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to send message')
+    } finally {
+      setSendingMessage(false)
     }
   }
 
@@ -127,86 +157,69 @@ const AdminDoctorsPage = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="Doctor Management" subtitle="Loading..." />
+        <div className="site-card p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots">
+            <div></div><div></div><div></div><div></div>
           </div>
-          <p className="text-gray-600">Loading doctors...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white py-12">
-          <div className="container-custom">
-            <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-              <ArrowLeftIcon className="h-5 w-5" />
-              <span className="font-medium">Back to Dashboard</span>
-            </Link>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-black mb-2">Doctor Management</h1>
-                <p className="text-white/90">Manage all registered doctors</p>
-              </div>
-            </div>
-          </div>
+    <div className="space-y-6">
+      <DashboardSubPageHeader
+        title="Doctor Management"
+        subtitle="Manage all registered doctors"
+      />
+      {/* Search */}
+      <div className="site-card p-4">
+        <div className="relative">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search doctors by name, email, phone, or specialization..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 text-sm"
+          />
         </div>
+      </div>
 
-        <div className="container-custom py-8">
-          {/* Search */}
-          <div className="mb-6">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search doctors by name, email, phone, or specialization..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-            </div>
-          </div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="site-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-0.5">Total Doctors</p>
+          <p className="text-xl site-card-title">{doctors.length}</p>
+        </div>
+        <div className="site-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-0.5">Active</p>
+          <p className="text-xl site-card-title text-green-600">
+            {doctors.filter(d => d.status === 'Active').length}
+          </p>
+        </div>
+        <div className="site-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-0.5">Pending</p>
+          <p className="text-xl site-card-title text-amber-600">
+            {doctors.filter(d => d.status === 'Inactive' || d.isVerified === false).length}
+          </p>
+        </div>
+        <div className="site-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 mb-0.5">On Leave</p>
+          <p className="text-xl site-card-title text-blue-600">
+            {doctors.filter(d => d.status === 'On Leave').length}
+          </p>
+        </div>
+      </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600 mb-1">Total Doctors</p>
-              <p className="text-2xl font-black text-gray-900">{doctors.length}</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600 mb-1">Active</p>
-              <p className="text-2xl font-black text-green-600">
-                {doctors.filter(d => d.status === 'Active').length}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600 mb-1">Pending</p>
-              <p className="text-2xl font-black text-yellow-600">
-                {doctors.filter(d => d.status === 'Inactive' || d.isVerified === false).length}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-600 mb-1">On Leave</p>
-              <p className="text-2xl font-black text-blue-600">
-                {doctors.filter(d => d.status === 'On Leave').length}
-              </p>
-            </div>
-          </div>
-
-          {/* Doctors Table */}
-          {filteredDoctors.length > 0 ? (
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      {/* Doctors Table */}
+      {filteredDoctors.length > 0 ? (
+            <div className="site-card overflow-hidden p-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-primary-50">
+                  <thead className="bg-gray-50 border-b border-gray-100">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Name</th>
                       <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Email</th>
@@ -290,7 +303,7 @@ const AdminDoctorsPage = () => {
                             </button>
                             {doctor.status !== 'Active' && (
                               <button
-                                onClick={() => handleApprove(doctor._id || doctor.id, true)}
+                                onClick={() => handleApproveClick(doctor)}
                                 className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                                 title="Approve"
                               >
@@ -313,18 +326,16 @@ const AdminDoctorsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-2xl shadow-xl border border-gray-100">
+            <div className="site-card text-center py-16">
               <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <UserGroupIcon className="h-12 w-12 text-primary-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">No Doctors Found</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No Doctors Found</h3>
+              <p className="text-gray-600 text-sm">
                 {searchTerm ? 'Try a different search term' : 'No doctors registered yet'}
               </p>
             </div>
           )}
-        </div>
-      </div>
 
       {/* View Modal */}
       {isViewOpen && selectedDoctor && (
@@ -386,6 +397,71 @@ const AdminDoctorsPage = () => {
                   <p className="text-gray-900">{formatAddress(selectedDoctor.clinic_address || selectedDoctor.address)}</p>
                 </div>
               </div>
+
+              {/* Request from doctor / message to doctor – system notification only */}
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Request from doctor / Send message</label>
+                <p className="text-xs text-gray-500 mb-2">Doctor will be notified in the system only. Use this to request documents or any information.</p>
+                <div className="flex gap-2">
+                  <textarea
+                    value={messageToDoctor}
+                    onChange={(e) => setMessageToDoctor(e.target.value)}
+                    placeholder="e.g. Please upload your license copy or update your availability..."
+                    rows={2}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSendMessageToDoctor}
+                    disabled={sendingMessage || !messageToDoctor.trim()}
+                    className="shrink-0 px-4 py-2 bg-primary-500 text-white rounded-lg font-semibold hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {sendingMessage ? 'Sending...' : 'Send message'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Approve doctor modal – optional message */}
+      {isApproveOpen && doctorToApprove && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full"
+          >
+            <h2 className="text-xl font-black text-gray-900 mb-2">Approve doctor</h2>
+            <p className="text-gray-600 text-sm mb-4">
+              Approve <strong>{doctorToApprove.name || doctorToApprove.full_name}</strong>? They will be notified in the system.
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Message to doctor (optional)</label>
+              <textarea
+                value={approveMessage}
+                onChange={(e) => setApproveMessage(e.target.value)}
+                placeholder="e.g. Welcome! Please complete your profile."
+                rows={2}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleApproveConfirm}
+                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+              >
+                Approve
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsApproveOpen(false); setDoctorToApprove(null); setApproveMessage('') }}
+                className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </motion.div>
         </div>
@@ -492,12 +568,12 @@ const AdminDoctorsPage = () => {
         </div>
       )}
 
-      <Footer />
     </div>
   )
 }
 
 export default AdminDoctorsPage
+
 
 
 

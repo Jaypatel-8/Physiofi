@@ -74,6 +74,8 @@ const patientSchema = new mongoose.Schema({
     default: 'Active'
   },
   lastLogin: Date,
+  loginAttempts: { type: Number, default: 0 },
+  lockUntil: Date,
   totalAppointments: {
     type: Number,
     default: 0
@@ -103,6 +105,22 @@ patientSchema.virtual('fullAddress').get(function() {
   
   return parts.join(', ');
 });
+
+// Lockout: increment failed attempts; lock 2 hours after 5 attempts
+patientSchema.methods.incLoginAttempts = function() {
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({ $unset: { lockUntil: 1 }, $set: { loginAttempts: 1 } });
+  }
+  const updates = { $inc: { loginAttempts: 1 } };
+  if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
+    updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 };
+  }
+  return this.updateOne(updates);
+};
+
+patientSchema.methods.resetLoginAttempts = function() {
+  return this.updateOne({ $unset: { loginAttempts: 1, lockUntil: 1 } });
+};
 
 // Method to compare password
 patientSchema.methods.comparePassword = async function(candidatePassword) {

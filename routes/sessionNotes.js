@@ -113,6 +113,15 @@ router.post('/', isDoctor, async (req, res) => {
       });
     }
 
+    // Validate session date
+    const sessionDate = new Date(session_date);
+    if (isNaN(sessionDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid session date'
+      });
+    }
+
     // Verify appointment exists
     const appointment = await Appointment.findById(appointmentId);
     if (!appointment) {
@@ -253,6 +262,7 @@ router.delete('/:id', isDoctor, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

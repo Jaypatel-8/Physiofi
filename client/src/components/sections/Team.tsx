@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { UserIcon, AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline'
 
 const Team = () => {
@@ -8,16 +9,16 @@ const Team = () => {
     {
       name: "Dr. Arth Patel",
       title: "Senior Pediatric Physiotherapist",
-      image: "/images/dr-arth-patel.jpg",
+      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
       qualifications: ["MSc Physiotherapy", "Pediatric Specialist"],
       experience: "8+ Years",
       specializations: ["Pediatric Physiotherapy", "Sports Injuries", "Neurological Rehabilitation"],
       rating: 4.9
     },
     {
-      name: "Dr. Prakruti Patel", 
+      name: "Dr. Prakruti Patel",
       title: "Senior Pediatric Occupational Therapist",
-      image: "/images/dr-prakruti-patel.jpg",
+      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
       qualifications: ["MSc Occupational Therapy", "BOT", "Pediatric Specialist"],
       experience: "6+ Years",
       specializations: ["Occupational Therapy", "Sensory Integration", "Developmental Therapy"],
@@ -25,8 +26,8 @@ const Team = () => {
     },
     {
       name: "Dr. Rajesh Sharma",
-      title: "Senior Orthopedic Physiotherapist", 
-      image: "/images/dr-rajesh-sharma.jpg",
+      title: "Senior Orthopedic Physiotherapist",
+      image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80",
       qualifications: ["MPT Orthopedics", "Orthopedic Specialist"],
       experience: "10+ Years",
       specializations: ["Orthopedic Rehabilitation", "Post-Surgical Care", "Sports Medicine"],
@@ -35,7 +36,7 @@ const Team = () => {
     {
       name: "Dr. Priya Desai",
       title: "Senior Neurological Physiotherapist",
-      image: "/images/dr-priya-desai.jpg", 
+      image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80",
       qualifications: ["MPT Neurology", "Neurological Specialist"],
       experience: "7+ Years",
       specializations: ["Neurological Rehabilitation", "Stroke Recovery", "Spinal Cord Injuries"],
@@ -44,7 +45,7 @@ const Team = () => {
   ]
 
   return (
-    <section id="team" className="section-padding bg-white">
+    <section id="team" className="section-padding bg-pastel-mesh">
       <div className="container-custom">
         {/* Header */}
         <motion.div
@@ -74,13 +75,17 @@ const Team = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 group"
+              className="site-card-elevated p-6 group"
             >
               {/* Doctor Image */}
-              <div className="relative mb-6">
-                <div className="w-full h-64 bg-primary-100 rounded-xl flex items-center justify-center">
-                  <UserIcon className="h-24 w-24 text-primary-500" />
-                </div>
+              <div className="relative mb-6 overflow-hidden rounded-xl bg-primary-100 aspect-[4/3]">
+                <Image
+                  src={doctor.image}
+                  alt={doctor.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                />
                 <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
                   <div className="bg-white rounded-full p-2 shadow-lg">
                     <StarIcon className="h-6 w-6 text-yellow-400" />
@@ -90,7 +95,7 @@ const Team = () => {
 
               {/* Doctor Info */}
               <div className="text-center space-y-3">
-                <h3 className="text-xl font-bold text-gray-900 font-display">
+                <h3 className="text-xl site-card-title font-display">
                   {doctor.name}
                 </h3>
                 <p className="text-primary-600 font-semibold">
@@ -123,7 +128,7 @@ const Team = () => {
                 {/* Qualifications */}
                 <div className="space-y-1">
                   {doctor.qualifications.slice(0, 2).map((qual, idx) => (
-                    <div key={idx} className="text-xs text-gray-500 bg-gray-50 rounded-full px-3 py-1">
+                    <div key={idx} className="text-xs text-gray-500 bg-card-2 rounded-full px-3 py-1 border border-premium/50">
                       {qual}
                     </div>
                   ))}
@@ -151,7 +156,7 @@ const Team = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="mt-16 bg-primary-50 rounded-3xl p-12"
+          className="mt-16 bg-card-1 rounded-2xl p-12 border border-premium"
         >
           <div className="text-center mb-8">
             <h3 className="text-3xl font-bold text-gray-900 mb-4 font-display">

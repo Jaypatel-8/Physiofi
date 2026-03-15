@@ -36,7 +36,7 @@ const Modal = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 overflow-y-auto"
+          className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden"
         >
           {/* Backdrop */}
           <div className="flex min-h-screen items-center justify-center p-4">
@@ -48,17 +48,17 @@ const Modal = ({
               onClick={onClose}
             />
             
-            {/* Modal */}
+            {/* Modal - max height so content scrolls and no huge white box */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2 }}
-              className={`relative w-full ${sizeClasses[size]} bg-white rounded-xl shadow-xl`}
+              className={`relative w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col bg-white rounded-xl shadow-xl`}
             >
               {/* Header */}
               {(title || showCloseButton) && (
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
                   {title && (
                     <h3 className="text-lg font-semibold text-gray-900">
                       {title}
@@ -66,8 +66,10 @@ const Modal = ({
                   )}
                   {showCloseButton && (
                     <button
+                      type="button"
                       onClick={onClose}
-                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                      aria-label="Close"
+                      className="p-2 -m-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                     >
                       <XMarkIcon className="h-5 w-5" />
                     </button>
@@ -75,8 +77,8 @@ const Modal = ({
                 </div>
               )}
               
-              {/* Content */}
-              <div className="p-6">
+              {/* Content - scrollable so modal doesn't stretch with empty white space */}
+              <div className="p-4 sm:p-6 overflow-y-auto overflow-x-hidden flex-1 min-h-0">
                 {children}
               </div>
             </motion.div>

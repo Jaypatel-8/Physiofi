@@ -1,14 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { ArrowLeftIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { doctorAPI } from '@/lib/api'
 import StatsCard from '@/components/dashboard/StatsCard'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 
 const DoctorAnalytics = () => {
   const { user, loading } = useAuth()
@@ -41,37 +38,19 @@ const DoctorAnalytics = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-          <p className="text-gray-600">Loading analytics...</p>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="Analytics" subtitle="Loading..." />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots"><div></div><div></div><div></div><div></div></div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-primary-600 to-primary-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/doctor/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Dashboard</span>
-          </Link>
-          <h1 className="text-4xl font-black mb-2">Analytics</h1>
-          <p className="text-white/90">Track your practice performance and insights</p>
-        </div>
-      </div>
-
-      <div className="container-custom py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="space-y-6">
+      <DashboardSubPageHeader title="Analytics" subtitle="Track your practice performance and insights" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard
             title="Total Patients"
             value={analytics?.totalPatients || 0}
@@ -96,10 +75,7 @@ const DoctorAnalytics = () => {
             icon={<ChartBarIcon className="h-7 w-7 text-white" />}
             color="bg-gradient-to-br from-yellow-500 to-yellow-600"
           />
-        </div>
       </div>
-      </div>
-      <Footer />
     </div>
   )
 }

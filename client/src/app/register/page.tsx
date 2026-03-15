@@ -18,6 +18,7 @@ import Footer from '@/components/layout/Footer'
 import { authAPI } from '@/lib/api'
 import LocationAutocomplete from '@/components/ui/LocationAutocomplete'
 import toast from 'react-hot-toast'
+import { normalizePhone, formatPhoneInput, getIndianMobileError, isValidEmail } from '@/lib/validation'
 
 const RegisterPage = () => {
   const router = useRouter()
@@ -109,16 +110,17 @@ const RegisterPage = () => {
     }
   }, [registerType])
 
-  // Real-time validation
+  // Real-time validation (Indian mobile: 10 digits, starts with 6–9)
   useEffect(() => {
     const errors: Record<string, string> = {}
     
     if (registerType === 'patient') {
-      if (patientFormData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(patientFormData.email)) {
-        errors.email = 'Invalid email format'
+      if (patientFormData.email && !isValidEmail(patientFormData.email)) {
+        errors.email = 'Enter a valid email address'
       }
-      if (patientFormData.phone && !/^[0-9]{10}$/.test(patientFormData.phone.replace(/\D/g, ''))) {
-        errors.phone = 'Phone must be 10 digits'
+      if (patientFormData.phone) {
+        const phoneErr = getIndianMobileError(patientFormData.phone)
+        if (phoneErr) errors.phone = phoneErr
       }
       if (patientFormData.password && patientFormData.password.length < 6) {
         errors.password = 'Password must be at least 6 characters'
@@ -127,11 +129,12 @@ const RegisterPage = () => {
         errors.confirmPassword = 'Passwords do not match'
       }
     } else {
-      if (doctorFormData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(doctorFormData.email)) {
-        errors.email = 'Invalid email format'
+      if (doctorFormData.email && !isValidEmail(doctorFormData.email)) {
+        errors.email = 'Enter a valid email address'
       }
-      if (doctorFormData.phone && !/^[0-9]{10}$/.test(doctorFormData.phone.replace(/\D/g, ''))) {
-        errors.phone = 'Phone must be 10 digits'
+      if (doctorFormData.phone) {
+        const phoneErr = getIndianMobileError(doctorFormData.phone)
+        if (phoneErr) errors.phone = phoneErr
       }
       if (doctorFormData.password && doctorFormData.password.length < 6) {
         errors.password = 'Password must be at least 6 characters'
@@ -183,16 +186,19 @@ const RegisterPage = () => {
 
   const handlePatientInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setPatientFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    if (name === 'phone') {
+      setPatientFormData(prev => ({ ...prev, phone: formatPhoneInput(value) }))
+    } else {
+      setPatientFormData(prev => ({ ...prev, [name]: value }))
+    }
     setError('')
   }
 
   const handleDoctorInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    if (name.startsWith('address.')) {
+    if (name === 'phone') {
+      setDoctorFormData(prev => ({ ...prev, phone: formatPhoneInput(value) }))
+    } else if (name.startsWith('address.')) {
       const addressField = name.split('.')[1]
       setDoctorFormData(prev => ({
         ...prev,
@@ -240,38 +246,51 @@ const RegisterPage = () => {
     e.preventDefault()
     setError('')
 
+    const phoneErr = getIndianMobileError(patientFormData.phone)
+    if (phoneErr) {
+      setError(phoneErr)
+      setValidationErrors(prev => ({ ...prev, phone: phoneErr }))
+      return
+    }
+    if (!isValidEmail(patientFormData.email)) {
+      setError('Please enter a valid email address')
+      setValidationErrors(prev => ({ ...prev, email: 'Enter a valid email address' }))
+      return
+    }
     if (patientFormData.password !== patientFormData.confirmPassword) {
       setError('Passwords do not match')
       return
     }
-
     if (patientFormData.password.length < 6) {
       setError('Password must be at least 6 characters')
+      return
+    }
+    if (!patientFormData.name.trim() || patientFormData.name.trim().length < 2) {
+      setError('Name must be at least 2 characters')
       return
     }
 
     setIsLoading(true)
 
     try {
-      // Prepare address - ensure it's properly formatted
-      let addressData = patientFormData.address
+      let addressData: string | object | undefined = patientFormData.address
       if (typeof addressData === 'string' && addressData.trim() !== '') {
         addressData = addressData.trim()
-      } else if (typeof addressData === 'object' && addressData !== null) {
-        addressData = addressData
-      } else {
+      } else if (typeof addressData !== 'object' || addressData === null) {
         addressData = undefined
       }
 
+      const phoneOnly = normalizePhone(patientFormData.phone).slice(-10)
+
       const response = await authAPI.patientRegister({
-        full_name: patientFormData.name.trim(), // Send as full_name (required by model)
-        name: patientFormData.name.trim(), // Also send as name for backward compatibility
+        full_name: patientFormData.name.trim(),
+        name: patientFormData.name.trim(),
         email: patientFormData.email.trim().toLowerCase(),
-        phone: patientFormData.phone.trim(),
+        phone: phoneOnly,
         password: patientFormData.password,
         age: parseInt(patientFormData.age),
         gender: patientFormData.gender,
-        address: addressData
+        ...(addressData !== undefined && { address: addressData as string })
       })
 
       if (response.data.success) {
@@ -279,32 +298,62 @@ const RegisterPage = () => {
         router.push('/login?type=patient')
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed')
+      const data = err.response?.data
+      let message = 'Registration failed'
+      if (data?.message) message = data.message
+      else if (err.message) message = err.message
+      if (!err.response) message = 'Network error. Please check your connection and try again.'
+      setError(message)
+      if (data?.errors && Array.isArray(data.errors)) {
+        const fieldErrors: Record<string, string> = {}
+        data.errors.forEach((item: { field?: string; msg?: string }) => {
+          if (item.field && item.msg) fieldErrors[item.field] = item.msg
+        })
+        setValidationErrors(prev => ({ ...prev, ...fieldErrors }))
+      }
       setIsLoading(false)
     }
+  }
+
+  // Map frontend specialization labels to backend enum (Ortho, Neuro, Pedia, Sports, General)
+  const mapSpecializationToBackend = (spec: string): string => {
+    const s = spec.toLowerCase()
+    if (s.includes('ortho') || s.includes('musculoskeletal')) return 'Ortho'
+    if (s.includes('neuro')) return 'Neuro'
+    if (s.includes('pediatric') || s.includes('pedia')) return 'Pedia'
+    if (s.includes('sports')) return 'Sports'
+    return 'General'
   }
 
   const handleDoctorSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
+    const phoneErr = getIndianMobileError(doctorFormData.phone)
+    if (phoneErr) {
+      setError(phoneErr)
+      setValidationErrors(prev => ({ ...prev, phone: phoneErr }))
+      return
+    }
+    if (!isValidEmail(doctorFormData.email)) {
+      setError('Please enter a valid email address')
+      setValidationErrors(prev => ({ ...prev, email: 'Enter a valid email address' }))
+      return
+    }
     if (doctorFormData.password !== doctorFormData.confirmPassword) {
       setError('Passwords do not match')
       return
     }
-
     if (doctorFormData.password.length < 6) {
       setError('Password must be at least 6 characters')
       return
     }
-
     if (doctorFormData.specialization.length === 0) {
       setError('Please add at least one specialization')
       return
     }
-
-    if (!doctorFormData.license) {
-      setError('License number is required')
+    if (!doctorFormData.license || doctorFormData.license.trim().length < 3) {
+      setError('Please enter a valid license number (at least 3 characters)')
       return
     }
 
@@ -327,17 +376,25 @@ const RegisterPage = () => {
         })
       }
 
+      const primarySpec = doctorFormData.specialization[0]
+      const specializationBackend = mapSpecializationToBackend(primarySpec)
+      const phoneOnly = normalizePhone(doctorFormData.phone).slice(-10)
+
       const response = await authAPI.doctorRegister({
-        name: doctorFormData.name,
-        email: doctorFormData.email,
-        phone: doctorFormData.phone,
+        full_name: doctorFormData.name.trim(),
+        name: doctorFormData.name.trim(),
+        email: doctorFormData.email.trim().toLowerCase(),
+        phone: phoneOnly,
         password: doctorFormData.password,
-        specialization: doctorFormData.specialization,
+        specialization: specializationBackend,
         qualifications: qualifications,
         experience: parseInt(doctorFormData.experience) || 0,
-        license: doctorFormData.license,
+        experience_years: parseInt(doctorFormData.experience) || 0,
+        license: doctorFormData.license.trim(),
+        license_no: doctorFormData.license.trim(),
         address: doctorFormData.address,
-        bio: doctorFormData.bio
+        occupation: doctorFormData.occupation?.trim() || undefined,
+        bio: doctorFormData.bio?.trim() || undefined
       })
 
       if (response.data.success) {
@@ -345,7 +402,19 @@ const RegisterPage = () => {
         router.push('/login?type=doctor')
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed')
+      const data = err.response?.data
+      let message = 'Registration failed'
+      if (data?.message) message = data.message
+      else if (err.message) message = err.message
+      if (!err.response) message = 'Network error. Please check your connection and try again.'
+      setError(message)
+      if (data?.errors && Array.isArray(data.errors)) {
+        const fieldErrors: Record<string, string> = {}
+        data.errors.forEach((item: { field?: string; msg?: string }) => {
+          if (item.field && item.msg) fieldErrors[item.field] = item.msg
+        })
+        setValidationErrors(prev => ({ ...prev, ...fieldErrors }))
+      }
       setIsLoading(false)
     }
   }
@@ -411,8 +480,9 @@ const RegisterPage = () => {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-accent-50 border border-accent-200 rounded-lg text-accent-700 text-sm">
-                {error}
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm" role="alert">
+                <p className="font-semibold mb-1">Registration failed</p>
+                <p>{error}</p>
               </div>
             )}
 
@@ -446,9 +516,14 @@ const RegisterPage = () => {
                       value={patientFormData.email}
                       onChange={handlePatientInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+                        validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                      }`}
                       placeholder="Enter your email"
                     />
+                    {validationErrors.email && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                    )}
                   </div>
 
                   <div>
@@ -462,9 +537,17 @@ const RegisterPage = () => {
                       value={patientFormData.phone}
                       onChange={handlePatientInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Enter your phone number"
+                      maxLength={10}
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+                        validationErrors.phone ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="10-digit Indian mobile (e.g. 9876543210)"
                     />
+                    {validationErrors.phone && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.phone}</p>
+                    )}
                   </div>
 
                   <div>
@@ -516,8 +599,11 @@ const RegisterPage = () => {
                         value={patientFormData.password}
                         onChange={handlePatientInputChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12"
-                        placeholder="Enter password"
+                        minLength={6}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12 ${
+                          validationErrors.password ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder="At least 6 characters"
                       />
                       <button
                         type="button"
@@ -527,6 +613,9 @@ const RegisterPage = () => {
                         {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                       </button>
                     </div>
+                    {validationErrors.password && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+                    )}
                   </div>
 
                   <div>
@@ -541,7 +630,9 @@ const RegisterPage = () => {
                         value={patientFormData.confirmPassword}
                         onChange={handlePatientInputChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-12 ${
+                          validationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         placeholder="Confirm password"
                       />
                       <button
@@ -552,6 +643,9 @@ const RegisterPage = () => {
                         {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                       </button>
                     </div>
+                    {validationErrors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.confirmPassword}</p>
+                    )}
                   </div>
                 </div>
 
@@ -611,9 +705,14 @@ const RegisterPage = () => {
                         value={doctorFormData.email}
                         onChange={handleDoctorInputChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         placeholder="professional@email.com"
                       />
+                      {validationErrors.email && (
+                        <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                      )}
                     </div>
 
                     <div>
@@ -627,9 +726,17 @@ const RegisterPage = () => {
                         value={doctorFormData.phone}
                         onChange={handleDoctorInputChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your phone number"
+                        maxLength={10}
+                        inputMode="numeric"
+                        autoComplete="tel"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          validationErrors.phone ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder="10-digit Indian mobile (e.g. 9876543210)"
                       />
+                      {validationErrors.phone && (
+                        <p className="mt-1 text-sm text-red-600">{validationErrors.phone}</p>
+                      )}
                     </div>
 
                     <div>

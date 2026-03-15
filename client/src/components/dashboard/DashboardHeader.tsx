@@ -8,12 +8,14 @@ interface DashboardHeaderProps {
   subtitle?: string
   user?: User | null
   greeting?: string
+  /** Softer style for doctor/admin dashboards */
+  variant?: 'default' | 'compact'
 }
 
-const DashboardHeader = ({ title, subtitle, user, greeting }: DashboardHeaderProps) => {
+const DashboardHeader = ({ title, subtitle, user, greeting, variant = 'default' }: DashboardHeaderProps) => {
+  const isCompact = variant === 'compact'
   const getGreeting = () => {
     if (greeting) return greeting
-    
     const hour = new Date().getHours()
     if (hour < 12) return 'Good Morning'
     if (hour < 18) return 'Good Afternoon'
@@ -21,82 +23,45 @@ const DashboardHeader = ({ title, subtitle, user, greeting }: DashboardHeaderPro
   }
 
   const getUserName = () => {
-    if (user?.name) {
-      return user.name.split(' ')[0] // First name only
-    }
+    if (user?.name) return user.name.trim().split(' ')[0]
     return 'User'
   }
 
   const getTitle = () => {
     if (title) return title
-    
-    if (user?.role === 'patient') {
-      return 'Patient Dashboard'
-    } else if (user?.role === 'doctor') {
-      return 'Doctor Dashboard'
-    } else if (user?.role === 'admin') {
-      return 'Admin Dashboard'
-    }
+    if (user?.role === 'patient') return 'Patient Dashboard'
+    if (user?.role === 'doctor') return 'Doctor Dashboard'
+    if (user?.role === 'admin') return 'Admin Dashboard'
     return 'Dashboard'
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 text-white py-16 px-4 overflow-hidden"
+      transition={{ duration: 0.35 }}
+      className={`relative overflow-hidden ${isCompact
+        ? 'border-b border-gray-100 bg-transparent py-6 lg:py-8 px-0'
+        : 'border-b border-primary-200/40 bg-gradient-to-br from-primary-50/90 via-white to-pastel-blue-50/80 py-10 lg:py-14 px-4'
+      }`}
     >
-      {/* Animated Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
-      </div>
-      
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-primary-800/20 to-transparent"></div>
-      
-      {/* Content */}
-      <div className="container-custom max-w-7xl mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className={isCompact ? 'relative z-10' : 'container-custom max-w-7xl mx-auto relative z-10'}>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center gap-3 mb-3"
-            >
-              <div className="w-1 h-8 bg-white/30 rounded-full"></div>
-              <p className="text-primary-100 text-sm font-semibold uppercase tracking-wider">
-                {getTitle()}
-              </p>
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl md:text-5xl font-black mb-3 leading-tight text-white"
-            >
-              {getGreeting()}, {getUserName()}!
-            </motion.h1>
+            <p className={`mb-1.5 ${isCompact ? 'text-gray-400 text-[11px] font-medium uppercase tracking-widest' : 'text-primary-600 text-xs font-semibold uppercase tracking-widest mb-2'}`}>
+              {getTitle()}
+            </p>
+            <h1 className={`tracking-tight mb-1 ${isCompact ? 'text-2xl md:text-3xl font-semibold text-gray-900' : 'text-3xl md:text-4xl font-extrabold text-gray-900'}`}>
+              {getGreeting()}, <span className={isCompact ? 'text-primary-600 font-medium' : 'text-primary-600'}>{getUserName()}</span>
+            </h1>
             {subtitle && (
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-primary-100 text-lg md:text-xl max-w-2xl leading-relaxed"
-              >
+              <p className={`max-w-xl leading-relaxed mt-0.5 ${isCompact ? 'text-gray-500 text-sm' : 'text-gray-600 text-sm md:text-base mt-1'}`}>
                 {subtitle}
-              </motion.p>
+              </p>
             )}
           </div>
         </div>
       </div>
-      
-      {/* Bottom Wave */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-slate-50/30"></div>
     </motion.div>
   )
 }

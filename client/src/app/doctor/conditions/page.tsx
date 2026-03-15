@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { 
-  ArrowLeftIcon, 
   PlusIcon,
   PencilIcon,
   TrashIcon,
@@ -16,8 +15,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { doctorAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
 
 const CONDITIONS = [
@@ -194,50 +192,33 @@ const DoctorConditions = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-          <p className="text-gray-600">Loading conditions...</p>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="Conditions & Treatment Plans" subtitle="Loading..." />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots"><div></div><div></div><div></div><div></div></div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-primary-600 to-primary-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/doctor/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Dashboard</span>
-          </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-black mb-2">Conditions & Treatment Plans</h1>
-              <p className="text-white/90">Manage conditions you treat and your treatment plans</p>
-            </div>
-            <button
-              onClick={() => {
-                resetForm()
-                setIsModalOpen(true)
-              }}
-              className="flex items-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-            >
-              <PlusIcon className="h-5 w-5" />
-              Add Condition
-            </button>
-          </div>
-        </div>
+    <>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <DashboardSubPageHeader title="Conditions & Treatment Plans" subtitle="Manage conditions you treat and your treatment plans" />
+        <button
+          onClick={() => {
+            resetForm()
+            setIsModalOpen(true)
+          }}
+          className="shrink-0 flex items-center gap-2 bg-primary-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary-700 transition-colors"
+        >
+          <PlusIcon className="h-5 w-5" />
+          Add Condition
+        </button>
       </div>
 
-      <div className="container-custom py-8">
+      <div>
         {conditions.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {conditions.map((condition) => (
@@ -332,38 +313,47 @@ const DoctorConditions = () => {
 
       {/* Add/Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="condition-modal-title"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-black text-gray-900">
+              <h2 id="condition-modal-title" className="text-2xl font-black text-gray-900">
                 {editingCondition ? 'Edit Condition' : 'Add Condition'}
               </h2>
               <button
+                type="button"
                 onClick={() => {
                   setIsModalOpen(false)
                   resetForm()
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-500 hover:text-gray-700 p-2 focus:ring-2 focus:ring-primary-500 rounded-lg"
+                aria-label="Close condition form"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="condition-select" className="block text-sm font-semibold text-gray-700 mb-2">
                   Condition *
                 </label>
                 <select
+                  id="condition-select"
                   name="condition"
                   value={formData.condition}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-required="true"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select a condition</option>
                   {CONDITIONS.map((cond) => (
@@ -373,94 +363,102 @@ const DoctorConditions = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="condition-treatment-plan" className="block text-sm font-semibold text-gray-700 mb-2">
                   Treatment Plan *
                 </label>
                 <textarea
+                  id="condition-treatment-plan"
                   name="treatmentPlan"
                   value={formData.treatmentPlan}
                   onChange={handleInputChange}
                   required
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-required="true"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Describe your treatment approach for this condition..."
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="condition-duration" className="block text-sm font-semibold text-gray-700 mb-2">
                     Duration *
                   </label>
                   <input
+                    id="condition-duration"
                     type="text"
                     name="duration"
                     value={formData.duration}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    aria-required="true"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., 4-6 weeks, 3 months"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="condition-sessions" className="block text-sm font-semibold text-gray-700 mb-2">
                     Number of Sessions
                   </label>
                   <input
+                    id="condition-sessions"
                     type="number"
                     name="sessions"
                     value={formData.sessions}
                     onChange={handleInputChange}
                     min="0"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., 12"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="condition-price" className="block text-sm font-semibold text-gray-700 mb-2">
                     Price (₹)
                   </label>
                   <input
+                    id="condition-price"
                     type="number"
                     name="price"
                     value={formData.price}
                     onChange={handleInputChange}
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., 5000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="condition-success-rate" className="block text-sm font-semibold text-gray-700 mb-2">
                     Success Rate (%)
                   </label>
                   <input
+                    id="condition-success-rate"
                     type="number"
                     name="successRate"
                     value={formData.successRate}
                     onChange={handleInputChange}
                     min="0"
                     max="100"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., 85"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="condition-description" className="block text-sm font-semibold text-gray-700 mb-2">
                   Description
                 </label>
                 <textarea
+                  id="condition-description"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Additional details about this condition and treatment..."
                 />
               </div>
@@ -487,8 +485,7 @@ const DoctorConditions = () => {
           </motion.div>
         </div>
       )}
-      <Footer />
-    </div>
+    </>
   )
 }
 

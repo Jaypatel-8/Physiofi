@@ -6,7 +6,6 @@ import Footer from '@/components/layout/Footer'
 import BookingPopup from '@/components/ui/BookingPopup'
 import Breadcrumb from '@/components/conditions/Breadcrumb'
 import ConditionHero from '@/components/conditions/ConditionHero'
-import SymptomsList from '@/components/conditions/SymptomsList'
 import TreatmentList from '@/components/conditions/TreatmentList'
 import WhyChooseSection from '@/components/conditions/WhyChooseSection'
 import CTASection from '@/components/conditions/CTASection'
@@ -95,7 +94,7 @@ export default function HomeVisitPage() {
         title="Home Visit Physiotherapy"
         description="A physiotherapist visits your home for fully personalized treatment. Ideal for seniors, post-surgery patients, working individuals, children, and those needing comfort-driven recovery."
         imageAlt="Home visit physiotherapy service"
-        imagePath="/images/hero/home-visit.jpg"
+        imagePath="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1200&q=85"
       />
 
       {/* Steps Section */}
@@ -121,6 +120,7 @@ export default function HomeVisitPage() {
                 const isLast = index === steps.length - 1
                 const isSecondLast = index === steps.length - 2
                 const isThirdLast = index === steps.length - 3
+                const StepIcon = step.icon
                 return (
                   <div key={index} className="relative">
                     {/* Visual Flow Connector */}
@@ -165,7 +165,7 @@ export default function HomeVisitPage() {
                                 transition={{ duration: 0.5 }}
                                 className="absolute -top-1 -right-1 w-10 h-10 bg-primary-400 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
                               >
-                                <step.icon className="h-5 w-5 text-white" strokeWidth={2.5} />
+                                <StepIcon className="h-5 w-5 text-white" strokeWidth={2.5} />
                               </motion.div>
                             </div>
                           </div>
@@ -195,7 +195,7 @@ export default function HomeVisitPage() {
         imageAlt="Physiotherapy care illustration"
         title="Expert Care at Your Doorstep"
         description="Our certified physiotherapists bring professional treatment directly to your home, ensuring comfort, convenience, and personalized attention throughout your recovery journey."
-        imagePath="/images/hero/physiotherapy-care.jpg"
+        imagePath="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=70"
       />
 
       <section className="py-16 bg-white">
@@ -233,7 +233,7 @@ export default function HomeVisitPage() {
       <BookingPopup 
         isOpen={isBookingOpen} 
         onClose={() => setIsBookingOpen(false)}
-        defaultServiceType={bookingType}
+        defaultServiceType="home"
       />
     </main>
   )

@@ -45,27 +45,23 @@ const AppointmentCard = ({ appointment, onView }: AppointmentCardProps) => {
       whileHover={{ x: 4, scale: 1.01 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
       onClick={onView}
-      className="group relative overflow-hidden bg-gradient-to-br from-blue-50/80 to-blue-100/60 rounded-2xl p-5 border-2 border-blue-200/50 hover:border-blue-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl"
+      className="group relative overflow-hidden site-card bg-primary-50/50 border-primary-200/40 rounded-xl p-5 cursor-pointer"
     >
-      {/* Gradient Background on Hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-100/0 to-blue-100/0 group-hover:from-blue-100/50 group-hover:to-transparent transition-all duration-300" />
-      
-      {/* Content */}
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <h4 className="font-bold text-gray-800 mb-2 text-lg group-hover:text-blue-700 transition-colors">
+            <h4 className="site-card-title text-lg mb-2 group-hover:text-primary-700 transition-colors">
               {appointment.type || 'Appointment'}
             </h4>
             
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-gray-700">
-                <CalendarDaysIcon className="h-4 w-4 text-blue-600" />
+                <CalendarDaysIcon className="h-4 w-4 text-primary-600" />
                 <span className="font-medium">{formatDate(appointment.appointmentDate)}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm text-gray-700">
-                <ClockIcon className="h-4 w-4 text-blue-600" />
+                <ClockIcon className="h-4 w-4 text-primary-600" />
                 <span className="font-medium">{formatTime(appointment.appointmentTime)}</span>
               </div>
               
@@ -90,7 +86,7 @@ const AppointmentCard = ({ appointment, onView }: AppointmentCardProps) => {
         </div>
         
         {/* Bottom Border Animation */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
       </div>
     </motion.div>
   )

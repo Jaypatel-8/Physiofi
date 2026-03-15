@@ -34,16 +34,16 @@ const CTASection = ({
           className="max-w-3xl mx-auto"
         >
           <h2 className="text-4xl lg:text-5xl font-black text-white mb-6 font-display">
-            {title.split(' ').map((word, index) => {
+            {(typeof title === 'string' ? title : 'Ready to Start Your Recovery Journey?').split(' ').map((word, index, arr) => {
               const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Journey', 'Start']
               const cleanWord = word.replace(/[.,!?;:]/g, '')
               const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
               return isFocusWord ? (
                 <span key={index} className="text-yellow-200">
-                  {word}{index < title.split(' ').length - 1 ? ' ' : ''}
+                  {word}{index < arr.length - 1 ? ' ' : ''}
                 </span>
               ) : (
-                <React.Fragment key={index}>{word}{index < title.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
+                <React.Fragment key={index}>{word}{index < arr.length - 1 ? ' ' : ''}</React.Fragment>
               )
             })}
           </h2>

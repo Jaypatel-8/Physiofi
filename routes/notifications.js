@@ -26,7 +26,7 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-// Get all notifications for a user
+// Get all notifications for a user (role-based filtering)
 router.get('/', verifyToken, async (req, res) => {
   try {
     const { isRead, limit = 50, page = 1 } = req.query;
@@ -36,6 +36,53 @@ router.get('/', verifyToken, async (req, res) => {
       user: req.user.userId,
       userModel: req.user.role === 'patient' ? 'Patient' : req.user.role === 'doctor' ? 'Doctor' : 'Admin'
     };
+
+    // Role-based notification filtering
+    const userRole = req.user.role;
+    
+    // Patients should only see: confirmed, cancelled, rescheduled, completed, accepted, rejected notifications
+    // NOT appointment_request (that's for doctors/admin only)
+    if (userRole === 'patient') {
+      query.type = {
+        $in: [
+          'appointment_confirmed',
+          'appointment_cancelled',
+          'appointment_rescheduled',
+          'appointment_reminder',
+          'treatment_update',
+          'progress_update',
+          'reschedule_accepted',
+          'reschedule_declined',
+          'appointment_status_change',
+          'admin_announcement',
+          'payment_reminder'
+        ]
+      };
+    }
+    
+    // Doctors and Admins should see: appointment_request and all other notifications
+    // They should NOT see appointment_confirmed for their own appointments (only patients see those)
+    if (userRole === 'doctor' || userRole === 'admin') {
+      // Show appointment requests, system notifications (approval, admin message), and other relevant notifications
+      query.type = {
+        $in: [
+          'appointment_request',
+          'appointment_cancelled',
+          'appointment_rescheduled',
+          'appointment_reminder',
+          'treatment_update',
+          'progress_update',
+          'reschedule_request',
+          'reschedule_accepted',
+          'reschedule_declined',
+          'appointment_status_change',
+          'system_announcement',
+          'doctor_approval',
+          'admin_message_to_doctor',
+          'admin_announcement'
+        ]
+      };
+    }
 
     if (isRead !== undefined) {
       query.isRead = isRead === 'true';
@@ -74,14 +121,51 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// Get unread notifications count
+// Get unread notifications count (role-based filtering)
 router.get('/unread-count', verifyToken, async (req, res) => {
   try {
-    const count = await Notification.countDocuments({
+    const userRole = req.user.role;
+    
+    let query = {
       user: req.user.userId,
-      userModel: req.user.role === 'patient' ? 'Patient' : req.user.role === 'doctor' ? 'Doctor' : 'Admin',
+      userModel: userRole === 'patient' ? 'Patient' : userRole === 'doctor' ? 'Doctor' : 'Admin',
       isRead: false
-    });
+    };
+
+    // Apply same role-based filtering as main notifications endpoint
+    if (userRole === 'patient') {
+      query.type = {
+        $in: [
+          'appointment_confirmed',
+          'appointment_cancelled',
+          'appointment_rescheduled',
+          'appointment_reminder',
+          'treatment_update',
+          'progress_update',
+          'reschedule_accepted',
+          'reschedule_declined',
+          'appointment_status_change'
+        ]
+      };
+    } else if (userRole === 'doctor' || userRole === 'admin') {
+      query.type = {
+        $in: [
+          'appointment_request',
+          'appointment_cancelled',
+          'appointment_rescheduled',
+          'appointment_reminder',
+          'treatment_update',
+          'progress_update',
+          'reschedule_request',
+          'reschedule_accepted',
+          'reschedule_declined',
+          'appointment_status_change',
+          'system_announcement'
+        ]
+      };
+    }
+
+    const count = await Notification.countDocuments(query);
 
     res.json({
       success: true,
@@ -200,6 +284,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

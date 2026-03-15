@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { HomeIcon } from '@heroicons/react/24/outline'
@@ -13,6 +13,8 @@ interface ImageSectionProps {
 }
 
 const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionProps) => {
+  const [imageFailed, setImageFailed] = useState(false)
+  const showPlaceholder = !imagePath || imageFailed
   return (
     <section className="py-16 bg-white">
       <div className="container-custom">
@@ -26,17 +28,17 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
               transition={{ duration: 0.8 }}
               className="space-y-6"
             >
-              <h2 className="text-4xl font-black text-gray-900 font-display">
-                {title.split(' ').map((word, index) => {
+              <h2 className="text-4xl font-bold text-gray-900 font-display">
+                {(typeof title === 'string' ? title : '').split(' ').map((word, index, arr) => {
                   const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Home', 'Visit', 'Pain', 'Rehabilitation', 'Doorstep', 'Anywhere']
                   const cleanWord = word.replace(/[.,!?;:]/g, '')
                   const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
                   return isFocusWord ? (
                     <span key={index} className="text-primary-500">
-                      {word}{index < title.split(' ').length - 1 ? ' ' : ''}
+                      {word}{index < arr.length - 1 ? ' ' : ''}
                     </span>
                   ) : (
-                    <React.Fragment key={index}>{word}{index < title.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
+                    <React.Fragment key={index}>{word}{index < arr.length - 1 ? ' ' : ''}</React.Fragment>
                   )
                 })}
               </h2>
@@ -56,7 +58,7 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
           >
             <div className="rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-secondary-100 to-pastel-blue-100">
               <div className="aspect-[4/3] relative">
-                {imagePath ? (
+                {!showPlaceholder ? (
                   <Image
                     src={imagePath}
                     alt={imageAlt}
@@ -64,10 +66,8 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
                     loading="lazy"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.style.display = 'none'
-                    }}
+                    quality={70}
+                    onError={() => setImageFailed(true)}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-secondary-100 to-pastel-blue-100">

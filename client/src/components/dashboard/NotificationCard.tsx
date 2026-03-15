@@ -13,8 +13,14 @@ const NotificationCard = ({ notification, index }: NotificationCardProps) => {
     const type = notification.type?.toLowerCase() || 'info'
     switch (type) {
       case 'success':
+      case 'doctor_approval':
         return <CheckCircleIcon className="h-5 w-5 text-emerald-500" />
       case 'warning':
+      case 'admin_message_to_doctor':
+        return <ExclamationTriangleIcon className="h-5 w-5 text-amber-500" />
+      case 'admin_announcement':
+        return <InformationCircleIcon className="h-5 w-5 text-blue-500" />
+      case 'payment_reminder':
         return <ExclamationTriangleIcon className="h-5 w-5 text-amber-500" />
       case 'error':
         return <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
@@ -27,9 +33,14 @@ const NotificationCard = ({ notification, index }: NotificationCardProps) => {
     const type = notification.type?.toLowerCase() || 'info'
     switch (type) {
       case 'success':
+      case 'doctor_approval':
         return 'from-emerald-50 to-emerald-100/50 border-emerald-200'
       case 'warning':
+      case 'admin_message_to_doctor':
+      case 'payment_reminder':
         return 'from-amber-50 to-amber-100/50 border-amber-200'
+      case 'admin_announcement':
+        return 'from-blue-50 to-blue-100/50 border-blue-200'
       case 'error':
         return 'from-red-50 to-red-100/50 border-red-200'
       default:
@@ -49,7 +60,7 @@ const NotificationCard = ({ notification, index }: NotificationCardProps) => {
           {getIcon()}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-primary-700 transition-colors">
+          <p className="text-sm site-card-title mb-1 group-hover:text-primary-700 transition-colors">
             {notification.title || 'Notification'}
           </p>
           <p className="text-xs text-gray-600 leading-relaxed">
@@ -72,6 +83,7 @@ const NotificationCard = ({ notification, index }: NotificationCardProps) => {
 }
 
 export default NotificationCard
+
 
 
 

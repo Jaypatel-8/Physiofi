@@ -25,19 +25,17 @@ const ProgressTracking = ({ progress }: ProgressTrackingProps) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-green-50/90 to-green-100/70 backdrop-blur-sm rounded-3xl shadow-xl p-8 border-2 border-green-200/60"
+      className="bg-pastel-mint-50 rounded-2xl border border-pastel-mint-200/50 p-6"
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-xl font-black text-gray-800 mb-2 bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
-            Recovery Progress
-          </h3>
-          <p className="text-sm text-gray-700">Your overall recovery journey</p>
+          <h3 className="text-base font-bold text-gray-900">Recovery Progress</h3>
+          <p className="text-sm text-gray-500 mt-0.5">Your overall recovery journey</p>
         </div>
-        <div className="w-12 h-12 bg-gradient-to-br from-green-200 to-green-300 rounded-xl flex items-center justify-center shadow-sm">
-          <ChartBarIcon className="h-6 w-6 text-green-700" />
+        <div className="w-10 h-10 bg-pastel-mint-100 rounded-xl flex items-center justify-center text-pastel-mint-600">
+          <ChartBarIcon className="h-5 w-5" />
         </div>
       </div>
       

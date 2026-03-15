@@ -7,6 +7,7 @@ import 'aos/dist/aos.css'
 
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import PageHero from '@/components/ui/PageHero'
 import { 
   UserGroupIcon, 
   TrophyIcon, 
@@ -37,45 +38,7 @@ const AboutPage = () => {
     { number: "98.2%", label: "Client Satisfaction", icon: TrophyIcon }
   ]
 
-  const teamMembers = [
-    {
-      name: "Dr. Arth Patel",
-      role: "Founder & Chief Physiotherapist",
-      specialization: "Orthopedic & Sports Rehabilitation",
-      experience: "8+ years",
-      education: "M.P.T (Master of Physiotherapy)",
-      image: "/images/team/dr-arth.jpg",
-      description: "Specialized in orthopedic and sports rehabilitation with extensive experience in treating athletes and post-surgical patients."
-    },
-    {
-      name: "Dr. Prakruti Patel", 
-      role: "Senior Physiotherapist",
-      specialization: "Neurological & Pediatric Care",
-      experience: "6+ years",
-      education: "M.P.T (Master of Physiotherapy)",
-      image: "/images/team/dr-prakruti.jpg",
-      description: "Expert in neurological rehabilitation and pediatric physiotherapy, helping children with developmental delays and neurological conditions."
-    },
-    {
-      name: "Dr. Rajesh Kumar",
-      role: "Senior Physiotherapist", 
-      specialization: "Cardiac & Geriatric Care",
-      experience: "7+ years",
-      education: "M.P.T (Master of Physiotherapy)",
-      image: "/images/team/dr-rajesh.jpg",
-      description: "Specialized in cardiac rehabilitation and geriatric care, helping elderly patients maintain independence and quality of life."
-    },
-    {
-      name: "Dr. Priya Sharma",
-      role: "Physiotherapist",
-      specialization: "Women's Health & Pelvic Floor",
-      experience: "4+ years", 
-      education: "M.P.T (Master of Physiotherapy)",
-      image: "/images/team/dr-priya.jpg",
-      description: "Expert in women's health physiotherapy, including prenatal and postnatal care, pelvic floor rehabilitation, and women's wellness."
-    }
-  ]
-
+  
   const values = [
     {
       icon: <HeartIcon className="h-12 w-12" />,
@@ -130,52 +93,29 @@ const AboutPage = () => {
     <main className="min-h-screen">
       <Header />
       <div className="pt-24"></div>
-      
-      {/* Hero Section - Modern Design */}
-      <section className="relative pt-32 pb-20 bg-white overflow-hidden">
-        
-        <div className="container-custom relative z-10">
-          <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 max-w-6xl mx-auto">
-            <h1 className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-tight">
-              ABOUT<br /><span className="text-primary-500">PHYSIOFI</span>
-            </h1>
-            <div className="lg:ml-auto lg:max-w-2xl">
-              <p className="text-xl text-gray-600 font-medium leading-relaxed">
-                PhysioFi is a modern physiotherapy brand dedicated to delivering personalised, evidence-based care through Home Visits, Tele-Consultations, and Advanced Therapy Services. We believe recovery should be accessible, comfortable, and built around the patient—not the system.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-white">
+      <PageHero
+        label="About PhysioFi"
+        title="About PhysioFi"
+        subtitle="Personalised, evidence-based care through home visits, tele-consultations, and advanced therapy — built around you."
+      />
+
+      {/* Stats Section – pastel cards */}
+      <section className="py-20 bg-pastel-mesh">
         <div className="container-custom">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
               <div
                 key={index}
                 data-aos="fade-up"
                 data-aos-delay={index * 100}
-                className="text-center"
+                className={`card-hover-premium rounded-2xl p-8 text-center ${['bg-card-1', 'bg-card-2', 'bg-card-3'][index]}`}
               >
-                {(() => {
-                  const colors = [
-                    { border: 'border-teal-400', bg: 'bg-teal-50', text: 'text-teal-600' },
-                    { border: 'border-deepTeal', bg: 'bg-deepTeal-50', text: 'text-deepTeal' },
-                    { border: 'border-forest', bg: 'bg-forest-50', text: 'text-forest' }
-                  ]
-                  const color = colors[index % colors.length]
-                  return (
-                    <>
-                      <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-white shadow-md`}>
-                        <stat.icon className={`h-10 w-10 ${color.text}`} />
-                      </div>
-                      <div className={`text-4xl font-bold mb-2 ${color.text}`}>{stat.number}</div>
-                      <div className="text-gray-700 font-medium">{stat.label}</div>
-                    </>
-                  )
-                })()}
+                <div className="icon-pastel w-16 h-16 mx-auto mb-4">
+                  <stat.icon className="h-8 w-8" strokeWidth={1.5} />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">{stat.number}</div>
+                <div className="text-sm font-medium text-primary-600/90 uppercase tracking-widest">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -183,7 +123,7 @@ const AboutPage = () => {
       </section>
 
       {/* Our Story */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-pastel-mesh">
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div data-aos="fade-right">
@@ -206,23 +146,19 @@ const AboutPage = () => {
               </div>
             </div>
             <div data-aos="fade-left" className="space-y-6">
-              <div className="bg-primary-50 rounded-3xl p-8 shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-0 h-0 border-l-[40px] border-l-transparent border-t-[40px] border-t-primary-200"></div>
-                <div className="absolute top-0 right-0 w-0 h-0 border-l-[35px] border-l-transparent border-t-[35px] border-t-primary-100"></div>
+              <div className="card-hover-premium bg-card-1 rounded-2xl p-8 relative overflow-hidden">
                 <div className="relative z-10">
-                  <h3 className="text-3xl font-black text-gray-900 mb-4 font-display">Our Mission</h3>
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 font-display tracking-tight">Our Mission</h3>
+                  <p className="text-gray-600 leading-relaxed">
                     To empower individuals to restore movement, reduce pain, and improve quality of life through advanced physiotherapy tailored to each patient.
                   </p>
                 </div>
                   </div>
               
-              <div className="bg-pastel-blue-50 rounded-3xl p-8 shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-0 h-0 border-l-[40px] border-l-transparent border-t-[40px] border-t-pastel-blue-200"></div>
-                <div className="absolute top-0 right-0 w-0 h-0 border-l-[35px] border-l-transparent border-t-[35px] border-t-pastel-blue-100"></div>
+              <div className="card-hover-premium bg-card-2 rounded-2xl p-8 relative overflow-hidden">
                 <div className="relative z-10">
-                  <h3 className="text-3xl font-black text-gray-900 mb-4 font-display">Our Vision</h3>
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 font-display tracking-tight">Our Vision</h3>
+                  <p className="text-gray-600 leading-relaxed">
                     To build India&apos;s most trusted physiotherapy ecosystem — a blend of home-based care, digital care, and premium physiotherapy centers.
                   </p>
                 </div>
@@ -233,7 +169,7 @@ const AboutPage = () => {
       </section>
 
       {/* Our Values */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-pastel-mesh">
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display">
@@ -250,21 +186,17 @@ const AboutPage = () => {
                 key={index}
                 data-aos="fade-up"
                 data-aos-delay={index * 100}
-                className={`${
-                  value.color?.includes('from-') ? `bg-gradient-to-br ${value.color}` : (value.color || 'bg-primary-50')
-                } rounded-3xl p-8 text-center border-4 border-primary-300 hover:scale-110 transition-all duration-500 transform hover:-translate-y-2 backdrop-blur-sm relative overflow-hidden group`}
+                className={`card-hover-premium rounded-2xl p-8 text-center relative overflow-hidden ${['bg-card-1', 'bg-card-2', 'bg-card-3', 'bg-card-1'][index]}`}
               >
-                <div className={`mb-6 ${
-                  value.color?.includes('from-') ? 'text-primary-600' : 'text-primary-600'
-                }`}>
-                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto bg-white shadow-md`}>
+                <div className="mb-6">
+                  <div className="icon-pastel w-16 h-16 mx-auto">
                     {value.icon}
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4 font-display">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 font-display tracking-tight">
                   {value.title}
                 </h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-500 leading-relaxed text-sm">
                   {value.description}
                 </p>
               </div>
@@ -274,7 +206,7 @@ const AboutPage = () => {
       </section>
 
       {/* Timeline - Ultra Modern Sleek Design */}
-      <section className="py-32 bg-white relative overflow-hidden">
+      <section className="py-32 bg-pastel-mesh relative overflow-hidden">
         <div className="container-custom relative z-10">
           <div className="text-center mb-24">
             <motion.div
@@ -394,27 +326,6 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-accent-500 via-accent-600 to-accent-700">
-        <div className="container-custom text-center">
-          <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display">
-            Get Started Today
-          </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
-            Join hundreds of satisfied patients who have experienced exceptional care with PhysioFi.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-accent-700 hover:bg-gray-50 font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center justify-center gap-2">
-              <HomeIcon className="h-5 w-5" />
-              Book Consultation
-            </button>
-            <button className="bg-white/20 backdrop-blur-sm text-white hover:bg-white hover:text-accent-700 font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center justify-center gap-2">
-              <VideoCameraIcon className="h-5 w-5" />
-              Book Tele-Consultation
-            </button>
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </main>

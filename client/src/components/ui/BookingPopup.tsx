@@ -16,6 +16,7 @@ import ThemedCalendar from './ThemedCalendar'
 import { appointmentAPI, doctorAPI, doctorPublicAPI } from '@/lib/api'
 import { useAuth } from '@/app/providers'
 import toast from 'react-hot-toast'
+import { isAlpha, isNumeric } from 'validator'
 
 interface BookingPopupProps {
   isOpen: boolean
@@ -39,6 +40,8 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
       pincode: ''
     }
   })
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([])
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
   const [availableDoctors, setAvailableDoctors] = useState<any[]>([])
   const [isLoadingDoctors, setIsLoadingDoctors] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,9 +57,21 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
       setShowSuccess(false)
       setShowHelper(false)
       setIsCalendarOpen(false)
+      setAvailableTimeSlots([])
+      setFormData(prev => ({ ...prev, appointmentTime: '' }))
       loadDoctors()
     }
   }, [isOpen, defaultServiceType])
+
+  // Fetch availability slots when doctor, date, and service type are selected
+  useEffect(() => {
+    if (formData.doctorId && formData.appointmentDate && formData.serviceType) {
+      loadAvailabilitySlots()
+    } else {
+      setAvailableTimeSlots([])
+      setFormData(prev => ({ ...prev, appointmentTime: '' }))
+    }
+  }, [formData.doctorId, formData.appointmentDate, formData.serviceType])
 
   const loadDoctors = async () => {
     try {
@@ -105,6 +120,41 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
     }
   }
 
+  const loadAvailabilitySlots = async () => {
+    if (!formData.doctorId || !formData.appointmentDate || !formData.serviceType) {
+      return
+    }
+
+    try {
+      setIsLoadingSlots(true)
+      const response = await doctorAPI.getAvailabilitySlots(
+        formData.doctorId,
+        formData.appointmentDate,
+        formData.serviceType
+      )
+      
+      if (response.data.success) {
+        const slots = response.data.data.availableSlots || []
+        setAvailableTimeSlots(slots)
+        
+        // Clear selected time if it's no longer available
+        if (formData.appointmentTime && !slots.includes(formData.appointmentTime)) {
+          setFormData(prev => ({ ...prev, appointmentTime: '' }))
+        }
+      } else {
+        setAvailableTimeSlots([])
+      }
+    } catch (error: any) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading availability slots:', error)
+      }
+      setAvailableTimeSlots([])
+      // Don't show error toast - just show no slots available
+    } finally {
+      setIsLoadingSlots(false)
+    }
+  }
+
   const handleToggleHelper = () => {
     setShowHelper(prev => !prev)
   }
@@ -149,21 +199,49 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
         return
       }
 
+      // Validate address fields for home visits
+      if (formData.serviceType === 'home') {
+        // Validate street address - must be alphanumeric with spaces, at least 5 characters
+        if (!formData.address.street || formData.address.street.trim().length < 5) {
+          toast.error('Please enter a valid street address (at least 5 characters)')
+          setIsSubmitting(false)
+          return
+        }
+        
+        // Check for random gibberish in street address
+        const streetWords = formData.address.street.trim().split(/\s+/)
+        if (streetWords.length === 1 && formData.address.street.length > 20) {
+          // Single long word might be gibberish
+          if (!/^[A-Za-z0-9\s\.,\-/]+$/.test(formData.address.street)) {
+            toast.error('Please enter a valid street address')
+            setIsSubmitting(false)
+            return
+          }
+        }
+        
+        // Validate city - must be letters and spaces only, 2-50 characters
+        if (!formData.address.city || !isAlpha(formData.address.city.replace(/\s/g, ''), 'en-US') || formData.address.city.trim().length < 2 || formData.address.city.trim().length > 50) {
+          toast.error('Please enter a valid city name (letters only, 2-50 characters)')
+          setIsSubmitting(false)
+          return
+        }
+        
+        // Validate pincode - must be exactly 6 digits
+        if (!formData.address.pincode || !isNumeric(formData.address.pincode) || formData.address.pincode.length !== 6) {
+          toast.error('Please enter a valid 6-digit pincode')
+          setIsSubmitting(false)
+          return
+        }
+      }
+      
       // Format address properly for home visits
       let formattedAddress = undefined
       if (formData.serviceType === 'home' && formData.address) {
-        // Only include address if at least street and city are provided
-        if (formData.address.street && formData.address.city) {
-          formattedAddress = {
-            street: formData.address.street,
-            city: formData.address.city,
-            state: formData.address.state || '',
-            pincode: formData.address.pincode || ''
-          }
-        } else {
-          toast.error('Please provide complete address for home visit')
-          setIsSubmitting(false)
-          return
+        formattedAddress = {
+          street: formData.address.street.trim(),
+          city: formData.address.city.trim(),
+          state: formData.address.state?.trim() || '',
+          pincode: formData.address.pincode.trim()
         }
       }
 
@@ -177,7 +255,6 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('Booking appointment with data:', appointmentData)
       }
       const response = await appointmentAPI.create(appointmentData)
       
@@ -279,7 +356,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
   ]
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="" size="xl">
       <AnimatePresence mode="wait">
         {!showSuccess ? (
           <motion.div
@@ -287,27 +364,29 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
+            className="space-y-4"
           >
-            <div className="text-center mb-6">
+            <div className="text-center mb-4">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200 }}
-                className="w-16 h-16 bg-gradient-to-br from-primary-500 via-secondary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                className="w-14 h-14 bg-gradient-to-br from-primary-500 via-secondary-500 to-primary-600 rounded-xl flex items-center justify-center mx-auto mb-3"
               >
-                <CalendarIcon className="h-8 w-8 text-white" />
+                <CalendarIcon className="h-7 w-7 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Book Your Appointment</h2>
-              <p className="text-gray-600">Quick & Easy - Just 2 minutes!</p>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Book Your Appointment</h2>
+              <p className="text-sm text-gray-600">Quick &amp; easy — about 2 minutes</p>
             </div>
 
             {/* Helper Button */}
             <button
+              type="button"
               onClick={handleToggleHelper}
-              className="w-full mb-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl hover:shadow-md transition-all duration-300 flex items-center justify-center space-x-2 hover:scale-105 active:scale-95"
+              className="w-full mb-3 p-2.5 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99]"
             >
               <QuestionMarkCircleIcon className="h-5 w-5 text-purple-600" />
-              <span className="font-semibold text-purple-700">Don't know which specialist to book?</span>
+              <span className="font-semibold text-purple-700 text-sm">Don&apos;t know which specialist to book?</span>
             </button>
 
             {/* Specialist Guide */}
@@ -317,13 +396,13 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mb-6 bg-gradient-to-br from-primary-50 via-secondary-50 to-tertiary-50 rounded-xl p-4 border-2 border-primary-200"
+                  className="mb-4 bg-gradient-to-br from-primary-50 via-secondary-50 to-tertiary-50 rounded-xl p-3 border-2 border-primary-200"
                 >
                   <h3 className="font-bold text-gray-900 mb-3 flex items-center space-x-2">
                     <SparklesIcon className="h-5 w-5 text-purple-600" />
                     <span>Which Specialist Do You Need?</span>
                   </h3>
-                  <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-1 gap-2 max-h-52 overflow-y-auto">
                     {specialistGuide.map((item, index) => (
                       <motion.div
                         key={index}
@@ -348,11 +427,13 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
               )}
             </AnimatePresence>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="overflow-y-auto custom-scrollbar pr-1">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
+                className="col-span-1 lg:col-span-2"
               >
                 <label htmlFor="serviceType" className="block text-sm font-semibold text-gray-700 mb-2">
                   Service Type *
@@ -395,6 +476,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
+                className="col-span-1"
               >
                 <label htmlFor="doctorId" className="block text-sm font-semibold text-gray-700 mb-2">
                   Select Doctor *
@@ -448,6 +530,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
+                className="col-span-1"
               >
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Appointment Date *
@@ -476,7 +559,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                     <ThemedCalendar
                       selectedDate={formData.appointmentDate}
                       onDateSelect={(date) => {
-                        setFormData(prev => ({ ...prev, appointmentDate: date }))
+                        setFormData(prev => ({ ...prev, appointmentDate: date, appointmentTime: '' }))
                         setIsCalendarOpen(false)
                       }}
                       minDate={new Date().toISOString().split('T')[0]}
@@ -490,23 +573,51 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
+                className="col-span-1"
               >
                 <label htmlFor="appointmentTime" className="block text-sm font-semibold text-gray-700 mb-2">
                   Appointment Time *
+                  {formData.doctorId && formData.appointmentDate && (
+                    <span className="text-xs font-normal text-gray-500 ml-2">
+                      (Based on doctor availability)
+                    </span>
+                  )}
                 </label>
-                <select
-                  id="appointmentTime"
-                  name="appointmentTime"
-                  value={formData.appointmentTime}
-                  onChange={(e) => setFormData(prev => ({ ...prev, appointmentTime: e.target.value }))}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-                >
-                  <option value="">Select time</option>
-                  {timeSlots.map((time) => (
-                    <option key={time} value={time}>{formatTimeForDisplay(time)}</option>
-                  ))}
-                </select>
+                {isLoadingSlots ? (
+                  <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-center text-gray-500">
+                    Loading available slots...
+                  </div>
+                ) : availableTimeSlots.length > 0 ? (
+                  <select
+                    id="appointmentTime"
+                    name="appointmentTime"
+                    value={formData.appointmentTime}
+                    onChange={(e) => setFormData(prev => ({ ...prev, appointmentTime: e.target.value }))}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                  >
+                    <option value="">Select available time</option>
+                    {availableTimeSlots.map((time) => (
+                      <option key={time} value={time}>{formatTimeForDisplay(time)}</option>
+                    ))}
+                  </select>
+                ) : formData.doctorId && formData.appointmentDate ? (
+                  <div className="w-full px-4 py-3 border border-amber-300 rounded-lg bg-amber-50 text-amber-700 text-center">
+                    No available slots for this date. Please select another date.
+                  </div>
+                ) : (
+                  <select
+                    id="appointmentTime"
+                    name="appointmentTime"
+                    value={formData.appointmentTime}
+                    onChange={(e) => setFormData(prev => ({ ...prev, appointmentTime: e.target.value }))}
+                    required
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-400 cursor-not-allowed"
+                  >
+                    <option value="">Select doctor and date first</option>
+                  </select>
+                )}
               </motion.div>
 
               {formData.serviceType === 'home' && (
@@ -514,31 +625,46 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="space-y-3"
+                  className="col-span-1 lg:col-span-2 space-y-3"
                 >
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Address (for Home Visit) *
                   </label>
                   <input
                     type="text"
-                    placeholder="Street Address"
+                    placeholder="Street Address (e.g., 123 Main Street, Apartment 4B)"
                     value={formData.address.street}
-                    onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, street: e.target.value } }))}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      // Allow alphanumeric, spaces, commas, periods, hyphens, slashes
+                      if (/^[A-Za-z0-9\s\.,\-/]*$/.test(value) && value.length <= 100) {
+                        setFormData(prev => ({ ...prev, address: { ...prev.address, street: value } }))
+                      }
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 mb-2"
                     required={formData.serviceType === 'home'}
-                    pattern=".{3,}"
-                    title="Please enter a valid street address (at least 3 characters)"
+                    minLength={5}
+                    maxLength={100}
+                    title="Please enter a valid street address (5-100 characters, letters, numbers, and common punctuation only)"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
                       placeholder="City"
                       value={formData.address.city}
-                      onChange={(e) => setFormData(prev => ({ ...prev, address: { ...prev.address, city: e.target.value } }))}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        // Only allow letters and spaces, convert to title case
+                        if (/^[A-Za-z\s]*$/.test(value) && value.length <= 50) {
+                          setFormData(prev => ({ ...prev, address: { ...prev.address, city: value } }))
+                        }
+                      }}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                       required={formData.serviceType === 'home'}
-                      pattern="[A-Za-z\s]{2,}"
-                      title="Please enter a valid city name"
+                      minLength={2}
+                      maxLength={50}
+                      pattern="[A-Za-z\s]{2,50}"
+                      title="Please enter a valid city name (letters only, 2-50 characters)"
                     />
                     <div>
                       <label className="block text-xs font-semibold text-gray-600 mb-1">
@@ -555,7 +681,9 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                         required={formData.serviceType === 'home'}
                         pattern="[0-9]{6}"
-                        title="Please enter a valid 6-digit pincode"
+                        minLength={6}
+                        maxLength={6}
+                        title="Please enter a valid 6-digit pincode (numbers only)"
                       />
                     </div>
                   </div>
@@ -566,6 +694,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
+                className="col-span-1 lg:col-span-2"
               >
                 <label htmlFor="symptoms" className="block text-sm font-semibold text-gray-700 mb-2">
                   Symptoms / Condition (Optional)
@@ -581,6 +710,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
                   maxLength={500}
                 />
               </motion.div>
+              </div>
 
               <button
                 type="submit"

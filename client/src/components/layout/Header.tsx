@@ -17,6 +17,7 @@ import {
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
+import NotificationBell from '@/components/ui/NotificationBell'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -78,7 +79,7 @@ const Header = () => {
     { name: 'Home', href: '/', colorClass: 'bg-primary-300' },
     { name: 'About', href: '/about', colorClass: 'bg-secondary-300' },
     { name: 'Services', href: '/services', colorClass: 'bg-tertiary-300', hasSubmenu: true, submenu: servicesSubmenu },
-    { name: 'Diseases', href: '#', colorClass: 'bg-accent-300', hasSubmenu: true, submenu: diseasesSubmenu },
+    { name: 'Diseases', href: '/conditions', colorClass: 'bg-accent-300', hasSubmenu: true, submenu: diseasesSubmenu },
     { name: 'Career', href: '/career', colorClass: 'bg-primary-300' },
     { name: 'Contact', href: '/contact', colorClass: 'bg-secondary-300' },
   ]
@@ -130,7 +131,6 @@ const Header = () => {
     // Check user state first (most reliable)
     if (user && user.role) {
       dashboardLink = getDashboardLinkFromUser(user)
-      console.log('Dashboard click - Using user state:', user.role, '->', dashboardLink)
     } else if (typeof window !== 'undefined' && isMounted) {
       // Fallback to localStorage
       try {
@@ -138,7 +138,6 @@ const Header = () => {
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser)
           dashboardLink = getDashboardLinkFromUser(parsedUser)
-          console.log('Dashboard click - Using localStorage:', parsedUser?.role, '->', dashboardLink)
         }
       } catch (e) {
         console.error('Error parsing user data:', e)
@@ -150,7 +149,6 @@ const Header = () => {
       console.log('Redirecting to:', dashboardLink)
       window.location.href = dashboardLink
     } else {
-      console.log('No valid user found, redirecting to login')
       window.location.href = '/login'
     }
   }
@@ -213,6 +211,24 @@ const Header = () => {
     }
   }
 
+  // Only patients (or guests) see full website menu; doctors and admins see only dashboard + logout
+  const getEffectiveRole = (): string | null => {
+    if (user?.role) return user.role
+    if (isMounted && typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('user')
+        if (stored) return JSON.parse(stored)?.role ?? null
+      } catch { /* ignore */ }
+    }
+    return null
+  }
+  const effectiveRole = getEffectiveRole()
+  const showWebsiteNavigation =
+    !isMounted ||
+    typeof window === 'undefined' ||
+    !effectiveRole ||
+    effectiveRole === 'patient'
+
   return (
     <header
       className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100/50 transition-all duration-300"
@@ -226,23 +242,21 @@ const Header = () => {
             transition={{ duration: 0.5 }}
             className="flex items-center space-x-2"
           >
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-secondary-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <Image
-                  src="/Physiofi Logo(1).png"
-                  alt="PhysioFi Logo"
-                  width={120}
-                  height={50}
-                  className="relative z-10 group-hover:scale-105 transition-transform duration-300 object-contain"
-                  style={{ width: 'auto', height: 'auto', maxWidth: '120px' }}
-                  priority
-                />
-              </div>
+            <Link href="/" className="flex items-center space-x-3">
+              <Image
+                src="/Physiofi Logo(1).png"
+                alt="PhysioFi Logo"
+                width={120}
+                height={50}
+                className="object-contain"
+                style={{ width: 'auto', height: 'auto', maxWidth: '120px' }}
+                priority
+              />
             </Link>
           </motion.div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - full website menu only for guests and patients; doctors/admins see only dashboard */}
+          {showWebsiteNavigation ? (
           <nav className="hidden lg:flex items-center space-x-1" ref={submenuRef}>
             {navigation.map((item, index) => (
               <motion.div
@@ -312,6 +326,11 @@ const Header = () => {
               </motion.div>
             ))}
           </nav>
+          ) : (
+            <nav className="hidden lg:flex items-center">
+              <span className="text-sm font-semibold text-gray-500">Dashboard</span>
+            </nav>
+          )}
 
           {/* Desktop CTA Buttons */}
           <div className="hidden lg:flex items-center space-x-3">
@@ -327,7 +346,9 @@ const Header = () => {
             ) : (
               // Show dashboard/logout only after mount and if user is authenticated
               <div className="flex items-center space-x-3">
+                <NotificationBell />
                 <button
+                  type="button"
                   onClick={handleDashboardClick}
                   className="group relative flex items-center space-x-2 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 overflow-hidden"
                 >
@@ -336,6 +357,7 @@ const Header = () => {
                   <span className="relative z-10">Dashboard</span>
                 </button>
                 <button
+                  type="button"
                   onClick={handleLogout}
                   className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 border border-transparent hover:border-red-200"
                   title="Logout"
@@ -349,6 +371,9 @@ const Header = () => {
 
           {/* Mobile menu button */}
           <motion.button
+            type="button"
+            aria-expanded={isMenuOpen}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
@@ -375,7 +400,7 @@ const Header = () => {
             className="lg:hidden bg-white/95 backdrop-blur-md shadow-2xl border-t border-gray-100/50"
           >
             <div className="px-4 py-6 space-y-3">
-              {navigation.map((item, index) => (
+              {showWebsiteNavigation && navigation.map((item, index) => (
                 <motion.div
                   key={item.name}
                   initial={{ opacity: 0, x: -20 }}
@@ -385,6 +410,7 @@ const Header = () => {
                   {item.hasSubmenu ? (
                     <div>
                       <button
+                        type="button"
                         onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
                         className="flex items-center justify-between w-full text-base font-semibold text-gray-800 hover:text-primary-600 px-4 py-3 rounded-xl hover:bg-primary-50/50 transition-all duration-300"
                       >
@@ -439,7 +465,7 @@ const Header = () => {
                 </motion.div>
               ))}
               
-              <div className="pt-4 mt-4 border-t border-gray-200 space-y-3">
+              <div className={`space-y-3 ${showWebsiteNavigation ? 'pt-4 mt-4 border-t border-gray-200' : ''}`}>
                 {typeof window === 'undefined' || !isMounted || !user || !user.role ? (
                   // Always render Login during SSR and initial render to prevent hydration mismatch
                   <Link
@@ -453,6 +479,9 @@ const Header = () => {
                 ) : (
                   // Show dashboard/logout only after mount and if user is authenticated
                   <div className="space-y-3">
+                    <div className="flex justify-center">
+                      <NotificationBell />
+                    </div>
                     <button
                       onClick={() => {
                         setIsMenuOpen(false)

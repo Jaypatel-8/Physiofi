@@ -58,6 +58,15 @@ router.get('/:id', async (req, res) => {
       });
     }
 
+    // Only show doctor profile to patients when approved (Active)
+    const doctorStatus = doctor.status || 'Active';
+    if (doctorStatus !== 'Active') {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found'
+      });
+    }
+
     // Get doctor's conditions and treatment plans
     const conditions = await DoctorCondition.find({
       doctor: req.params.id,
@@ -1413,6 +1422,137 @@ router.get('/available', async (req, res) => {
     });
   }
 });
+
+// Get doctor availability slots for a specific date and service type (public)
+router.get('/:id/availability-slots', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date, serviceType } = req.query;
+
+    if (!date || !serviceType) {
+      return res.status(400).json({
+        success: false,
+        message: 'Date and serviceType are required'
+      });
+    }
+
+    const doctor = await Doctor.findById(id);
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found'
+      });
+    }
+
+    if (doctor.status !== 'Active') {
+      return res.status(400).json({
+        success: false,
+        message: 'Doctor is not available'
+      });
+    }
+
+    const appointmentDate = new Date(date);
+    const dayName = appointmentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    
+    // Map service type to appointment type
+    const appointmentTypeMap = {
+      'home': 'Home Visit',
+      'tele': 'Online Consultation',
+      'clinic': 'Clinic Visit'
+    };
+    const appointmentType = appointmentTypeMap[serviceType] || serviceType;
+
+    // Check date-specific availability first
+    const dateStr = appointmentDate.toISOString().split('T')[0];
+    const dateSpecific = doctor.dateSpecificAvailability?.find(da => {
+      const daDateStr = da.date instanceof Date 
+        ? da.date.toISOString().split('T')[0] 
+        : da.date;
+      return daDateStr === dateStr;
+    });
+
+    let availableSlots = [];
+
+    if (dateSpecific && dateSpecific.available) {
+      // Use date-specific availability
+      const start = dateSpecific.start;
+      const end = dateSpecific.end;
+      availableSlots = generateTimeSlots(start, end, 60); // 60-minute slots
+    } else {
+      // Use weekly schedule
+      const daySchedule = doctor.availability[dayName] || [];
+      const relevantSlots = daySchedule.filter(slot => slot.type === appointmentType);
+      
+      if (relevantSlots.length > 0) {
+        // Combine all slots for the day
+        relevantSlots.forEach(slot => {
+          const slots = generateTimeSlots(slot.start, slot.end, 60);
+          availableSlots = [...availableSlots, ...slots];
+        });
+        // Remove duplicates and sort
+        availableSlots = [...new Set(availableSlots)].sort();
+      }
+    }
+
+    // Check existing appointments to remove booked slots
+    const Appointment = require('../models/Appointment');
+    const existingAppointments = await Appointment.find({
+      doctor: id,
+      appointmentDate: {
+        $gte: new Date(dateStr + 'T00:00:00'),
+        $lt: new Date(dateStr + 'T23:59:59')
+      },
+      status: { $in: ['Pending', 'Confirmed', 'Scheduled'] }
+    });
+
+    const bookedSlots = existingAppointments.map(apt => apt.appointmentTime);
+    availableSlots = availableSlots.filter(slot => !bookedSlots.includes(slot));
+
+    res.json({
+      success: true,
+      data: {
+        doctorId: id,
+        doctorName: doctor.name,
+        date: dateStr,
+        serviceType: appointmentType,
+        availableSlots,
+        bookedSlots
+      }
+    });
+  } catch (error) {
+    console.error('Get availability slots error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Helper function to generate time slots
+function generateTimeSlots(startTime, endTime, intervalMinutes = 60) {
+  const slots = [];
+  const [startHour, startMin] = startTime.split(':').map(Number);
+  const [endHour, endMin] = endTime.split(':').map(Number);
+  
+  let currentHour = startHour;
+  let currentMin = startMin;
+  
+  while (
+    currentHour < endHour || 
+    (currentHour === endHour && currentMin < endMin)
+  ) {
+    const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`;
+    slots.push(timeStr);
+    
+    currentMin += intervalMinutes;
+    if (currentMin >= 60) {
+      currentHour += Math.floor(currentMin / 60);
+      currentMin = currentMin % 60;
+    }
+  }
+  
+  return slots;
+}
 
 // Get all doctors (admin)
 router.get('/all', isDoctor, async (req, res) => {

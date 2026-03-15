@@ -2,78 +2,48 @@
 
 import { motion } from 'framer-motion'
 
+const DASHBOARD_PALETTE = [
+  { bg: 'bg-primary-50', iconBg: 'bg-primary-100', iconColor: 'text-primary-600', border: 'border-primary-200/50' },
+  { bg: 'bg-pastel-blue-50', iconBg: 'bg-pastel-blue-100', iconColor: 'text-pastel-blue-600', border: 'border-pastel-blue-200/50' },
+  { bg: 'bg-pastel-mint-50', iconBg: 'bg-pastel-mint-100', iconColor: 'text-pastel-mint-600', border: 'border-pastel-mint-200/50' },
+  { bg: 'bg-pastel-lavender-50', iconBg: 'bg-pastel-lavender-100', iconColor: 'text-pastel-lavender-600', border: 'border-pastel-lavender-200/50' },
+  { bg: 'bg-pastel-peach-50', iconBg: 'bg-pastel-peach-100', iconColor: 'text-pastel-peach-600', border: 'border-pastel-peach-200/50' },
+  { bg: 'bg-pastel-sage-50', iconBg: 'bg-pastel-sage-100', iconColor: 'text-pastel-sage-600', border: 'border-pastel-sage-200/50' },
+]
+
 interface StatsCardProps {
   title: string
   value: number | string
   icon: React.ReactNode
   color: string
   onClick?: () => void
-  trend?: {
-    value: number
-    isPositive: boolean
-  }
+  trend?: { value: number; isPositive: boolean }
+  index?: number
 }
 
-const StatsCard = ({ title, value, icon, color, onClick, trend }: StatsCardProps) => {
+const StatsCard = ({ title, value, icon, onClick, trend, index = 0 }: StatsCardProps) => {
+  const style = DASHBOARD_PALETTE[index % DASHBOARD_PALETTE.length]
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      transition={{ duration: 0.28, delay: index * 0.04 }}
       onClick={onClick}
-      className={`group relative overflow-hidden rounded-3xl cursor-pointer shadow-xl hover:shadow-2xl border-2 transition-all duration-300 ${color}`}
-      style={{ 
-        borderColor: color.includes('blue') ? 'rgba(147, 197, 253, 0.6)' :
-                    color.includes('purple') ? 'rgba(196, 181, 253, 0.6)' :
-                    color.includes('green') ? 'rgba(187, 247, 208, 0.6)' :
-                    color.includes('pink') ? 'rgba(251, 182, 206, 0.6)' :
-                    color.includes('cyan') ? 'rgba(165, 243, 252, 0.6)' :
-                    color.includes('indigo') ? 'rgba(196, 181, 253, 0.6)' :
-                    color.includes('emerald') ? 'rgba(167, 243, 208, 0.6)' :
-                    'rgba(203, 213, 225, 0.6)'
-      }}
+      className={`group relative site-card p-4 ${style.bg} ${style.border} ${onClick ? 'cursor-pointer' : ''}`}
     >
-      {/* Subtle overlay on hover */}
-      <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all duration-300" />
-      
-      {/* Content */}
-      <div className="relative p-7 z-10">
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex-1">
-            <p className="text-gray-700 text-xs font-bold uppercase tracking-widest mb-3">{title}</p>
-            <motion.p 
-              className="text-5xl font-black mb-2 leading-none text-gray-900"
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.1, type: "spring" }}
-            >
-              {value}
-            </motion.p>
-            {trend && (
-              <div className={`flex items-center gap-1.5 text-sm font-bold mt-3 px-3 py-1.5 rounded-lg ${
-                trend.isPositive ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-red-100 text-red-800 border border-red-200'
-              }`}>
-                <span>{trend.isPositive ? '↑' : '↓'}</span>
-                <span>{Math.abs(trend.value)}%</span>
-              </div>
-            )}
-          </div>
-          <motion.div 
-            className="relative z-10"
-            whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="w-16 h-16 rounded-2xl bg-white/80 backdrop-blur-sm flex items-center justify-center group-hover:bg-white transition-all duration-300 shadow-lg border-2 border-white/50">
-              <div className="text-gray-800">
-                {icon}
-              </div>
-            </div>
-          </motion.div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-gray-500 mb-0.5">{title}</p>
+          <p className="text-xl site-card-title tabular-nums">{value}</p>
+          {trend && (
+            <span className={`inline-block mt-2 text-xs font-medium ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+              {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+            </span>
+          )}
         </div>
-        
-        {/* Bottom Accent Line */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-300/50 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${style.iconBg} ${style.iconColor} opacity-90`}>
+          {icon}
+        </div>
       </div>
     </motion.div>
   )

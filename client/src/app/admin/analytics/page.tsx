@@ -1,29 +1,29 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeftIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { adminAPI } from '@/lib/api'
 import StatsCard from '@/components/dashboard/StatsCard'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 
 const AdminAnalytics = () => {
+  const router = useRouter()
   const { user, loading } = useAuth()
   const [analytics, setAnalytics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
+      if (!user || user.role !== 'admin') {
+        router.replace('/admin/login')
         return
       }
       loadAnalytics()
     }
-  }, [user, loading])
+  }, [user, loading, router])
 
   const loadAnalytics = async () => {
     try {
@@ -41,68 +41,55 @@ const AdminAnalytics = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-          <p className="text-gray-600">Loading analytics...</p>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="Analytics" subtitle="Loading..." />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="site-card p-4 h-24 animate-pulse rounded-xl" />
+          ))}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-yellow-600 to-yellow-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Dashboard</span>
-          </Link>
-          <h1 className="text-4xl font-black mb-2">Analytics</h1>
-          <p className="text-white/90">Track your practice performance and insights</p>
-        </div>
+    <div className="space-y-6">
+      <DashboardSubPageHeader
+        title="Analytics"
+        subtitle="Track platform performance and insights"
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatsCard
+          title="Total Revenue"
+          value={`₹${(analytics?.totalRevenue || 0).toLocaleString()}`}
+          icon={<ChartBarIcon className="h-6 w-6" />}
+          color=""
+          index={0}
+        />
+        <StatsCard
+          title="Monthly Revenue"
+          value={`₹${(analytics?.monthlyRevenue || 0).toLocaleString()}`}
+          icon={<ChartBarIcon className="h-6 w-6" />}
+          color=""
+          index={1}
+        />
+        <StatsCard
+          title="Total Appointments"
+          value={analytics?.totalAppointments || 0}
+          icon={<ChartBarIcon className="h-6 w-6" />}
+          color=""
+          index={2}
+        />
+        <StatsCard
+          title="Active Users"
+          value={analytics?.activeUsers || 0}
+          icon={<ChartBarIcon className="h-6 w-6" />}
+          color=""
+          index={3}
+        />
       </div>
-
-      <div className="container-custom py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard
-            title="Total Revenue"
-            value={`₹${(analytics?.totalRevenue || 0).toLocaleString()}`}
-            icon={<ChartBarIcon className="h-7 w-7 text-white" />}
-            color="bg-gradient-to-br from-green-500 to-green-600"
-          />
-          <StatsCard
-            title="Monthly Revenue"
-            value={`₹${(analytics?.monthlyRevenue || 0).toLocaleString()}`}
-            icon={<ChartBarIcon className="h-7 w-7 text-white" />}
-            color="bg-gradient-to-br from-primary-500 to-primary-600"
-          />
-          <StatsCard
-            title="Total Appointments"
-            value={analytics?.totalAppointments || 0}
-            icon={<ChartBarIcon className="h-7 w-7 text-white" />}
-            color="bg-gradient-to-br from-primary-500 to-primary-600"
-          />
-          <StatsCard
-            title="Active Users"
-            value={analytics?.activeUsers || 0}
-            icon={<ChartBarIcon className="h-7 w-7 text-white" />}
-            color="bg-gradient-to-br from-purple-500 to-purple-600"
-          />
-        </div>
-      </div>
-      </div>
-      <Footer />
     </div>
   )
 }
 
 export default AdminAnalytics
-

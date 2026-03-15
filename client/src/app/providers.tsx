@@ -5,6 +5,7 @@ import { AuthContextType, User } from '@/types/auth'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import NotificationContainer from '@/components/ui/NotificationContainer'
 import { authAPI } from '@/lib/api'
+import { setAuthCookie, clearAuthCookie } from '@/lib/authCookie'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -16,15 +17,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Logout function - defined early to avoid circular dependency
   const logout = () => {
-    // Clear state first
     setUser(null)
     setToken(null)
-    // Clear localStorage (only on client side)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+      clearAuthCookie()
+      localStorage.clear()
     }
-    // Reset initialization state
     setIsInitialized(false)
     setLoading(true)
   }
@@ -40,13 +38,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: userData.name || userData.full_name,
           email: userData.email,
           mobile: userData.phone || userData.mobile || '',
-          role: userData.role // Role comes from backend response
+          role: userData.role, // Role comes from backend response
+          ...(userData.role === 'doctor' && userData.status !== undefined && { status: userData.status })
         }
         setUser(userObj)
         setToken(authToken)
         if (typeof window !== 'undefined') {
           localStorage.setItem('user', JSON.stringify(userObj))
-          localStorage.setItem('token', authToken) // Ensure token is stored
+          localStorage.setItem('token', authToken)
+          setAuthCookie(authToken) // keep middleware in sync
         }
         return true
       }
@@ -57,12 +57,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Only logout on 401 (unauthorized) or 403 (forbidden) errors
       // Network errors or 500 errors should not cause logout
       if (error.response?.status === 401 || error.response?.status === 403) {
-        console.error('Token validation failed - unauthorized:', error)
+        if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.error('Token validation failed - unauthorized:', error)
+        }
         logout()
         return false
       }
-      // For other errors (network, 500, etc.), don't logout - just return false
-      console.warn('Token validation error (non-critical):', error)
       return false
     }
   }
@@ -85,18 +85,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (storedToken && storedUser) {
         try {
+          // Set cookie immediately so middleware allows dashboard on next request (e.g. refresh on /patient/dashboard)
+          setAuthCookie(storedToken)
           // Parse user from localStorage first to set state immediately
           try {
             const parsedUser = JSON.parse(storedUser)
             if (parsedUser && parsedUser.role) {
-              // Set user state immediately from localStorage (optimistic update)
               setUser(parsedUser)
               setToken(storedToken)
             }
           } catch (e) {
             // Invalid user data, will be cleared below
           }
-          
+
           // Validate token with server
           const isValid = await validateToken(storedToken)
           
@@ -111,8 +112,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsInitialized(true)
           }
         } catch (error) {
-          // Error validating token, clear everything
-          console.error('Token validation error:', error)
+          if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+            console.error('Token validation error:', error)
+          }
           logout()
           setLoading(false)
           setIsInitialized(true)
@@ -134,12 +136,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Token validation only happens on initial load now
 
   const login = (userData: User, authToken: string) => {
-    // Store in localStorage first (synchronous) - this happens immediately (only on client side)
     if (typeof window !== 'undefined') {
       localStorage.setItem('token', authToken)
       localStorage.setItem('user', JSON.stringify(userData))
+      setAuthCookie(authToken)
     }
-    // Update state synchronously to avoid delays
     setUser(userData)
     setToken(authToken)
     // Mark as initialized to prevent re-initialization

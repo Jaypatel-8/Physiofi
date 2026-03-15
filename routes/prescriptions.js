@@ -110,6 +110,21 @@ router.post('/', isDoctor, async (req, res) => {
       });
     }
 
+    // Enhanced validation
+    if (!Array.isArray(medications) || medications.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide at least one medication'
+      });
+    }
+
+    if (diagnosis.trim().length < 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Diagnosis must be at least 3 characters'
+      });
+    }
+
     // Verify patient exists
     const patient = await Patient.findById(patientId);
     if (!patient) {
@@ -237,6 +252,7 @@ router.delete('/:id', isDoctor, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

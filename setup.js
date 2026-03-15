@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 
 // Load environment variables
@@ -24,7 +23,7 @@ const connectDB = async () => {
   }
 };
 
-// Create default admin user
+// Create default admin user (password is hashed by Admin model pre-save)
 const createDefaultAdmin = async () => {
   try {
     const existingAdmin = await Admin.findOne({ email: 'admin@physiofi.com' });
@@ -34,15 +33,15 @@ const createDefaultAdmin = async () => {
       return existingAdmin;
     }
 
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    
     const admin = new Admin({
+      full_name: 'System Administrator',
       name: 'System Administrator',
       email: 'admin@physiofi.com',
       phone: '+91 9998103191',
-      password: hashedPassword,
-      role: 'Super Admin',
+      password: 'admin123',  // plain; Admin model hashes it on save
+      role: 'superadmin',
       department: 'Operations',
+      status: 'Active',
       isVerified: true
     });
 
@@ -50,6 +49,7 @@ const createDefaultAdmin = async () => {
     console.log('✅ Default admin created successfully');
     console.log('📧 Email: admin@physiofi.com');
     console.log('🔑 Password: admin123');
+    console.log('   (Change password after first login. Admin login: /admin/login)');
     
     return admin;
   } catch (error) {

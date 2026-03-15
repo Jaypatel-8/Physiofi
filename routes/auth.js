@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const Admin = require('../models/Admin');
+const { sendPasswordResetEmail } = require('../services/emailService');
 const router = express.Router();
 
 // Generate JWT token
@@ -27,6 +28,50 @@ router.post('/patient/register', async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required fields'
+      });
+    }
+
+    // Enhanced validation
+    if (patientName.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name must be at least 2 characters'
+      });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    if (!/^[0-9]{10}$/.test(phone.replace(/\D/g, ''))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit phone number'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
+    const ageNum = parseInt(age);
+    if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid age (0-120)'
+      });
+    }
+
+    if (!['Male', 'Female', 'Other'].includes(gender)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Gender must be Male, Female, or Other'
       });
     }
 
@@ -158,6 +203,14 @@ router.post('/patient/login', async (req, res) => {
       });
     }
 
+    if (patient.isLocked) {
+      const lockMinutes = Math.ceil((patient.lockUntil - Date.now()) / 60000);
+      return res.status(400).json({
+        success: false,
+        message: `Account is temporarily locked due to multiple failed login attempts. Try again in ${lockMinutes} minutes.`
+      });
+    }
+
     // Verify password
     // Check if password_hash exists
     if (!patient.password_hash && !patient.password) {
@@ -170,13 +223,14 @@ router.post('/patient/login', async (req, res) => {
     
     const isPasswordValid = await patient.comparePassword(password);
     if (!isPasswordValid) {
-      console.log('Password validation failed for patient:', patient._id, 'Has password_hash:', !!patient.password_hash);
+      await patient.incLoginAttempts();
       return res.status(400).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
+    await patient.resetLoginAttempts();
     // Update last login and ensure status is set
     patient.lastLogin = new Date();
     if (!patient.status) {
@@ -250,18 +304,24 @@ router.post('/patient/forgot-password', async (req, res) => {
     patient.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
     await patient.save();
 
-    // In production, send email with reset link
-    // For now, return token in development
-    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=patient`;
+    // Send password reset email
+    const emailResult = await sendPasswordResetEmail(
+      email,
+      patient.full_name || patient.name,
+      resetToken,
+      'patient'
+    );
 
-    console.log('Password Reset Link:', resetUrl);
-    console.log('Reset Token:', resetToken);
-
+    // Always return success message (security best practice - don't reveal if email exists)
     res.json({
       success: true,
-      message: 'Password reset link sent to your email',
-      // Only in development
-      ...(process.env.NODE_ENV === 'development' && { resetToken, resetUrl })
+      message: 'If that email exists, a password reset link has been sent to your email',
+      // Only in development, show token for testing
+      ...(process.env.NODE_ENV === 'development' && { 
+        resetToken, 
+        resetUrl: `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=patient`,
+        emailSent: emailResult.success
+      })
     });
   } catch (error) {
     console.error('Forgot password error:', error);
@@ -354,12 +414,48 @@ router.post('/doctor/register', async (req, res) => {
       });
     }
 
+    // Enhanced validation
+    if (doctorName.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name must be at least 2 characters'
+      });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    if (!/^[0-9]{10}$/.test(phone.replace(/\D/g, ''))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit phone number'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
     // Validate specialization enum
     const validSpecializations = ['Ortho', 'Neuro', 'Pedia', 'Sports', 'General'];
     if (!validSpecializations.includes(specialization)) {
       return res.status(400).json({
         success: false,
         message: `Specialization must be one of: ${validSpecializations.join(', ')}`
+      });
+    }
+
+    if (!doctorLicense || doctorLicense.trim().length < 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid license number'
       });
     }
 
@@ -375,21 +471,24 @@ router.post('/doctor/register', async (req, res) => {
       });
     }
 
-    // Create new doctor - support both old and new field names
+    // Hash password before create so Doctor validation (password_hash required) passes
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(password, salt);
+
     const doctorData = {
       full_name: doctorName,
-      name: doctorName, // For backward compatibility
+      name: doctorName,
       email,
       phone,
-      password, // Will be hashed to password_hash in pre-save hook
+      password_hash,
       specialization,
       license_no: doctorLicense,
-      license: doctorLicense, // For backward compatibility
+      license: doctorLicense,
       experience_years: doctorExperience || 0,
-      experience: doctorExperience || 0, // For backward compatibility
+      experience: doctorExperience || 0,
       consultation_fees: consultation_fees || 0,
-      status: 'Inactive', // New doctors need admin approval - set to Inactive initially
-      isVerified: false // Doctors need verification
+      status: 'Inactive',
+      isVerified: false
     };
 
     // Add optional fields
@@ -463,13 +562,11 @@ router.post('/doctor/login', async (req, res) => {
       });
     }
 
-    // Handle doctors without status field (legacy records)
-    // Default to 'Active' if status is not set
-    const doctorStatus = doctor.status || 'Active';
-    if (doctorStatus !== 'Active') {
+    if (doctor.isLocked) {
+      const lockMinutes = Math.ceil((doctor.lockUntil - Date.now()) / 60000);
       return res.status(400).json({
         success: false,
-        message: 'Account is inactive or pending approval'
+        message: `Account is temporarily locked due to multiple failed login attempts. Try again in ${lockMinutes} minutes.`
       });
     }
 
@@ -485,13 +582,14 @@ router.post('/doctor/login', async (req, res) => {
     
     const isPasswordValid = await doctor.comparePassword(password);
     if (!isPasswordValid) {
-      console.log('Password validation failed for doctor:', doctor._id, 'Has password_hash:', !!doctor.password_hash);
+      await doctor.incLoginAttempts();
       return res.status(400).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
+    await doctor.resetLoginAttempts();
     // Update last active
     doctor.lastActive = new Date();
     await doctor.save();
@@ -499,6 +597,7 @@ router.post('/doctor/login', async (req, res) => {
     // Generate token
     const token = generateToken(doctor._id, 'doctor');
 
+    const doctorStatus = doctor.status || 'Active';
     res.json({
       success: true,
       message: 'Login successful',
@@ -510,7 +609,8 @@ router.post('/doctor/login', async (req, res) => {
           email: doctor.email,
           phone: doctor.phone,
           specialization: doctor.specialization,
-          role: 'doctor'
+          role: 'doctor',
+          status: doctorStatus
         }
       }
     });
@@ -549,15 +649,24 @@ router.post('/doctor/forgot-password', async (req, res) => {
     doctor.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
     await doctor.save();
 
-    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=doctor`;
+    // Send password reset email
+    const emailResult = await sendPasswordResetEmail(
+      email,
+      doctor.full_name || doctor.name,
+      resetToken,
+      'doctor'
+    );
 
-    console.log('Password Reset Link:', resetUrl);
-    console.log('Reset Token:', resetToken);
-
+    // Always return success message (security best practice)
     res.json({
       success: true,
-      message: 'Password reset link sent to your email',
-      ...(process.env.NODE_ENV === 'development' && { resetToken, resetUrl })
+      message: 'If that email exists, a password reset link has been sent to your email',
+      // Only in development, show token for testing
+      ...(process.env.NODE_ENV === 'development' && { 
+        resetToken, 
+        resetUrl: `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=doctor`,
+        emailSent: emailResult.success
+      })
     });
   } catch (error) {
     console.error('Forgot password error:', error);
@@ -649,11 +758,11 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // Check if account is locked
     if (admin.isLocked) {
+      const lockMinutes = Math.ceil((admin.lockUntil - Date.now()) / 60000);
       return res.status(400).json({
         success: false,
-        message: 'Account is temporarily locked due to multiple failed login attempts'
+        message: `Account is temporarily locked due to multiple failed login attempts. Try again in ${lockMinutes} minutes.`
       });
     }
 
@@ -723,15 +832,24 @@ router.post('/admin/forgot-password', async (req, res) => {
     admin.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
     await admin.save();
 
-    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=admin`;
+    // Send password reset email
+    const emailResult = await sendPasswordResetEmail(
+      email,
+      admin.full_name || admin.name,
+      resetToken,
+      'admin'
+    );
 
-    console.log('Password Reset Link:', resetUrl);
-    console.log('Reset Token:', resetToken);
-
+    // Always return success message (security best practice)
     res.json({
       success: true,
-      message: 'Password reset link sent to your email',
-      ...(process.env.NODE_ENV === 'development' && { resetToken, resetUrl })
+      message: 'If that email exists, a password reset link has been sent to your email',
+      // Only in development, show token for testing
+      ...(process.env.NODE_ENV === 'development' && { 
+        resetToken, 
+        resetUrl: `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&type=admin`,
+        emailSent: emailResult.success
+      })
     });
   } catch (error) {
     console.error('Forgot password error:', error);

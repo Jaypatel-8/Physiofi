@@ -69,7 +69,7 @@ export default function ConditionsPage() {
                 Conditions We Treat
               </span>
             </motion.div>
-            <h1 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight">
+            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-display leading-tight">
               Conditions We <span className="text-primary-500">Treat</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
@@ -93,12 +93,12 @@ export default function ConditionsPage() {
                 whileHover={{ y: -5, scale: 1.02 }}
               >
                 <Link href={condition.href}>
-                  <div className={`${condition.color} rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 h-full flex items-start gap-4 cursor-pointer group`}>
+                  <div className={`site-card ${condition.color} rounded-xl p-6 h-full flex items-start gap-4 cursor-pointer group`}>
                     <div className={`w-12 h-12 ${condition.color} rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md group-hover:scale-110 transition-transform`}>
                       <CheckCircleIcon className={`h-6 w-6 ${condition.iconColor}`} />
                     </div>
                     <div className="flex-grow">
-                      <h3 className="text-lg font-black text-gray-900 mb-2 font-display group-hover:text-primary-600 transition-colors">
+                      <h3 className="text-lg site-card-title font-display mb-2 group-hover:text-primary-600 transition-colors">
                         {condition.name}
                       </h3>
                       <p className="text-sm text-gray-600">

@@ -2,8 +2,6 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import Image from 'next/image'
-import { HomeIcon } from '@heroicons/react/24/outline'
 
 interface ConditionHeroProps {
   title: string
@@ -13,102 +11,42 @@ interface ConditionHeroProps {
   imagePath?: string
 }
 
-const ConditionHero = ({ title, subtitle, description, imageAlt = "Physiotherapy treatment", imagePath }: ConditionHeroProps) => {
+const ConditionHero = ({ title, subtitle, description }: ConditionHeroProps) => {
   return (
-    <section className="relative py-20 bg-gradient-to-br from-primary-50 via-pastel-mint-50 to-pastel-sky-50 overflow-hidden">
-      <div className="container-custom relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-6"
+    <section className="relative overflow-hidden hero-pastel-bg">
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary-100/12 blur-[100px]" />
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary-50/15 blur-[80px]" />
+      </div>
+      <div className="container-custom relative z-10 py-20 lg:py-24">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="text-primary-600 text-sm font-medium tracking-[0.2em] uppercase mb-4"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-block"
-            >
-              <span className="bg-primary-100 text-primary-800 px-5 py-2 rounded-full text-sm font-semibold">
-                Expert Physiotherapy Care
-              </span>
-            </motion.div>
-            
-            <h1 className="text-5xl lg:text-6xl font-black text-gray-900 font-display leading-tight">
-              {title.split(' ').map((word, index) => {
-                const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Home', 'Visit', 'Pain', 'Rehabilitation']
-                const cleanWord = word.replace(/[.,!?;:]/g, '')
-                const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
-                return isFocusWord ? (
-                  <span key={index} className="text-primary-500">
-                    {word}{index < title.split(' ').length - 1 ? ' ' : ''}
-                  </span>
-                ) : (
-                  <React.Fragment key={index}>{word}{index < title.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
-                )
-              })}
-              {subtitle && (
-                <span className="block">
-                  {subtitle.split(' ').map((word, index) => {
-                    const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Home', 'Visit', 'Pain', 'Rehabilitation']
-                    const cleanWord = word.replace(/[.,!?;:]/g, '')
-                    const isFocusWord = focusWords.some(fw => cleanWord.toLowerCase() === fw.toLowerCase())
-                    return isFocusWord ? (
-                      <span key={index} className="text-primary-500">
-                        {word}{index < subtitle.split(' ').length - 1 ? ' ' : ''}
-                      </span>
-                    ) : (
-                      <React.Fragment key={index}>{word}{index < subtitle.split(' ').length - 1 ? ' ' : ''}</React.Fragment>
-                    )
-                  })}
-                </span>
-              )}
-            </h1>
-            
-            <p className="text-xl text-gray-700 leading-relaxed font-light">
-              {description}
-            </p>
-          </motion.div>
+            Expert care
+          </motion.p>
 
-          {/* Right Content - Image Only */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08, duration: 0.5 }}
+            className="text-4xl lg:text-5xl font-bold text-gray-900 font-display leading-tight tracking-tight mb-6"
           >
-            {imagePath ? (
-              <div className="rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary-100 to-pastel-mint-100">
-                <div className="aspect-[4/3] relative">
-                  <Image
-                    src={imagePath}
-                    alt={imageAlt}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.style.display = 'none'
-                    }}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-tl-[60px] rounded-br-[60px] rounded-tr-3xl rounded-bl-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary-100 to-pastel-mint-100">
-                <div className="aspect-[4/3] relative flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <div className="w-32 h-32 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                      <HomeIcon className="h-16 w-16 text-primary-500" />
-                    </div>
-                    <p className="text-gray-600 font-medium">{imageAlt}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </motion.div>
+            {title}
+            {subtitle && <span className="block text-primary-600 mt-2">{subtitle}</span>}
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.14 }}
+            className="text-lg text-gray-500 leading-relaxed"
+          >
+            {description}
+          </motion.p>
         </div>
       </div>
     </section>
@@ -116,8 +54,3 @@ const ConditionHero = ({ title, subtitle, description, imageAlt = "Physiotherapy
 }
 
 export default ConditionHero
-
-
-
-
-

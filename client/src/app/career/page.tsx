@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import PageHero from '@/components/ui/PageHero'
 import { 
   BriefcaseIcon,
   AcademicCapIcon,
@@ -230,44 +231,32 @@ const CareerPage = () => {
     <main className="min-h-screen">
       <Header />
       <div className="pt-24"></div>
-      <div className="pt-32"></div>
-      
-      {/* Hero Section - Modern Design */}
-      <section className="relative py-20 bg-white overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-orange-100/20 to-transparent rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-yellow-100/20 to-transparent rounded-full blur-3xl"></div>
+
+      <PageHero
+        label="Career"
+        title="Join our team"
+        subtitle="Be part of a team making a real difference. Help us deliver exceptional physiotherapy care."
+      >
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => document.getElementById('open-positions')?.scrollIntoView({ behavior: 'smooth' })}
+            className="btn-hero-primary"
+          >
+            View open positions
+          </motion.button>
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => document.getElementById('application-form')?.scrollIntoView({ behavior: 'smooth' })}
+            className="btn-hero-secondary"
+          >
+            Apply now
+          </motion.button>
         </div>
-        
-        <div className="container-custom relative z-10">
-          <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 max-w-6xl mx-auto">
-            <h1 className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-tight">
-              JOIN OUR<br />TEAM
-            </h1>
-            <div className="lg:ml-auto lg:max-w-md">
-              <p className="text-xl text-gray-600 font-medium leading-relaxed mb-6">
-                Be part of a team that&apos;s making a real difference in people&apos;s lives.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <motion.button 
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-gradient-to-r from-accent-500 to-deepTeal text-white font-black text-lg px-10 py-5 rounded-3xl border-4 border-white/20 hover:border-white transition-all duration-300 shadow-2xl"
-                >
-                  View Open Positions
-                </motion.button>
-                <motion.button 
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-white/90 backdrop-blur-md border-4 border-teal-500 text-teal-600 font-black text-lg px-10 py-5 rounded-3xl hover:border-forest transition-all duration-300 shadow-xl"
-                >
-                  Apply Now
-                </motion.button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      </PageHero>
 
       {/* Why Work With Us */}
       <section className="py-20 bg-white">
@@ -340,7 +329,7 @@ const CareerPage = () => {
       </section>
 
       {/* Open Positions */}
-      <section className="py-20 bg-white">
+      <section id="open-positions" className="py-20 bg-gradient-to-br from-gray-50 to-white">
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display">
@@ -423,7 +412,7 @@ const CareerPage = () => {
       </section>
 
       {/* Application Form */}
-      <section className="py-20 bg-white">
+      <section id="application-form" className="py-20 bg-white">
         <div className="container-custom">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
@@ -552,16 +541,36 @@ const CareerPage = () => {
                   <label htmlFor="resume" className="block text-sm font-medium text-gray-700 mb-2">
                     Resume/CV *
                   </label>
-                  <input
-                    type="file"
-                    id="resume"
-                    name="resume"
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300"
-                  />
-                  <p className="text-sm text-gray-500 mt-1">Upload PDF, DOC, or DOCX file (Max 5MB)</p>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="resume"
+                      name="resume"
+                      onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx"
+                      required
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="resume"
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-primary-400 transition-all duration-300 group"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg className="w-10 h-10 mb-3 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold text-primary-600 group-hover:text-primary-700">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">PDF, DOC, or DOCX (MAX. 5MB)</p>
+                        {formData.resume && (
+                          <p className="mt-2 text-sm font-medium text-primary-600">
+                            Selected: {formData.resume.name}
+                          </p>
+                        )}
+                      </div>
+                    </label>
+                  </div>
                 </div>
 
                 <div>
@@ -613,7 +622,9 @@ const CareerPage = () => {
         </div>
       </section>
 
-      <Footer />
+      <div id="footer-section">
+        <Footer />
+      </div>
     </main>
   )
 }

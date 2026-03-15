@@ -54,9 +54,9 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    letter-spacing: -0.025em;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     color: #1E1E1E;
   }
 }
@@ -83,7 +83,7 @@
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1;
+    @apply site-card;
   }
   
   .input-field {
@@ -107,11 +107,11 @@
   }
   
   .service-card {
-    @apply bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-105 border border-gray-100;
+    @apply site-card-elevated p-8 rounded-2xl;
   }
   
   .testimonial-card {
-    @apply bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-teal-500;
+    @apply site-card p-6 border-l-4 border-primary-500;
   }
   
   .gradient-primary {
@@ -128,6 +128,50 @@
   
   .animate-on-scroll.visible {
     @apply opacity-100 translate-y-0;
+  }
+
+  /* Site-wide card – use on every page for consistent look */
+  .site-card {
+    @apply bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-200;
+  }
+  .site-card:hover {
+    @apply shadow-md border-gray-200/80;
+  }
+  .site-card-elevated {
+    @apply site-card shadow-md border-gray-200/60;
+  }
+  .site-card-elevated:hover {
+    @apply shadow-lg border-primary-200/40;
+  }
+  .site-card-title {
+    @apply font-display font-semibold text-gray-900;
+  }
+  .site-card-body {
+    @apply text-gray-600 text-[15px] leading-relaxed;
+  }
+
+  /* Pastel palette – conditions we treat style (use site-wide for cards) */
+  .bg-pastel-mesh {
+    background: linear-gradient(180deg, #f6fbf9 0%, #eef7f4 50%, #f6fbf9 100%);
+  }
+  .card-hover-premium {
+    @apply site-card rounded-2xl transition-all duration-300 ease-out;
+    border: 1px solid rgba(19,165,129,0.16);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .card-hover-premium:hover {
+    transform: translateY(-2px);
+    border-color: rgba(19,165,129,0.28);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .icon-pastel {
+    @apply rounded-xl flex items-center justify-center text-primary-600 transition-all duration-300;
+    background: linear-gradient(145deg, #eef8f5 0%, #e5f4ef 100%);
+    border: 1px solid rgba(19,165,129,0.12);
+  }
+  .icon-pastel:hover {
+    background: linear-gradient(145deg, #e5f4ef 0%, #dceee8 100%);
+    border-color: rgba(19,165,129,0.2);
   }
 }
 

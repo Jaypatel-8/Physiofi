@@ -17,77 +17,18 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline'
 
+// Therapy imagery – smaller size for faster load (Unsplash)
 const advancedTherapies = [
-  {
-    id: 'cupping',
-    name: 'Cupping Therapy',
-    description: 'A suction-based therapy using silicone or vacuum cups to relieve muscle tightness and improve blood flow.',
-    image: '/therapies/cupping-therapy.jpg',
-    href: '/services/advanced-therapies/cupping-therapy'
-  },
-  {
-    id: 'dry-needling',
-    name: 'Dry Needling',
-    description: 'Sterile needles target deep muscle trigger points for fast pain relief.',
-    image: '/therapies/dry-needling.jpg',
-    href: '/services/advanced-therapies/dry-needling'
-  },
-  {
-    id: 'manual',
-    name: 'Manual Therapy',
-    description: 'Hands-on techniques for pain relief and improving joint movement.',
-    image: '/therapies/manual-therapy.jpg',
-    href: '/services/advanced-therapies/manual-therapy'
-  },
-  {
-    id: 'soft-tissue',
-    name: 'Soft Tissue Mobilisation',
-    description: 'Breaks muscle adhesions and reduces chronic tightness.',
-    image: '/therapies/soft-tissue.jpg',
-    href: '/services/advanced-therapies/soft-tissue-mobilisation'
-  },
-  {
-    id: 'kinesio',
-    name: 'Kinesio Taping',
-    description: 'Supports joints & reduces pain using elastic therapeutic tape.',
-    image: '/therapies/kinesio-taping.jpg',
-    href: '/services/advanced-therapies/kinesio-taping'
-  },
-  {
-    id: 'strength',
-    name: 'Strength & Conditioning',
-    description: 'Exercise-based therapy for long-term recovery and fitness.',
-    image: '/therapies/strength-conditioning.jpg',
-    href: '/services/advanced-therapies/strength-conditioning'
-  },
-  {
-    id: 'neuro',
-    name: 'Neuro Physiotherapy',
-    description: 'For movement disorders caused by neurological conditions.',
-    image: '/therapies/neuro-physio.jpg',
-    href: '/services/advanced-therapies/neuro-physiotherapy'
-  },
-  {
-    id: 'posture',
-    name: 'Posture Correction Therapy',
-    description: 'Fixes posture-related pain & improves alignment.',
-    image: '/therapies/posture-correction.jpg',
-    href: '/services/advanced-therapies/posture-correction'
-  },
-  {
-    id: 'balance',
-    name: 'Balance & Gait Training',
-    description: 'Improves walking stability and prevents falls.',
-    image: '/therapies/balance-gait.jpg',
-    href: '/services/advanced-therapies/balance-gait-training'
-  },
-  {
-    id: 'pediatric',
-    name: 'Advanced Pediatric Physiotherapy',
-    description: 'For kids with developmental or motor delays.',
-    image: '/therapies/pediatric-advanced.jpg',
-    href: '/services/advanced-therapies/pediatric-advanced'
-  }
+  { id: 'cupping', name: 'Cupping Therapy', description: 'A suction-based therapy using silicone or vacuum cups to relieve muscle tightness and improve blood flow.', image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=65', href: '/services/advanced-therapies/cupping-therapy' },
+  { id: 'dry-needling', name: 'Dry Needling', description: 'Sterile needles target deep muscle trigger points for fast pain relief.', image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=400&q=65', href: '/services/advanced-therapies/dry-needling' },
+  { id: 'manual', name: 'Manual Therapy', description: 'Hands-on techniques for pain relief and improving joint movement.', image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=65', href: '/services/advanced-therapies/manual-therapy' },
+  { id: 'soft-tissue', name: 'Soft Tissue Mobilisation', description: 'Breaks muscle adhesions and reduces chronic tightness.', image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&q=65', href: '/services/advanced-therapies/soft-tissue-mobilisation' },
+  { id: 'kinesio', name: 'Kinesio Taping', description: 'Supports joints & reduces pain using elastic therapeutic tape.', image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&q=65', href: '/services/advanced-therapies/kinesio-taping' },
+  { id: 'strength', name: 'Strength & Conditioning', description: 'Exercise-based therapy for long-term recovery and fitness.', image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&q=65', href: '/services/advanced-therapies/strength-conditioning' },
+  { id: 'neuro', name: 'Neuro Physiotherapy', description: 'For movement disorders caused by neurological conditions.', image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=65', href: '/services/advanced-therapies/neuro-physiotherapy' },
+  { id: 'posture', name: 'Posture Correction Therapy', description: 'Fixes posture-related pain & improves alignment.', image: 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&q=65', href: '/services/advanced-therapies/posture-correction' },
+  { id: 'balance', name: 'Balance & Gait Training', description: 'Improves walking stability and prevents falls.', image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400&q=65', href: '/services/advanced-therapies/balance-gait-training' },
+  { id: 'pediatric', name: 'Advanced Pediatric Physiotherapy', description: 'For kids with developmental or motor delays.', image: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400&q=65', href: '/services/advanced-therapies/pediatric-advanced' },
 ]
 
 export default function AdvancedTherapiesPage() {
@@ -121,7 +62,7 @@ export default function AdvancedTherapiesPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
+              className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-display leading-tight"
             >
               <span className="text-primary-500">Advanced</span> <span className="text-primary-500">Therapies</span>
               <span className="block">Treatments</span>
@@ -164,15 +105,14 @@ export default function AdvancedTherapiesPage() {
                           unoptimized
                           loading={index < 3 ? "eager" : "lazy"}
                           onError={(e) => {
-                            console.error('Image failed to load:', therapy.image)
                             const target = e.target as HTMLImageElement
-                            target.style.display = 'none'
+                            if (target) target.style.display = 'none'
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none"></div>
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 p-6 bg-white">
-                        <h3 className="text-2xl font-black text-gray-900 font-display">
+                        <h3 className="text-xl site-card-title font-display">
                           {therapy.name}
                         </h3>
                       </div>
@@ -180,9 +120,9 @@ export default function AdvancedTherapiesPage() {
                   </div>
 
                   {/* Back of Card */}
-                  <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl shadow-xl p-6 flex flex-col justify-between border-2 border-primary-200">
+                  <div className="absolute inset-0 backface-hidden rotate-y-180 site-card p-6 flex flex-col justify-between border-primary-200/60">
                     <div>
-                      <h3 className="text-2xl font-black text-gray-900 mb-4 font-display">
+                      <h3 className="text-xl site-card-title font-display mb-4">
                         {therapy.name}
                       </h3>
                       <p className="text-gray-700 leading-relaxed mb-6">

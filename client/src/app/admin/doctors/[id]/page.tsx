@@ -17,8 +17,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
 import { adminAPI } from '@/lib/api'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
+import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
 
 const AdminDoctorDetail = () => {
@@ -31,13 +30,13 @@ const AdminDoctorDetail = () => {
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
+      if (!user || user.role !== 'admin') {
+        router.replace('/admin/login')
         return
       }
       loadDoctor()
     }
-  }, [user, loading, doctorId])
+  }, [user, loading, doctorId, router])
 
   const loadDoctor = async () => {
     try {
@@ -60,15 +59,12 @@ const AdminDoctorDetail = () => {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="loading-dots mx-auto mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+      <div className="space-y-6">
+        <DashboardSubPageHeader title="Doctor Details" subtitle="Loading..." />
+        <div className="site-card p-8 flex items-center justify-center min-h-[200px]">
+          <div className="loading-dots">
+            <div></div><div></div><div></div><div></div>
           </div>
-          <p className="text-gray-600">Loading doctor details...</p>
         </div>
       </div>
     )
@@ -78,32 +74,26 @@ const AdminDoctorDetail = () => {
     return null
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="pt-16 lg:pt-20">
-      <div className="bg-gradient-to-r from-purple-600 to-purple-500 text-white py-12">
-        <div className="container-custom">
-          <Link href="/admin/doctors" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4">
-            <ArrowLeftIcon className="h-5 w-5" />
-            <span className="font-medium">Back to Doctors</span>
-          </Link>
-          <h1 className="text-4xl font-black mb-2">Doctor Details</h1>
-          <p className="text-white/90">Complete doctor information and statistics</p>
-        </div>
-      </div>
+  const doctorName = doctor.name || doctor.full_name
+  const subtitle = doctorName ? `Dr. ${doctorName}` : 'Complete doctor information'
 
-      <div className="container-custom py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Basic Information */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
-            >
-              <div className="flex items-start gap-6 mb-6">
+  return (
+    <div className="space-y-6">
+      <Link href="/admin/doctors" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600">
+        <ArrowLeftIcon className="h-4 w-4" />
+        Back to Doctors
+      </Link>
+      <DashboardSubPageHeader title="Doctor Details" subtitle={subtitle} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Basic Information */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="site-card p-6"
+          >
+            <div className="flex items-start gap-6 mb-6">
                 <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
                   <UserCircleIcon className="h-14 w-14 text-white" />
                 </div>
@@ -116,9 +106,9 @@ const AdminDoctorDetail = () => {
                     <span className="text-gray-600">({doctor.rating?.count || 0} reviews)</span>
                   </div>
                 </div>
-              </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Email</p>
                   <p className="font-semibold text-gray-900">{doctor.email || 'N/A'}</p>
@@ -139,8 +129,8 @@ const AdminDoctorDetail = () => {
                     {doctor.status || 'Active'}
                   </span>
                 </div>
-              </div>
-            </motion.div>
+            </div>
+          </motion.div>
 
             {/* Specialization */}
             {doctor.specialization?.length > 0 && (
@@ -148,7 +138,7 @@ const AdminDoctorDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-xl font-black text-gray-900 mb-4">Specialization</h3>
                 <div className="flex flex-wrap gap-2">
@@ -167,7 +157,7 @@ const AdminDoctorDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-xl font-black text-gray-900 mb-4">Qualifications</h3>
                 <div className="space-y-3">
@@ -188,7 +178,7 @@ const AdminDoctorDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-xl font-black text-gray-900 mb-4">Address</h3>
                 <p className="text-gray-600">
@@ -203,7 +193,7 @@ const AdminDoctorDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+                className="site-card p-6"
               >
                 <h3 className="text-xl font-black text-gray-900 mb-4">Bio</h3>
                 <p className="text-gray-600">{doctor.bio}</p>
@@ -218,7 +208,7 @@ const AdminDoctorDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+              className="site-card p-6"
             >
               <h3 className="text-lg font-black text-gray-900 mb-4">Statistics</h3>
               <div className="space-y-4">
@@ -251,7 +241,7 @@ const AdminDoctorDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100"
+              className="site-card p-6"
             >
               <h3 className="text-lg font-black text-gray-900 mb-4">Actions</h3>
               <div className="space-y-3">
@@ -272,8 +262,6 @@ const AdminDoctorDetail = () => {
           </div>
         </div>
       </div>
-      </div>
-      <Footer />
     </div>
   )
 }
