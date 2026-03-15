@@ -353,7 +353,6 @@ const AdminAppointmentDetail = () => {
           </div>
         </div>
       </div>
-    </div>
     </>
   )
 }
