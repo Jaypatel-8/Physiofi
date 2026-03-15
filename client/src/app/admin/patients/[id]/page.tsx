@@ -367,7 +367,6 @@ const AdminPatientDetail = () => {
           </div>
         </div>
       </div>
-    </div>
     </>
   )
 }
