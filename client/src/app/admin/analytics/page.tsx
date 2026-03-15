@@ -53,6 +53,7 @@ const AdminAnalytics = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardSubPageHeader
         title="Analytics"
@@ -89,6 +90,7 @@ const AdminAnalytics = () => {
         />
       </div>
     </div>
+    </>
   )
 }
 

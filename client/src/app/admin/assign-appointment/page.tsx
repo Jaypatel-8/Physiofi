@@ -111,6 +111,7 @@ export default function AdminAssignAppointmentPage() {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardSubPageHeader
         title="Assign Patient to Doctor"
@@ -216,5 +217,6 @@ export default function AdminAssignAppointmentPage() {
         </form>
       </motion.div>
     </div>
+    </>
   )
 }

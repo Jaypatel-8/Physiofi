@@ -62,6 +62,7 @@ const AdminAppointments = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardSubPageHeader
         title="All Appointments"
@@ -88,6 +89,7 @@ const AdminAppointments = () => {
         )}
       </div>
     </div>
+    </>
   )
 }
 

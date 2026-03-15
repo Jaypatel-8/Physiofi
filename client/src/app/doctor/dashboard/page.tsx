@@ -182,6 +182,7 @@ const DoctorDashboard = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardHeader
         variant="compact"
@@ -492,6 +493,7 @@ const DoctorDashboard = () => {
         </motion.div>
       </div>
     </div>
+    </>
   )
 }
 

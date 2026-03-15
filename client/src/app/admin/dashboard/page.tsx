@@ -179,6 +179,7 @@ const AdminDashboard = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardHeader
         variant="compact"
@@ -483,6 +484,7 @@ const AdminDashboard = () => {
         </div>
       </div>
     </div>
+    </>
   )
 }
 

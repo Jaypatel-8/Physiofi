@@ -169,6 +169,7 @@ const AdminDoctorsPage = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <DashboardSubPageHeader
         title="Doctor Management"
@@ -569,6 +570,7 @@ const AdminDoctorsPage = () => {
       )}
 
     </div>
+    </>
   )
 }
 

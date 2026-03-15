@@ -92,6 +92,7 @@ const AdminAppointmentDetail = () => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <Link href="/admin/appointments" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600">
         <ArrowLeftIcon className="h-4 w-4" />
@@ -353,6 +354,7 @@ const AdminAppointmentDetail = () => {
         </div>
       </div>
     </div>
+    </>
   )
 }
 
