@@ -66,12 +66,24 @@ const Services = () => {
           >
             Our Services
           </m.p>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 font-display leading-tight tracking-tight">
+          <m.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+            className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 font-display leading-tight tracking-tight"
+          >
             Care for every need
-          </h2>
-          <p className="text-gray-500 max-w-xl mx-auto text-lg">
+          </m.h2>
+          <m.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.45, delay: 0.1 }}
+            className="text-gray-500 max-w-xl mx-auto text-lg"
+          >
             Tailored physiotherapy for your recovery
-          </p>
+          </m.p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-20 max-w-4xl mx-auto">
@@ -113,12 +125,24 @@ const Services = () => {
           className="mb-16"
         >
           <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-gray-900 mb-2 font-display">
+            <m.h3
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, delay: 0.05 }}
+              className="text-3xl font-bold text-gray-900 mb-2 font-display"
+            >
               <span className="text-primary-600">Advanced</span> Therapies
-            </h3>
-            <p className="text-gray-600">
+            </m.h3>
+            <m.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              className="text-gray-600"
+            >
               Evidence-based advanced treatments for comprehensive recovery
-            </p>
+            </m.p>
           </div>
           <m.a
             href="/services/advanced-therapies"

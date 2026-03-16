@@ -127,9 +127,15 @@ const AboutPage = () => {
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div data-aos="fade-right">
-              <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display"
+              >
                 Our Story
-              </h2>
+              </motion.h2>
               <div className="space-y-6 text-gray-600 leading-relaxed">
                 <p className="text-lg font-medium">
                   A story of purpose, growth, and care—built step by step.
@@ -172,12 +178,24 @@ const AboutPage = () => {
       <section className="py-20 bg-pastel-mesh">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, delay: 0.05 }}
+              className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display"
+            >
               Our <span className="text-primary-500">Values</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              className="text-xl text-gray-600 max-w-3xl mx-auto"
+            >
               The principles that guide everything we do and shape our approach to patient care.
-            </p>
+            </motion.p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">

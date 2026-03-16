@@ -184,7 +184,7 @@ router.post('/', isPatient, async (req, res) => {
 
     // Populate the appointment with patient and doctor details
     await appointment.populate('patient', 'name email phone age gender address');
-    await appointment.populate('doctor', 'name specialization');
+    await appointment.populate('doctor', 'name full_name specialization');
 
     // Create notification for doctor and patient with all details
     try {
@@ -311,7 +311,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 
     const appointments = await Appointment.find(query)
       .populate('patient', 'name email phone')
-      .populate('doctor', 'name specialization')
+      .populate('doctor', 'name full_name specialization')
       .sort({ appointmentDate: -1, appointmentTime: -1 })
       .skip(skip)
       .limit(parseInt(limit))
@@ -344,7 +344,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
       .populate('patient', 'name email phone age gender address')
-      .populate('doctor', 'name specialization email phone');
+      .populate('doctor', 'name full_name specialization email phone');
 
     if (!appointment) {
       return res.status(404).json({
@@ -427,7 +427,7 @@ router.patch('/:id/status', isAuthenticated, async (req, res) => {
     
     // Populate for notifications
     await appointment.populate('patient', 'name email phone age gender address');
-    await appointment.populate('doctor', 'name specialization');
+    await appointment.populate('doctor', 'name full_name specialization');
 
     // Create notifications for status change
     if (oldStatus !== status) {
@@ -898,7 +898,7 @@ router.patch('/:id/cancel', isAuthenticated, async (req, res) => {
     
     // Populate for notifications
     await appointment.populate('patient', 'name email phone age gender address');
-    await appointment.populate('doctor', 'name specialization');
+    await appointment.populate('doctor', 'name full_name specialization');
 
     // Create notifications for cancellation
     try {
@@ -1008,7 +1008,7 @@ router.patch('/:id/complete', isAuthenticated, async (req, res) => {
     
     // Populate for notifications
     await appointment.populate('patient', 'name email phone age gender address');
-    await appointment.populate('doctor', 'name specialization');
+    await appointment.populate('doctor', 'name full_name specialization');
 
     // Create notifications for completion
     try {
@@ -1135,7 +1135,7 @@ router.get('/type/:type', isAuthenticated, async (req, res) => {
 
     const appointments = await Appointment.find(query)
       .populate('patient', 'name email phone')
-      .populate('doctor', 'name specialization')
+      .populate('doctor', 'name full_name specialization')
       .sort({ appointmentDate: -1, appointmentTime: -1 })
       .skip(skip)
       .limit(parseInt(limit));

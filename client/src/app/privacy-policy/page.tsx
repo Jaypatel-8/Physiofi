@@ -17,9 +17,14 @@ export default function PrivacyPolicyPage() {
             animate={{ opacity: 1, y: 0 }}
             className="prose prose-lg max-w-none"
           >
-            <h1 className="text-4xl lg:text-5xl font-black text-gray-900 mb-8 font-display">
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.08 }}
+              className="text-4xl lg:text-5xl font-black text-gray-900 mb-8 font-display"
+            >
               Privacy <span className="text-primary-500">Policy</span>
-            </h1>
+            </motion.h1>
             
             <div className="text-gray-700 space-y-6 leading-relaxed">
               <p className="text-lg">

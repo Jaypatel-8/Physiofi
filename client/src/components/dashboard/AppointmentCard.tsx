@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CalendarDaysIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import { CalendarDaysIcon, ClockIcon, MapPinIcon, UserIcon, HomeIcon } from '@heroicons/react/24/outline'
 
 interface AppointmentCardProps {
   appointment: any
@@ -10,19 +10,26 @@ interface AppointmentCardProps {
   showDoctor?: boolean
 }
 
-const AppointmentCard = ({ appointment, onView }: AppointmentCardProps) => {
+const AppointmentCard = ({ appointment, onView, showDoctor = true }: AppointmentCardProps) => {
   const formatDate = (date: string) => {
     if (!date) return 'N/A'
     return new Date(date).toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     })
   }
 
   const formatTime = (time: string) => {
     if (!time) return 'N/A'
     return time
+  }
+
+  const formatAddress = (addr: any) => {
+    if (!addr) return null
+    const parts = [addr.street, addr.landmark, addr.city, addr.state, addr.pincode].filter(Boolean)
+    return parts.length ? parts.join(', ') : null
   }
 
   const getStatusColor = (status: string) => {
@@ -40,6 +47,14 @@ const AppointmentCard = ({ appointment, onView }: AppointmentCardProps) => {
     }
   }
 
+  const serviceType = appointment.serviceType || appointment.type
+  const addressStr = formatAddress(appointment.address)
+  const doctorObj = appointment.doctor
+  const doctorName = typeof doctorObj === 'object' && doctorObj
+    ? (doctorObj.name || (doctorObj as any).full_name)
+    : (appointment.doctorName || appointment.doctor)
+  const isHomeVisit = (serviceType || appointment.type || '').toLowerCase().includes('home')
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -51,27 +66,47 @@ const AppointmentCard = ({ appointment, onView }: AppointmentCardProps) => {
     >
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h4 className="site-card-title text-lg mb-2 group-hover:text-primary-700 transition-colors">
-              {appointment.type || 'Appointment'}
+              {appointment.type || serviceType || 'Appointment'}
             </h4>
             
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-gray-700">
-                <CalendarDaysIcon className="h-4 w-4 text-primary-600" />
+                <CalendarDaysIcon className="h-4 w-4 text-primary-600 flex-shrink-0" />
                 <span className="font-medium">{formatDate(appointment.appointmentDate)}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm text-gray-700">
-                <ClockIcon className="h-4 w-4 text-primary-600" />
+                <ClockIcon className="h-4 w-4 text-primary-600 flex-shrink-0" />
                 <span className="font-medium">{formatTime(appointment.appointmentTime)}</span>
               </div>
               
-              {appointment.serviceType && (
+              {(serviceType || appointment.type) && (
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <MapPinIcon className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium capitalize">{appointment.serviceType}</span>
+                  <HomeIcon className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                  <span className="font-medium capitalize">{serviceType || appointment.type}</span>
                 </div>
+              )}
+
+              {showDoctor && doctorName && (
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <UserIcon className="h-4 w-4 text-primary-600 flex-shrink-0" />
+                  <span className="font-medium">Dr. {typeof doctorName === 'string' ? doctorName : String((doctorName as any)?.name ?? (doctorName as any)?.full_name ?? '')}</span>
+                </div>
+              )}
+
+              {isHomeVisit && addressStr && (
+                <div className="flex items-start gap-2 text-sm text-gray-700">
+                  <MapPinIcon className="h-4 w-4 text-primary-600 flex-shrink-0 mt-0.5" />
+                  <span className="line-clamp-2">{addressStr}</span>
+                </div>
+              )}
+
+              {Array.isArray(appointment.symptoms) && appointment.symptoms.length > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Symptoms: {appointment.symptoms.slice(0, 2).join(', ')}{appointment.symptoms.length > 2 ? '…' : ''}
+                </p>
               )}
             </div>
           </div>
@@ -80,15 +115,12 @@ const AppointmentCard = ({ appointment, onView }: AppointmentCardProps) => {
             <motion.span
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold border-2 ${getStatusColor(appointment.status)} shadow-sm`}
+              className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold border-2 flex-shrink-0 ${getStatusColor(appointment.status)} shadow-sm`}
             >
               {appointment.status}
             </motion.span>
           )}
         </div>
-        
-        {/* Bottom Border Animation */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-400 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
       </div>
     </motion.div>
   )

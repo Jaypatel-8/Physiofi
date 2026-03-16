@@ -112,18 +112,39 @@ const Hero = memo(() => {
             </m.div>
 
             <div className="space-y-5">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 font-display leading-[1.08] tracking-tight">
+              <m.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 font-display leading-[1.08] tracking-tight"
+              >
                 Your Path to{' '}
                 <span className="text-primary-600">Better Movement</span>
                 <span className="block mt-1 text-gray-800">Starts Here</span>
-              </h1>
-              <div className="h-0.5 w-14 bg-primary-400/60 rounded-full" aria-hidden />
-              <p className="text-lg lg:text-xl text-gray-500 font-normal leading-relaxed">
+              </m.h1>
+              <m.div
+                initial={{ opacity: 0, scaleX: 0 }}
+                animate={{ opacity: 1, scaleX: 1 }}
+                transition={{ duration: 0.4, delay: 0.14 }}
+                className="h-0.5 w-14 bg-primary-400/60 rounded-full origin-left"
+                aria-hidden
+              />
+              <m.p
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                className="text-lg lg:text-xl text-gray-500 font-normal leading-relaxed"
+              >
                 Personalized physiotherapy through home visits, tele-consultation, and advanced care — for your comfort, recovery, and long-term wellbeing.
-              </p>
-              <p className="text-sm text-gray-400 font-light italic tracking-wide">
+              </m.p>
+              <m.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.22 }}
+                className="text-sm text-gray-400 font-light italic tracking-wide"
+              >
                 Empowering minds, transforming lives
-              </p>
+              </m.p>
             </div>
 
             <m.div

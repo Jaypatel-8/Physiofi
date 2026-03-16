@@ -103,15 +103,33 @@ export default function TeleConsultationPage() {
               viewport={{ once: true }}
               className="space-y-6"
             >
-              <h2 className="text-4xl font-black text-gray-900 font-display">
+              <motion.h2
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="text-4xl font-black text-gray-900 font-display"
+              >
                 Expert Care <span className="text-primary-500">From Anywhere</span>
-              </h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.05 }}
+                className="text-lg text-gray-700 leading-relaxed"
+              >
                 Our tele-consultation service brings professional physiotherapy care directly to you, no matter where you are. Through phone consultations, our certified physiotherapists provide comprehensive assessments, personalized exercise guidance, and ongoing support for your recovery journey.
-              </p>
-              <p className="text-lg text-gray-700 leading-relaxed">
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="text-lg text-gray-700 leading-relaxed"
+              >
                 Perfect for busy professionals, individuals with mobility challenges, or those who prefer the convenience of remote consultations. Receive the same quality care and attention as in-person sessions, tailored to your specific needs and schedule.
-              </p>
+              </motion.p>
               <div className="flex flex-wrap gap-3">
                 {['Posture Correction', 'Pain Management', 'Ergonomic Guidance', 'Fitness Programs', 'Remote Follow-ups'].map((tag, idx) => (
                   <span key={idx} className="bg-card-1 px-4 py-2 rounded-full text-sm font-medium text-primary-700 border border-premium">
@@ -151,12 +169,24 @@ export default function TeleConsultationPage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-black text-gray-900 mb-4 font-display">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl font-black text-gray-900 mb-4 font-display"
+            >
               <span className="text-primary-500">Tele-Consultation</span> <span className="text-primary-500">Process</span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: 0.08 }}
+              className="text-lg text-gray-600 max-w-2xl mx-auto font-light"
+            >
               Our simple 5-step process for online physiotherapy sessions
-            </p>
+            </motion.p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -201,9 +231,15 @@ export default function TeleConsultationPage() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <h2 className="text-4xl font-black text-gray-900 mb-8 font-display text-center">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl font-black text-gray-900 mb-8 font-display text-center"
+            >
               What You'll <span className="text-primary-500">Need</span>
-            </h2>
+            </motion.h2>
             <div className="grid md:grid-cols-2 gap-4">
               {requirements.map((requirement, index) => (
                 <motion.div

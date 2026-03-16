@@ -37,15 +37,26 @@ const DoctorProfile = () => {
       setIsLoading(true)
       const response = await doctorAPI.getProfile()
       if (response.data.success) {
-        const data = response.data.data.doctor || response.data.data
+        const raw = response.data.data?.doctor ?? response.data.data
+        if (!raw) {
+          setIsLoading(false)
+          return
+        }
+        // Normalize: backend uses full_name, experience_years, qualifications
+        const data = {
+          ...raw,
+          name: raw.name || raw.full_name || '',
+          experience: raw.experience ?? raw.experience_years ?? '',
+          education: raw.education || raw.qualifications || ''
+        }
         setProfile(data)
         setFormData({
-          name: data.name || data.full_name || '',
+          name: data.name || raw.full_name || '',
           email: data.email || '',
-          phone: data.phone || data.mobile || '',
-          specialization: Array.isArray(data.specialization) ? data.specialization[0] : (data.specialization || ''),
-          experience: data.experience ?? data.experience_years ?? '',
-          education: data.education || data.qualifications || ''
+          phone: data.phone || raw.mobile || '',
+          specialization: Array.isArray(raw.specialization) ? raw.specialization[0] : (raw.specialization || ''),
+          experience: String(data.experience ?? raw.experience_years ?? ''),
+          education: data.education || raw.qualifications || ''
         })
       }
     } catch (error) {
@@ -144,7 +155,7 @@ const DoctorProfile = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg">{profile?.phone || profile?.mobile || 'N/A'}</p>
+                <p className="px-4 py-3 bg-gray-50 rounded-lg">{profile?.phone || (profile as any)?.mobile || 'N/A'}</p>
               )}
             </div>
 
@@ -158,7 +169,7 @@ const DoctorProfile = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg">{profile?.specialization?.[0] || 'N/A'}</p>
+                <p className="px-4 py-3 bg-gray-50 rounded-lg">{Array.isArray(profile?.specialization) ? profile.specialization[0] : (profile?.specialization || 'N/A')}</p>
               )}
             </div>
 
@@ -172,7 +183,7 @@ const DoctorProfile = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg">{profile?.experience || 'N/A'}</p>
+                <p className="px-4 py-3 bg-gray-50 rounded-lg">{profile?.experience ?? (profile as any)?.experience_years ?? 'N/A'}</p>
               )}
             </div>
 
@@ -186,7 +197,7 @@ const DoctorProfile = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg">{profile?.education || 'N/A'}</p>
+                <p className="px-4 py-3 bg-gray-50 rounded-lg">{profile?.education || (profile as any)?.qualifications || 'N/A'}</p>
               )}
             </div>
           </div>

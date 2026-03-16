@@ -43,13 +43,32 @@ const WhyChooseSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <p className="text-primary-600 text-sm font-medium tracking-[0.2em] uppercase mb-4">Why choose us</p>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4 font-display tracking-tight">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-primary-600 text-sm font-medium tracking-[0.2em] uppercase mb-4"
+          >
+            Why choose us
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.05 }}
+            className="text-3xl font-bold text-gray-900 mb-4 font-display tracking-tight"
+          >
             Why Choose PhysioFi?
-          </h2>
-          <p className="text-gray-500 max-w-xl mx-auto text-lg">
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-gray-500 max-w-xl mx-auto text-lg"
+          >
             Expert care at your home or online
-          </p>
+          </motion.p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">

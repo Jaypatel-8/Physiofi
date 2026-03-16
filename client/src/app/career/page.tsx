@@ -262,12 +262,24 @@ const CareerPage = () => {
       <section className="py-20 bg-white">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display"
+            >
               Why Work With Us?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.45, delay: 0.08 }}
+              className="text-xl text-gray-600 max-w-3xl mx-auto"
+            >
               Join a team that values your growth, recognizes your contributions, and provides meaningful work.
-            </p>
+            </motion.p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -297,12 +309,24 @@ const CareerPage = () => {
       <section className="py-20 bg-white">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display"
+            >
               Our Values
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.45, delay: 0.08 }}
+              className="text-xl text-gray-600 max-w-3xl mx-auto"
+            >
               The principles that guide our work and shape our culture.
-            </p>
+            </motion.p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -332,12 +356,24 @@ const CareerPage = () => {
       <section id="open-positions" className="py-20 bg-gradient-to-br from-gray-50 to-white">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 font-display"
+            >
               Open Positions
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.45, delay: 0.08 }}
+              className="text-xl text-gray-600 max-w-3xl mx-auto"
+            >
               Explore our current job openings and find the perfect role for you.
-            </p>
+            </motion.p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
@@ -605,12 +641,24 @@ const CareerPage = () => {
       {/* CTA Section */}
       <section className="py-20 bg-accent-500">
         <div className="container-custom text-center">
-          <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display"
+          >
             Ready to Make a Difference?
-          </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: 0.08 }}
+            className="text-xl text-white/90 mb-8 max-w-3xl mx-auto"
+          >
             Join our team and help us provide exceptional physiotherapy care to patients across Ahmedabad.
-          </p>
+          </motion.p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="bg-white text-primary-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-xl transition-colors duration-300">
               View All Positions

@@ -115,14 +115,24 @@ const ServicesPage = () => {
         
         <div className="container-custom relative z-10">
           <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 max-w-6xl mx-auto">
-            <h1 className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-tight">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-tight"
+            >
               SERVICES<br /><span className="text-primary-500">TAILORED</span><br />TO <span className="text-primary-500">YOU</span>
-            </h1>
-            <div className="lg:ml-auto lg:max-w-md">
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              className="lg:ml-auto lg:max-w-md"
+            >
               <p className="text-xl text-gray-600 font-medium leading-relaxed">
                 Explore our comprehensive range of services designed to help you recover, regain strength, and improve your overall well-being.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -169,14 +179,26 @@ const ServicesPage = () => {
         
         <div className="container-custom relative z-10">
           <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 mb-16">
-            <h2 className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-tight">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="text-5xl lg:text-7xl font-black text-gray-900 font-display leading-tight"
+            >
               OUR<br />PROCESS
-            </h2>
-            <div className="lg:ml-auto lg:max-w-md">
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.45, delay: 0.08 }}
+              className="lg:ml-auto lg:max-w-md"
+            >
               <p className="text-xl text-gray-600 font-medium leading-relaxed">
                 Our systematic approach ensures you receive the best possible care throughout your recovery journey.
               </p>
-            </div>
+            </motion.div>
           </div>
 
           <div className="relative max-w-6xl mx-auto">
@@ -257,12 +279,24 @@ const ServicesPage = () => {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-secondary-500 via-secondary-600 to-secondary-700">
         <div className="container-custom text-center">
-          <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-4xl lg:text-6xl font-bold text-white mb-6 font-display"
+          >
             Get Started Today
-          </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: 0.08 }}
+            className="text-xl text-white/90 mb-8 max-w-3xl mx-auto"
+          >
             Book your consultation today and take the first step towards better health and wellness.
-          </p>
+          </motion.p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handleBookHomeVisit}

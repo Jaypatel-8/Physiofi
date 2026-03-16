@@ -20,7 +20,13 @@ const SymptomsList = ({ symptoms, title = "Common Symptoms" }: SymptomsListProps
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto"
         >
-          <h2 className="text-4xl font-black text-gray-900 mb-8 font-display text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className="text-4xl font-black text-gray-900 mb-8 font-display text-center"
+          >
             {(typeof title === 'string' ? title : 'Common Symptoms').split(' ').map((word, index, arr) => {
               const focusWords = ['Symptoms', 'symptoms', 'Common', 'PhysioFi', 'physiofi', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits']
               const cleanWord = word.replace(/[.,!?;:]/g, '')
@@ -33,7 +39,7 @@ const SymptomsList = ({ symptoms, title = "Common Symptoms" }: SymptomsListProps
                 <React.Fragment key={index}>{word}{index < arr.length - 1 ? ' ' : ''}</React.Fragment>
               )
             })}
-          </h2>
+          </motion.h2>
           
           <div className="grid md:grid-cols-2 gap-4">
             {symptoms.map((symptom, index) => (

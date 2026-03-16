@@ -28,7 +28,13 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
               transition={{ duration: 0.8 }}
               className="space-y-6"
             >
-              <h2 className="text-4xl font-bold text-gray-900 font-display">
+              <motion.h2
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="text-4xl font-bold text-gray-900 font-display"
+              >
                 {(typeof title === 'string' ? title : '').split(' ').map((word, index, arr) => {
                   const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Home', 'Visit', 'Pain', 'Rehabilitation', 'Doorstep', 'Anywhere']
                   const cleanWord = word.replace(/[.,!?;:]/g, '')
@@ -41,10 +47,16 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
                     <React.Fragment key={index}>{word}{index < arr.length - 1 ? ' ' : ''}</React.Fragment>
                   )
                 })}
-              </h2>
-              <p className="text-lg text-gray-700 leading-relaxed font-light">
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: 0.08 }}
+                className="text-lg text-gray-700 leading-relaxed font-light"
+              >
                 {description}
-              </p>
+              </motion.p>
             </motion.div>
           )}
           

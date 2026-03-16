@@ -9,21 +9,33 @@ interface NotificationCardProps {
 }
 
 const NotificationCard = ({ notification, index }: NotificationCardProps) => {
+  // Approved/success = green; by nature (type) for others
   const getIcon = () => {
     const type = notification.type?.toLowerCase() || 'info'
+    const isApproved = (notification as any).status === 'approved' || (notification as any).data?.status === 'approved'
+    if (isApproved) return <CheckCircleIcon className="h-5 w-5 text-emerald-500" />
     switch (type) {
       case 'success':
       case 'doctor_approval':
+      case 'appointment_confirmed':
+      case 'reschedule_accepted':
+      case 'treatment_update':
+      case 'progress_update':
         return <CheckCircleIcon className="h-5 w-5 text-emerald-500" />
-      case 'warning':
-      case 'admin_message_to_doctor':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-amber-500" />
-      case 'admin_announcement':
-        return <InformationCircleIcon className="h-5 w-5 text-blue-500" />
-      case 'payment_reminder':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-amber-500" />
+      case 'appointment_cancelled':
+      case 'reschedule_declined':
       case 'error':
         return <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+      case 'warning':
+      case 'admin_message_to_doctor':
+      case 'payment_reminder':
+      case 'appointment_request':
+      case 'appointment_reminder':
+      case 'appointment_status_change':
+        return <ExclamationTriangleIcon className="h-5 w-5 text-amber-500" />
+      case 'admin_announcement':
+      case 'system_announcement':
+        return <InformationCircleIcon className="h-5 w-5 text-blue-500" />
       default:
         return <InformationCircleIcon className="h-5 w-5 text-primary-500" />
     }
@@ -31,18 +43,30 @@ const NotificationCard = ({ notification, index }: NotificationCardProps) => {
 
   const getBgColor = () => {
     const type = notification.type?.toLowerCase() || 'info'
+    const isApproved = (notification as any).status === 'approved' || (notification as any).data?.status === 'approved'
+    if (isApproved) return 'from-emerald-50 to-emerald-100/50 border-emerald-200'
     switch (type) {
       case 'success':
       case 'doctor_approval':
+      case 'appointment_confirmed':
+      case 'reschedule_accepted':
+      case 'treatment_update':
+      case 'progress_update':
         return 'from-emerald-50 to-emerald-100/50 border-emerald-200'
+      case 'appointment_cancelled':
+      case 'reschedule_declined':
+      case 'error':
+        return 'from-red-50 to-red-100/50 border-red-200'
       case 'warning':
       case 'admin_message_to_doctor':
       case 'payment_reminder':
+      case 'appointment_request':
+      case 'appointment_reminder':
+      case 'appointment_status_change':
         return 'from-amber-50 to-amber-100/50 border-amber-200'
       case 'admin_announcement':
+      case 'system_announcement':
         return 'from-blue-50 to-blue-100/50 border-blue-200'
-      case 'error':
-        return 'from-red-50 to-red-100/50 border-red-200'
       default:
         return 'from-primary-50 to-primary-100/50 border-primary-200'
     }

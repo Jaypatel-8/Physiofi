@@ -452,10 +452,22 @@ const RegisterPage = () => {
                   </div>
                 )}
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="text-3xl font-bold text-gray-900 mb-2"
+              >
                 {registerType === 'patient' ? 'Patient Registration' : 'Doctor Registration'}
-              </h1>
-              <p className="text-gray-600">Create your {registerType} account</p>
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.15 }}
+                className="text-gray-600"
+              >
+                Create your {registerType} account
+              </motion.p>
             </div>
 
             {/* Registration Type Selector */}

@@ -106,12 +106,24 @@ export default function HomeVisitPage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-black text-gray-900 mb-4 font-display">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl font-black text-gray-900 mb-4 font-display"
+            >
               How It <span className="text-primary-500">Works</span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: 0.08 }}
+              className="text-lg text-gray-600 max-w-2xl mx-auto font-light"
+            >
               Our simple 6-step process ensures you receive the best care at home
-            </p>
+            </motion.p>
           </motion.div>
 
           <div className="relative max-w-6xl mx-auto py-12">
@@ -206,9 +218,15 @@ export default function HomeVisitPage() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <h2 className="text-4xl font-black text-gray-900 mb-8 font-display text-center">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl font-black text-gray-900 mb-8 font-display text-center"
+            >
               Related Conditions We <span className="text-primary-500">Treat</span>
-            </h2>
+            </motion.h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {relatedConditions.map((condition, index) => (
                 <motion.div

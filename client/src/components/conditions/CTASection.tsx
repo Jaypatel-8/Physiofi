@@ -33,7 +33,13 @@ const CTASection = ({
           transition={{ duration: 0.6 }}
           className="max-w-3xl mx-auto"
         >
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-6 font-display">
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className="text-4xl lg:text-5xl font-black text-white mb-6 font-display"
+          >
             {(typeof title === 'string' ? title : 'Ready to Start Your Recovery Journey?').split(' ').map((word, index, arr) => {
               const focusWords = ['PhysioFi', 'physiofi', 'symptoms', 'Symptoms', 'Recovery', 'Treatment', 'Expert', 'Care', 'Better', 'Health', 'Therapy', 'Help', 'Benefits', 'Journey', 'Start']
               const cleanWord = word.replace(/[.,!?;:]/g, '')
@@ -49,7 +55,7 @@ const CTASection = ({
           </h2>
           <p className="text-xl text-white/95 mb-10 font-light">
             {description}
-          </p>
+          </motion.p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button

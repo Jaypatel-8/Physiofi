@@ -318,7 +318,7 @@ const PatientDashboard = () => {
                 </div>
                 <Link
                   href="/patient/appointments"
-                  className="flex items-center gap-1.5 text-primary-600 font-medium text-sm hover:text-primary-700"
+                  className="flex items-center gap-1.5 text-primary-600 font-medium text-sm hover:text-primary-700 no-underline"
                 >
                   View all <ArrowRightIcon className="h-4 w-4" />
                 </Link>

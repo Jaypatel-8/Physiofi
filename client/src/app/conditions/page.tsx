@@ -69,12 +69,22 @@ export default function ConditionsPage() {
                 Conditions We Treat
               </span>
             </motion.div>
-            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-display leading-tight">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-display leading-tight"
+            >
               Conditions We <span className="text-primary-500">Treat</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.18 }}
+              className="text-xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed"
+            >
               Expert physiotherapy treatment for a wide range of conditions. Our certified therapists provide personalized care to help you recover and improve your quality of life.
-            </p>
+            </motion.p>
           </motion.div>
         </div>
       </section>
@@ -122,12 +132,24 @@ export default function ConditionsPage() {
             viewport={{ once: true }}
             className="max-w-3xl mx-auto"
           >
-            <h2 className="text-4xl lg:text-5xl font-black text-white mb-6 font-display">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.05 }}
+              className="text-4xl lg:text-5xl font-black text-white mb-6 font-display"
+            >
               Ready to Start Your <span className="text-yellow-200">Recovery</span>?
-            </h2>
-            <p className="text-xl text-white/95 mb-8 font-light">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              className="text-xl text-white/95 mb-8 font-light"
+            >
               Book a consultation with our expert physiotherapists today
-            </p>
+            </motion.p>
             <button
               onClick={() => setIsBookingOpen(true)}
               className="bg-white text-primary-700 hover:bg-gray-50 font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-xl hover:scale-105 hover:-translate-y-0.5 active:scale-95"

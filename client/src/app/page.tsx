@@ -33,12 +33,11 @@ import Link from 'next/link'
 // Tree-shake icon imports - only import what's needed
 import { 
   ArrowRightIcon,
-  HeartIcon,
   UserIcon,
   ShieldCheckIcon,
   HomeIcon,
   SparklesIcon,
-  ClockIcon
+  ClockIcon,
 } from '@heroicons/react/24/outline'
 
 // Memoize component to prevent unnecessary re-renders
@@ -180,12 +179,24 @@ const Home = memo(function Home() {
                 Why Choose Us
               </span>
             </motion.div>
-            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+              className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
+            >
               Why Choose <span className="text-primary-500">PhysioFi</span>?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-xl mx-auto font-light">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              className="text-xl text-gray-600 max-w-xl mx-auto font-light"
+            >
               Expert physiotherapy care delivered right at your home or online
-            </p>
+            </motion.p>
           </div>
 
           <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -238,34 +249,46 @@ const Home = memo(function Home() {
                 Conditions We Treat
               </span>
             </motion.div>
-            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+              className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
+            >
               <span className="text-primary-500">Expert</span> <span className="text-primary-500">Treatment</span> For
               <span className="block">Various Conditions</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              className="text-xl text-gray-600 max-w-2xl mx-auto font-light"
+            >
               Comprehensive physiotherapy care for a wide range of conditions and injuries
-            </p>
+            </motion.p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { name: 'Low Back Pain / Sciatica', href: '/conditions/low-back-pain', color: 'bg-primary-50', iconColor: 'text-primary-600' },
-              { name: 'Neck Pain / Cervical Spondylosis', href: '/conditions/neck-pain', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600' },
-              { name: 'Shoulder Pain', href: '/conditions/shoulder-pain', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600' },
-              { name: 'Knee Pain', href: '/conditions/knee-pain', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600' },
-              { name: 'Sports Injuries', href: '/conditions/sports-injuries', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600' },
-              { name: 'Post-Operative Rehabilitation', href: '/conditions/post-operative', color: 'bg-pastel-sage-50', iconColor: 'text-pastel-sage-600' },
-              { name: 'Stroke Rehabilitation', href: '/conditions/stroke-rehabilitation', color: 'bg-primary-50', iconColor: 'text-primary-600' },
-              { name: "Parkinson's Disease", href: '/conditions/parkinsons', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600' },
-              { name: 'Spinal Cord Injury', href: '/conditions/spinal-cord-injury', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600' },
-              { name: 'COPD / Asthma / Breathing Issues', href: '/conditions/copd-asthma', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600' },
-              { name: 'Post-COVID Recovery', href: '/conditions/post-covid', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600' },
-              { name: 'Pediatric Physiotherapy', href: '/conditions/pediatric-developmental', color: 'bg-pastel-sage-50', iconColor: 'text-pastel-sage-600' },
-              { name: 'Torticollis (Children)', href: '/conditions/torticollis', color: 'bg-primary-50', iconColor: 'text-primary-600' },
-              { name: 'Balance Problems (Geriatric)', href: '/conditions/balance-problems', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600' },
-              { name: 'Osteoporosis', href: '/conditions/osteoporosis', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600' },
-              { name: 'Pregnancy-Related Pain', href: '/conditions/pregnancy-pain', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600' },
-              { name: 'Urinary Incontinence', href: '/conditions/urinary-incontinence', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600' },
+              { name: 'Low Back Pain / Sciatica', href: '/conditions/low-back-pain', color: 'bg-primary-50', iconColor: 'text-primary-600', iconSrc: '/icons/back-pain-icon.png' },
+              { name: 'Neck Pain / Cervical Spondylosis', href: '/conditions/neck-pain', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600', iconSrc: '/icons/neck-pain-icon.png' },
+              { name: 'Shoulder Pain', href: '/conditions/shoulder-pain', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600', iconSrc: '/icons/shoulder-pain-icon.png' },
+              { name: 'Knee Pain', href: '/conditions/knee-pain', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600', iconSrc: '/icons/knee-pain-icon.png' },
+              { name: 'Sports Injuries', href: '/conditions/sports-injuries', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600', iconSrc: '/icons/sports-injuries-icon.png' },
+              { name: 'Post-Operative Rehabilitation', href: '/conditions/post-operative', color: 'bg-pastel-sage-50', iconColor: 'text-pastel-sage-600', iconSrc: '/icons/post-operative-icon.png' },
+              { name: 'Stroke Rehabilitation', href: '/conditions/stroke-rehabilitation', color: 'bg-primary-50', iconColor: 'text-primary-600', iconSrc: '/icons/stroke-rehabilitation-icon.png' },
+              { name: "Parkinson's Disease", href: '/conditions/parkinsons', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600', iconSrc: '/icons/parkinsons-icon.png' },
+              { name: 'Spinal Cord Injury', href: '/conditions/spinal-cord-injury', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600', iconSrc: '/icons/spinal-cord-injury-icon.png' },
+              { name: 'COPD / Asthma / Breathing Issues', href: '/conditions/copd-asthma', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600', iconSrc: '/icons/copd-asthma-icon.png' },
+              { name: 'Post-COVID Recovery', href: '/conditions/post-covid', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600', iconSrc: '/icons/post-covid-icon.png' },
+              { name: 'Pediatric Physiotherapy', href: '/conditions/pediatric-developmental', color: 'bg-pastel-sage-50', iconColor: 'text-pastel-sage-600', iconSrc: '/icons/pediatric-developmental-icon.png' },
+              { name: 'Torticollis (Children)', href: '/conditions/torticollis', color: 'bg-primary-50', iconColor: 'text-primary-600', iconSrc: '/icons/torticollis-icon.png' },
+              { name: 'Balance Problems (Geriatric)', href: '/conditions/balance-problems', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600', iconSrc: '/icons/balance-problems-icon.png' },
+              { name: 'Osteoporosis', href: '/conditions/osteoporosis', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600', iconSrc: '/icons/osteoporosis-icon.png' },
+              { name: 'Pregnancy-Related Pain', href: '/conditions/pregnancy-pain', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600', iconSrc: '/icons/pregnancy-pain-icon.png' },
+              { name: 'Urinary Incontinence', href: '/conditions/urinary-incontinence', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600', iconSrc: '/icons/urinary-incontinence-icon.png' },
             ].map((condition, index) => (
               <motion.div
                 key={index}
@@ -287,8 +310,8 @@ const Home = memo(function Home() {
                         <ArrowRightIcon className="h-4 w-4" />
                       </p>
                     </div>
-                    <div className={`w-12 h-12 ${condition.color.replace('-50', '-100')} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 ${condition.iconColor}`}>
-                      <HeartIcon className="h-6 w-6" />
+                    <div className={`w-12 h-12 ${condition.color.replace('-50', '-100')} rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:scale-110 transition-transform duration-300 ${condition.iconColor}`}>
+                      <img src={condition.iconSrc} alt={condition.name} className="h-7 w-7 object-contain" />
                     </div>
                   </div>
                 </Link>

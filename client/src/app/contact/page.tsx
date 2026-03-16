@@ -114,7 +114,14 @@ const ContactPage = () => {
             transition={{ delay: 0.2 }}
             className="bg-card-1 rounded-2xl p-8 border border-premium shadow-sm"
           >
-            <h2 className="text-xl font-semibold text-gray-900 mb-6 tracking-tight">Send us a message</h2>
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.15 }}
+              className="text-xl font-semibold text-gray-900 mb-6 tracking-tight"
+            >
+              Send us a message
+            </motion.h2>
             
             {isSubmitted ? (
               <div className="text-center py-8">
