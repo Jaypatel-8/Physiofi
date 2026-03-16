@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import { UserIcon, AcademicCapIcon, StarIcon } from '@heroicons/react/24/outline'
 
 const Team = () => {
@@ -9,7 +8,6 @@ const Team = () => {
     {
       name: "Dr. Arth Patel",
       title: "Senior Pediatric Physiotherapist",
-      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
       qualifications: ["MSc Physiotherapy", "Pediatric Specialist"],
       experience: "8+ Years",
       specializations: ["Pediatric Physiotherapy", "Sports Injuries", "Neurological Rehabilitation"],
@@ -18,7 +16,6 @@ const Team = () => {
     {
       name: "Dr. Prakruti Patel",
       title: "Senior Pediatric Occupational Therapist",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
       qualifications: ["MSc Occupational Therapy", "BOT", "Pediatric Specialist"],
       experience: "6+ Years",
       specializations: ["Occupational Therapy", "Sensory Integration", "Developmental Therapy"],
@@ -27,7 +24,6 @@ const Team = () => {
     {
       name: "Dr. Rajesh Sharma",
       title: "Senior Orthopedic Physiotherapist",
-      image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80",
       qualifications: ["MPT Orthopedics", "Orthopedic Specialist"],
       experience: "10+ Years",
       specializations: ["Orthopedic Rehabilitation", "Post-Surgical Care", "Sports Medicine"],
@@ -36,7 +32,6 @@ const Team = () => {
     {
       name: "Dr. Priya Desai",
       title: "Senior Neurological Physiotherapist",
-      image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80",
       qualifications: ["MPT Neurology", "Neurological Specialist"],
       experience: "7+ Years",
       specializations: ["Neurological Rehabilitation", "Stroke Recovery", "Spinal Cord Injuries"],
@@ -77,19 +72,10 @@ const Team = () => {
               viewport={{ once: true }}
               className="site-card-elevated p-6 group"
             >
-              {/* Doctor Image */}
-              <div className="relative mb-6 overflow-hidden rounded-xl bg-primary-100 aspect-[4/3]">
-                <Image
-                  src={doctor.image}
-                  alt={doctor.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 25vw"
-                />
-                <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-white rounded-full p-2 shadow-lg">
-                    <StarIcon className="h-6 w-6 text-yellow-400" />
-                  </div>
+              {/* Doctor Avatar (no photo, icon-based for cleaner design) */}
+              <div className="relative mb-6 flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 shadow-inner">
+                  <UserIcon className="h-12 w-12" />
                 </div>
               </div>
 

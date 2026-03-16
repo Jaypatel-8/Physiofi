@@ -170,12 +170,12 @@ const Hero = memo(() => {
             </m.div>
           </m.div>
 
-          {/* Right - LCP image (priority first slide) */}
+          {/* Right - LCP image (priority first slide) – hidden on small screens for cleaner mobile view */}
           <m.div
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="relative"
+            className="relative hidden lg:block"
           >
             <div className="relative rounded-3xl overflow-hidden shadow-xl ring-1 ring-black/5 ring-inset">
               <div className="aspect-[4/3] bg-primary-100/50 relative" style={{ minHeight: 320 }}>

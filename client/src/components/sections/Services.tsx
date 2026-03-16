@@ -2,7 +2,6 @@
 
 import { LazyMotion, domAnimation, m } from 'framer-motion'
 import Link from 'next/link'
-import Image from 'next/image'
 import { 
   HomeIcon, 
   VideoCameraIcon, 
@@ -52,12 +51,6 @@ const Services = () => {
     { step: "2", title: "Undergo a detailed assessment", description: "Our expert evaluates your condition, medical history, and specific needs", icon: CheckCircleIcon },
     { step: "3", title: "Receive personalized treatment", description: "Evidence-based therapy tailored to your condition and recovery goals", icon: StarIcon },
     { step: "4", title: "Track progress and improve", description: "Regular monitoring and adjustment of treatment based on your progress", icon: CheckCircleIcon }
-  ]
-
-  const serviceImages = [
-    { src: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&q=65', alt: 'Physiotherapy session' },
-    { src: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=65', alt: 'Home visit care' },
-    { src: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=65', alt: 'Online consultation' },
   ]
 
   return (
@@ -111,23 +104,6 @@ const Services = () => {
               </div>
             </m.a>
           )})}
-        </div>
-
-        {/* Related imagery - lazy loaded */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-20 max-w-4xl mx-auto">
-          {serviceImages.map((img, i) => (
-            <div key={i} className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-primary-200/40 shadow-sm">
-              <Image
-                src={img.src}
-                alt={img.alt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, 33vw"
-                loading="lazy"
-                quality={65}
-              />
-            </div>
-          ))}
         </div>
 
         <m.div

@@ -18,10 +18,22 @@ const notificationRoutes = require('./routes/notifications');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// Middleware – allow Vercel app and localhost to avoid "Network Error" from CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  process.env.CLIENT_URL
+].filter(Boolean);
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    if (origin.endsWith('.vercel.app')) return cb(null, true);
+    cb(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
