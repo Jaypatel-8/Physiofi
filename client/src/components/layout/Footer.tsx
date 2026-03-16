@@ -67,9 +67,9 @@ const Footer = () => {
   return (
     <footer className="bg-primary-900 text-white">
       <div className="container-custom">
-        <div className="py-12 lg:py-16">
+        <div className="py-10 sm:py-12 lg:py-16">
           {/* Top: logo + tagline + contact + social */}
-          <div className="grid lg:grid-cols-12 gap-10 lg:gap-8 pb-10 lg:pb-12 border-b border-white/15">
+          <div className="grid lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8 pb-8 sm:pb-10 lg:pb-12 border-b border-white/15">
             <div className="lg:col-span-4">
               <Link href="/" className="inline-block mb-4">
                 <span className="inline-block [filter:brightness(0)_invert(1)]">

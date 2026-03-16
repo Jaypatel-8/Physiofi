@@ -74,8 +74,8 @@ export default function DashboardLayout({ role, children }: DashboardLayoutProps
               )}
             </div>
           </header>
-          <main className="flex-1 p-4 lg:p-6">
-            <div className="max-w-6xl mx-auto">
+          <main className="flex-1 p-4 sm:p-5 md:p-6 lg:p-6">
+            <div className="max-w-6xl mx-auto w-full min-w-0">
               {children}
             </div>
           </main>
@@ -90,7 +90,7 @@ export default function DashboardLayout({ role, children }: DashboardLayoutProps
       <div className="pt-16 lg:pt-20">
         {!isDashboardIndex && (
           <div className="border-b border-primary-200/40 bg-white/80 backdrop-blur-sm shadow-sm">
-            <div className="container-custom max-w-7xl mx-auto py-3 px-4 flex items-center justify-between gap-4">
+            <div className="container-custom py-3 flex items-center justify-between gap-4">
               <Link
                 href={dashboardHref}
                 className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold text-sm"
@@ -112,7 +112,7 @@ export default function DashboardLayout({ role, children }: DashboardLayoutProps
           </div>
         )}
 
-        <main className="container-custom max-w-7xl mx-auto py-6 px-4">
+        <main className="container-custom max-w-7xl mx-auto py-6 sm:py-8">
           {children}
         </main>
       </div>

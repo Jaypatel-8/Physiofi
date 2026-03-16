@@ -166,9 +166,9 @@ const Home = memo(function Home() {
       <Header />
       <Hero />
       {/* Why Choose Us – pastel cards */}
-      <section className="py-20 bg-pastel-mesh">
+      <section className="py-12 sm:py-16 lg:py-20 bg-pastel-mesh">
         <div className="container-custom">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-14 lg:mb-16">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -184,7 +184,7 @@ const Home = memo(function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 sm:mb-6 font-display leading-tight"
             >
               Why Choose <span className="text-primary-500">PhysioFi</span>?
             </motion.h2>
@@ -193,13 +193,13 @@ const Home = memo(function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.45, delay: 0.1 }}
-              className="text-xl text-gray-600 max-w-xl mx-auto font-light"
+              className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-xl mx-auto font-light"
             >
               Expert physiotherapy care delivered right at your home or online
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
             {whyChooseUs.map((item, index) => {
               const style = cardStyle(index)
               const Icon = item.icon
@@ -211,7 +211,7 @@ const Home = memo(function Home() {
                   transition={{ duration: 0.35, delay: index * 0.06 }}
                   viewport={{ once: true, margin: '-40px' }}
                   whileHover={{ y: -4, scale: 1.01 }}
-                  className={`${style.bg} card-hover-premium border border-primary-200/40 rounded-2xl p-6 text-center flex flex-col`}
+                  className={`${style.bg} card-hover-premium border border-primary-200/40 rounded-2xl p-4 sm:p-5 lg:p-6 text-center flex flex-col`}
                   style={{ minHeight: '200px' }}
                 >
                   <div className="flex flex-col flex-grow">
@@ -236,9 +236,9 @@ const Home = memo(function Home() {
       <Services />
       
       {/* Diseases Section */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container-custom">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-14 lg:mb-16">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -254,7 +254,7 @@ const Home = memo(function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 font-display leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 sm:mb-6 font-display leading-tight"
             >
               <span className="text-primary-500">Expert</span> <span className="text-primary-500">Treatment</span> For
               <span className="block">Various Conditions</span>
@@ -264,13 +264,13 @@ const Home = memo(function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.45, delay: 0.1 }}
-              className="text-xl text-gray-600 max-w-2xl mx-auto font-light"
+              className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto font-light"
             >
               Comprehensive physiotherapy care for a wide range of conditions and injuries
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
             {[
               { name: 'Low Back Pain / Sciatica', href: '/conditions/low-back-pain', color: 'bg-primary-50', iconColor: 'text-primary-600', iconSrc: '/icons/back-pain-icon.png' },
               { name: 'Neck Pain / Cervical Spondylosis', href: '/conditions/neck-pain', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600', iconSrc: '/icons/neck-pain-icon.png' },
@@ -300,7 +300,7 @@ const Home = memo(function Home() {
               >
                 <Link
                   href={condition.href}
-                  className={`${condition.color} rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300 group block`}
+                  className={`${condition.color} rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 group block`}
                 >
                   <div className="flex items-start gap-4">
                     <div className="flex-grow">

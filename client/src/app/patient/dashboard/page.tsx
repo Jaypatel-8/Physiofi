@@ -304,12 +304,12 @@ const PatientDashboard = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="lg:col-span-2 min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-primary-50 rounded-2xl border border-primary-200/40 p-6"
+              className="bg-primary-50 rounded-2xl border border-primary-200/40 p-4 sm:p-5 lg:p-6"
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -357,12 +357,12 @@ const PatientDashboard = () => {
             </motion.div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-pastel-blue-50 rounded-2xl border border-pastel-blue-200/50 p-5"
+              className="bg-pastel-blue-50 rounded-2xl border border-pastel-blue-200/50 p-4 sm:p-5"
             >
               <h3 className="text-base font-bold text-gray-900 mb-4">Quick Links</h3>
               <div className="space-y-2">
