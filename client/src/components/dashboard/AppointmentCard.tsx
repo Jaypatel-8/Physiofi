@@ -6,6 +6,8 @@ import { CalendarDaysIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/out
 interface AppointmentCardProps {
   appointment: any
   onView?: () => void
+  showPatient?: boolean
+  showDoctor?: boolean
 }
 
 const AppointmentCard = ({ appointment, onView }: AppointmentCardProps) => {
