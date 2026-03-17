@@ -85,14 +85,14 @@ const Contact = () => {
   ]
 
   return (
-    <section id="contact" className="py-32 bg-pastel-mesh relative overflow-hidden">
+    <section id="contact" className="section-py bg-pastel-mesh relative overflow-hidden">
       <div className="container-custom relative z-10">
-        <div className="text-center mb-20">
+        <div className="text-center mb-10 sm:mb-16 md:mb-20">
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-primary-600 text-sm font-medium tracking-[0.2em] uppercase mb-4"
+            className="text-primary-600 text-xs sm:text-sm font-medium tracking-[0.2em] uppercase mb-3 sm:mb-4"
           >
             Contact
           </motion.p>
@@ -101,7 +101,7 @@ const Contact = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.05 }}
-            className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 font-display leading-tight tracking-tight"
+            className="text-2xl sm:text-3xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 font-display leading-tight tracking-tight px-1"
           >
             Get in touch
           </motion.h2>
@@ -110,13 +110,13 @@ const Contact = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-gray-500 max-w-xl mx-auto text-lg"
+            className="text-gray-500 max-w-xl mx-auto text-base sm:text-lg px-1"
           >
             We're here to help with appointments and questions
           </motion.p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-10">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
           {/* Contact Information - Book Design */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -144,9 +144,9 @@ const Contact = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.08 }}
-                  className={`group relative flex items-start gap-4 ${style.bg} card-hover-premium border border-primary-200/40 rounded-2xl p-6 overflow-hidden`}
+                  className={`group relative flex items-start gap-3 sm:gap-4 ${style.bg} card-hover-premium border border-primary-200/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 overflow-hidden`}
                 >
-                  <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${style.iconBg} ${style.iconColor}`}>
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl flex items-center justify-center ${style.iconBg} ${style.iconColor}`}>
                     <info.icon className="h-5 w-5" strokeWidth={1.5} />
                   </div>
                   <div className="min-w-0">
@@ -166,7 +166,7 @@ const Contact = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-card-2 rounded-2xl p-6 border border-premium shadow-sm"
+              className="bg-card-2 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-premium shadow-sm"
             >
               <div className="flex items-center gap-4 mb-3">
                 <div className="w-10 h-10 rounded-lg bg-primary-500/10 flex items-center justify-center text-primary-600">
@@ -184,9 +184,9 @@ const Contact = () => {
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="bg-primary-50 rounded-2xl p-10 border border-primary-200/40 shadow-sm"
+            className="bg-primary-50 rounded-xl sm:rounded-2xl p-5 sm:p-8 md:p-10 border border-primary-200/40 shadow-sm"
           >
-            <h3 className="text-xl font-semibold text-gray-900 mb-6 font-display tracking-tight">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 font-display tracking-tight">
               Send a message
             </h3>
             

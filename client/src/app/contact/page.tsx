@@ -97,7 +97,7 @@ const ContactPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <div className="pt-24"></div>
+      <div className="page-top-spacing" />
 
       <PageHero
         label="Contact"
@@ -105,14 +105,14 @@ const ContactPage = () => {
         subtitle="Questions, appointments, or support — we're here for your recovery journey."
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-6 lg:px-8 py-10 sm:py-14 lg:py-16 bg-pastel-mesh min-h-[50vh]">
-        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-6 lg:px-8 py-8 sm:py-10 md:py-14 lg:py-16 bg-pastel-mesh min-h-[50vh]">
+        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12">
           {/* Contact Form */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-card-1 rounded-2xl p-5 sm:p-6 lg:p-8 border border-premium shadow-sm"
+            className="bg-card-1 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-premium shadow-sm"
           >
             <motion.h2
               initial={{ opacity: 0, y: 10 }}

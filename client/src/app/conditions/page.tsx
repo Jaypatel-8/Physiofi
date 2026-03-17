@@ -3,41 +3,16 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import Image from 'next/image'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import BookingPopup from '@/components/ui/BookingPopup'
 import Breadcrumb from '@/components/conditions/Breadcrumb'
 import { CONDITIONS } from '@/data/conditions'
-import { getConditionIconPath } from '@/data/conditionIcons'
-import { CheckCircleIcon } from '@heroicons/react/24/outline'
+import { getConditionIcon } from '@/data/conditionIcons'
 
-function ConditionCardIcon({
-  slug,
-  name,
-  iconColor,
-  className,
-}: {
-  slug: string
-  name: string
-  iconColor: string
-  className?: string
-}) {
-  const [imgFailed, setImgFailed] = useState(false)
-  const src = getConditionIconPath(slug)
-  if (imgFailed) {
-    return <CheckCircleIcon className={`h-12 w-12 ${iconColor} ${className ?? ''}`} />
-  }
-  return (
-    <Image
-      src={src}
-      alt={name}
-      width={96}
-      height={96}
-      className="object-contain w-full h-full"
-      onError={() => setImgFailed(true)}
-    />
-  )
+function ConditionCardIcon({ slug, iconColor }: { slug: string; iconColor: string }) {
+  const Icon = getConditionIcon(slug)
+  return <Icon className={`h-6 w-6 sm:h-7 sm:w-7 flex-shrink-0 ${iconColor}`} />
 }
 
 export default function ConditionsPage() {
@@ -52,7 +27,7 @@ export default function ConditionsPage() {
   return (
     <main className="min-h-screen">
       <Header />
-      <div className="pt-24"></div>
+      <div className="pt-20 sm:pt-24" />
       <Breadcrumb items={[
         { label: 'Services', href: '/services' },
         { label: 'Conditions' }
@@ -65,15 +40,15 @@ export default function ConditionsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="text-center mb-10 sm:mb-16"
           >
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="inline-block mb-4"
+              className="inline-block mb-3 sm:mb-4"
             >
-              <span className="bg-primary-100 text-primary-800 px-5 py-2 rounded-full text-sm font-semibold">
+              <span className="bg-primary-100 text-primary-800 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold">
                 Conditions We Treat
               </span>
             </motion.div>
@@ -81,7 +56,7 @@ export default function ConditionsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-              className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-display leading-tight"
+              className="text-3xl sm:text-4xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 font-display leading-tight px-1"
             >
               Conditions We <span className="text-primary-500">Treat</span>
             </motion.h1>
@@ -89,7 +64,7 @@ export default function ConditionsPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.18 }}
-              className="text-xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed"
+              className="text-base sm:text-xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed px-1"
             >
               Expert physiotherapy treatment for a wide range of conditions. Our certified therapists provide personalized care to help you recover and improve your quality of life.
             </motion.p>
@@ -100,32 +75,32 @@ export default function ConditionsPage() {
       {/* Conditions Grid */}
       <section className="section-py bg-white">
         <div className="container-custom">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {CONDITIONS.map((condition, index) => (
               <motion.div
                 key={condition.slug}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ y: -5, scale: 1.02 }}
+                transition={{ delay: index * 0.04 }}
+                whileHover={{ y: -2, scale: 1.01 }}
               >
-                <Link href={condition.href}>
-                  <div className={`site-card ${condition.color} rounded-xl p-6 h-full flex items-start gap-4 cursor-pointer group`}>
-                    <div className={`w-24 h-24 ${condition.color} rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md group-hover:scale-110 transition-transform overflow-hidden`}>
-                      <ConditionCardIcon slug={condition.slug} name={condition.name} iconColor={condition.iconColor} />
+                <Link href={condition.href} className="block">
+                  <div className={`site-card ${condition.color} rounded-2xl p-4 sm:p-5 md:p-6 h-full flex items-start gap-3 sm:gap-4 cursor-pointer group min-w-0`}>
+                    <div className={`w-12 h-12 sm:w-14 sm:h-14 ${condition.color} rounded-xl flex items-center justify-center flex-shrink-0 border border-white/80 shadow-sm group-hover:scale-105 transition-transform`}>
+                      <ConditionCardIcon slug={condition.slug} iconColor={condition.iconColor} />
                     </div>
-                      <div className="flex-grow">
-                        <h3 className="text-lg site-card-title font-display mb-2 group-hover:text-primary-600 transition-colors">
-                          {condition.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Learn more about treatment options
-                        </p>
-                      </div>
+                    <div className="flex-grow min-w-0">
+                      <h3 className="text-base sm:text-lg site-card-title font-display mb-1 group-hover:text-primary-600 transition-colors leading-snug">
+                        {condition.name}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-500">
+                        Learn more about treatment options
+                      </p>
                     </div>
-                  </Link>
-                </motion.div>
+                  </div>
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -138,14 +113,14 @@ export default function ConditionsPage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="max-w-3xl mx-auto"
+            className="max-w-3xl mx-auto px-1"
           >
             <motion.h2
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.05 }}
-              className="text-4xl lg:text-5xl font-black text-white mb-6 font-display"
+              className="text-2xl sm:text-3xl lg:text-5xl font-black text-white mb-4 sm:mb-6 font-display leading-tight"
             >
               Ready to Start Your <span className="text-yellow-200">Recovery</span>?
             </motion.h2>
@@ -154,13 +129,13 @@ export default function ConditionsPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: 0.1 }}
-              className="text-xl text-white/95 mb-8 font-light"
+              className="text-base sm:text-xl text-white/95 mb-6 sm:mb-8 font-light"
             >
               Book a consultation with our expert physiotherapists today
             </motion.p>
             <button
               onClick={() => setIsBookingOpen(true)}
-              className="bg-white text-primary-700 hover:bg-gray-50 font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-xl hover:scale-105 hover:-translate-y-0.5 active:scale-95"
+              className="bg-white text-primary-700 hover:bg-gray-50 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
             >
               Book Consultation
             </button>

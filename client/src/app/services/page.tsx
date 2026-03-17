@@ -108,7 +108,7 @@ const ServicesPage = () => {
   return (
     <main className="min-h-screen">
       <Header />
-      <div className="pt-24"></div>
+      <div className="page-top-spacing" />
       
       {/* Hero Section - Modern Design */}
       <section className="relative section-py bg-white overflow-hidden">

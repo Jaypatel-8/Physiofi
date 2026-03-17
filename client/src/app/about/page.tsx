@@ -92,7 +92,7 @@ const AboutPage = () => {
   return (
     <main className="min-h-screen">
       <Header />
-      <div className="pt-24"></div>
+      <div className="page-top-spacing" />
 
       <PageHero
         label="About PhysioFi"
