@@ -94,7 +94,7 @@ export default function TeleConsultationPage() {
       />
 
       {/* Additional Content Section */}
-      <section className="py-16 bg-gradient-to-br from-secondary-50 to-pastel-blue-50">
+      <section className="section-py-sm bg-gradient-to-br from-secondary-50 to-pastel-blue-50">
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -161,7 +161,7 @@ export default function TeleConsultationPage() {
       </section>
 
       {/* Tele Process Section */}
-      <section className="py-16 bg-pastel-mesh">
+      <section className="section-py-sm bg-pastel-mesh">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -223,7 +223,7 @@ export default function TeleConsultationPage() {
         imagePath="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=70"
       />
 
-      <section className="py-16 bg-pastel-mesh">
+      <section className="section-py-sm bg-pastel-mesh">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

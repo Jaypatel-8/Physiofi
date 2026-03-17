@@ -107,7 +107,7 @@ const Testimonials = memo(() => {
   }, [])
 
   return (
-    <section id="testimonials" className="py-20 bg-white relative overflow-hidden">
+    <section id="testimonials" className="section-py bg-white relative overflow-hidden">
       <div className="container-custom relative z-10">
         {/* Header */}
         <div className="text-center mb-16">

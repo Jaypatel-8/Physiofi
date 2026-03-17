@@ -242,7 +242,7 @@ const PatientDashboard = () => {
 
   return (
     <>
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <DashboardHeader
           subtitle="Track your appointments, treatments, and recovery progress"
           user={user}
@@ -251,7 +251,7 @@ const PatientDashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex flex-wrap gap-3"
+          className="mb-5 sm:mb-8 flex flex-wrap gap-2 sm:gap-3"
         >
           <button
             onClick={() => setIsBookingOpen(true)}
@@ -311,10 +311,10 @@ const PatientDashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-primary-50 rounded-2xl border border-primary-200/40 p-4 sm:p-5 lg:p-6"
             >
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">Upcoming Appointments</h2>
-                  <p className="text-sm text-gray-500 mt-0.5">Your next scheduled sessions</p>
+              <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6">
+                <div className="min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-gray-900">Upcoming Appointments</h2>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Your next scheduled sessions</p>
                 </div>
                 <Link
                   href="/patient/appointments"

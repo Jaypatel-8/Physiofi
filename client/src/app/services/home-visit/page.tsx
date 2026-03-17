@@ -98,7 +98,7 @@ export default function HomeVisitPage() {
       />
 
       {/* Steps Section */}
-      <section className="py-16 bg-white">
+      <section className="section-py-sm bg-white">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -210,7 +210,7 @@ export default function HomeVisitPage() {
         imagePath="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=70"
       />
 
-      <section className="py-16 bg-white">
+      <section className="section-py-sm bg-white">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

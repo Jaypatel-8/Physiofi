@@ -34,7 +34,7 @@ const WhyChooseSection = () => {
   const cardBg = ['bg-card-1', 'bg-card-2', 'bg-card-3', 'bg-card-1']
 
   return (
-    <section className="py-16 bg-pastel-mesh">
+    <section className="section-py-sm bg-pastel-mesh">
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

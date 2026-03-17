@@ -149,7 +149,7 @@ const MedicalRecordsPage = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 rounded-2xl border border-primary-200/50 bg-primary-50/50">
+          <div className="text-center py-10 sm:py-14 lg:py-16 rounded-2xl border border-primary-200/50 bg-primary-50/50">
             <div className="w-20 h-20 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary-600">
               <DocumentTextIcon className="h-10 w-10" />
             </div>

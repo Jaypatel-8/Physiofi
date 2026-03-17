@@ -20,10 +20,10 @@ const Services = dynamic(() => import('@/components/sections/Services'), {
 
 // Lazy load heavy components for better performance
 const Testimonials = dynamic(() => import('@/components/sections/Testimonials'), {
-  loading: () => <div className="py-20 bg-white"><div className="container-custom text-center">Loading...</div></div>
+  loading: () => <div className="py-12 sm:py-16 lg:py-20 bg-white"><div className="container-custom text-center">Loading...</div></div>
 })
 const Contact = dynamic(() => import('@/components/sections/Contact'), {
-  loading: () => <div className="py-20 bg-white"><div className="container-custom text-center">Loading...</div></div>
+  loading: () => <div className="py-12 sm:py-16 lg:py-20 bg-white"><div className="container-custom text-center">Loading...</div></div>
 })
 const Footer = dynamic(() => import('@/components/layout/Footer'))
 const FloatingActionButton = dynamic(() => import('@/components/ui/FloatingActionButton'))

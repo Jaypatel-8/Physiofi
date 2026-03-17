@@ -18,7 +18,7 @@ const ConditionHero = ({ title, subtitle, description }: ConditionHeroProps) => 
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary-100/12 blur-[100px]" />
         <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary-50/15 blur-[80px]" />
       </div>
-      <div className="container-custom relative z-10 py-20 lg:py-24">
+      <div className="container-custom relative z-10 py-12 sm:py-16 lg:py-24">
         <div className="max-w-3xl mx-auto text-center">
           <motion.p
             initial={{ opacity: 0, y: 16 }}

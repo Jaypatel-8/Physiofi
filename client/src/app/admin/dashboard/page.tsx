@@ -293,7 +293,7 @@ const AdminDashboard = () => {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-16"
+                    className="text-center py-10 sm:py-14 lg:py-16"
                   >
                     <div className="relative w-24 h-24 mx-auto mb-6">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full animate-pulse"></div>

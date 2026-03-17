@@ -24,7 +24,7 @@ const CTASection = ({
   }
 
   return (
-    <section className="py-20 bg-gradient-to-r from-primary-300 via-pastel-mint-300 to-pastel-sky-300">
+    <section className="section-py bg-gradient-to-r from-primary-300 via-pastel-mint-300 to-pastel-sky-300">
       <div className="container-custom text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

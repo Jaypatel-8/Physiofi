@@ -327,7 +327,7 @@ const AdminDoctorsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="site-card text-center py-16">
+            <div className="site-card text-center py-10 sm:py-14 lg:py-16">
               <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <UserGroupIcon className="h-12 w-12 text-primary-600" />
               </div>

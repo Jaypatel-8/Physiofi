@@ -111,7 +111,7 @@ const ServicesPage = () => {
       <div className="pt-24"></div>
       
       {/* Hero Section - Modern Design */}
-      <section className="relative py-20 bg-white overflow-hidden">
+      <section className="relative section-py bg-white overflow-hidden">
         
         <div className="container-custom relative z-10">
           <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 max-w-6xl mx-auto">
@@ -138,7 +138,7 @@ const ServicesPage = () => {
       </section>
 
       {/* Services Grid */}
-      <section className="py-20 bg-white">
+      <section className="section-py bg-white">
         <div className="container-custom">
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {services.map((service, index) => (
@@ -175,7 +175,7 @@ const ServicesPage = () => {
       </section>
 
       {/* Process Section - Modern Design */}
-      <section className="py-20 bg-white relative overflow-hidden">
+      <section className="section-py bg-white relative overflow-hidden">
         
         <div className="container-custom relative z-10">
           <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6 mb-16">
@@ -277,7 +277,7 @@ const ServicesPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-secondary-500 via-secondary-600 to-secondary-700">
+      <section className="section-py bg-gradient-to-br from-secondary-500 via-secondary-600 to-secondary-700">
         <div className="container-custom text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}

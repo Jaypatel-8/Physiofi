@@ -51,7 +51,7 @@ export default function ConditionsPage() {
       ]} />
       
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-primary-50 via-pastel-mint-50 to-pastel-sky-50">
+      <section className="section-py bg-gradient-to-br from-primary-50 via-pastel-mint-50 to-pastel-sky-50">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -90,7 +90,7 @@ export default function ConditionsPage() {
       </section>
 
       {/* Conditions Grid */}
-      <section className="py-20 bg-white">
+      <section className="section-py bg-white">
         <div className="container-custom">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {conditions.map((condition, index) => (
@@ -124,7 +124,7 @@ export default function ConditionsPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-300 via-pastel-mint-300 to-pastel-sky-300">
+      <section className="section-py bg-gradient-to-r from-primary-300 via-pastel-mint-300 to-pastel-sky-300">
         <div className="container-custom text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

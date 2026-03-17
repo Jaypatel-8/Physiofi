@@ -11,7 +11,7 @@ interface SymptomsListProps {
 
 const SymptomsList = ({ symptoms, title = "Common Symptoms" }: SymptomsListProps) => {
   return (
-    <section className="py-16 bg-white">
+    <section className="section-py-sm bg-white">
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

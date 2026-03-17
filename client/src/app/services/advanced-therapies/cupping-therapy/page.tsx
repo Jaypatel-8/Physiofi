@@ -31,7 +31,7 @@ export default function CuppingTherapyPage() {
       />
 
       {/* What It Is Section */}
-      <section className="py-20 bg-white">
+      <section className="section-py bg-white">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -57,7 +57,7 @@ export default function CuppingTherapyPage() {
       </section>
 
       {/* Used For Section */}
-      <section className="py-20 bg-primary-50">
+      <section className="section-py bg-primary-50">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -93,7 +93,7 @@ export default function CuppingTherapyPage() {
       </section>
 
       {/* How We Do It Section */}
-      <section className="py-20 bg-white">
+      <section className="section-py bg-white">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -171,7 +171,7 @@ export default function CuppingTherapyPage() {
       </section>
 
       {/* Duration & Benefits */}
-      <section className="py-20 bg-primary-50">
+      <section className="section-py bg-primary-50">
         <div className="container-custom">
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <motion.div
@@ -227,7 +227,7 @@ export default function CuppingTherapyPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary-300">
+      <section className="section-py bg-primary-300">
         <div className="container-custom text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

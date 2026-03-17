@@ -18,7 +18,7 @@ export default function PageHero({ label, title, subtitle, children, className =
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-primary-100/12 blur-[100px] animate-float-slow" />
         <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-[450px] h-[450px] rounded-full bg-primary-50/15 blur-[80px] animate-float-slower" />
       </div>
-      <div className="container-custom relative z-10 py-20 lg:py-24">
+      <div className="container-custom relative z-10 py-12 sm:py-16 lg:py-24">
         <div className="max-w-3xl mx-auto text-center">
           {label && (
             <motion.p

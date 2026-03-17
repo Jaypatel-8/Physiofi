@@ -78,7 +78,7 @@ const getDefaultIcon = (treatment: string, index: number): React.ComponentType<{
 
 const TreatmentList = ({ treatments, title = "How We Help", treatmentIcons }: TreatmentListProps) => {
   return (
-    <section className="py-16 bg-gradient-to-br from-pastel-sage-50 via-pastel-peach-50 to-pastel-lavender-50">
+    <section className="section-py-sm bg-gradient-to-br from-pastel-sage-50 via-pastel-peach-50 to-pastel-lavender-50">
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

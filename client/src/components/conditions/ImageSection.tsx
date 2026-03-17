@@ -16,7 +16,7 @@ const ImageSection = ({ imageAlt, title, description, imagePath }: ImageSectionP
   const [imageFailed, setImageFailed] = useState(false)
   const showPlaceholder = !imagePath || imageFailed
   return (
-    <section className="py-16 bg-white">
+    <section className="section-py-sm bg-white">
       <div className="container-custom">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}

@@ -65,7 +65,7 @@ export default function DashboardSidebar({ role }: { role: Role }) {
 
   const NavContent = () => (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-4 pt-14 lg:pt-4 border-b border-gray-100">
         <Link href={role === 'doctor' ? '/doctor/dashboard' : '/admin/dashboard'} className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
           <Image
             src="/Physiofi Logo(1).png"
@@ -156,13 +156,14 @@ export default function DashboardSidebar({ role }: { role: Role }) {
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
+        {/* Close button above nav content so it stays clickable on mobile */}
         <button
           type="button"
           onClick={() => setMobileOpen(false)}
-          className="absolute top-3.5 right-3.5 p-2 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 lg:hidden transition-colors"
+          className="absolute top-3 right-3 z-[60] p-2.5 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-800 active:bg-gray-200 lg:hidden transition-colors touch-manipulation"
           aria-label="Close menu"
         >
-          <XMarkIcon className="h-5 w-5" />
+          <XMarkIcon className="h-6 w-6" />
         </button>
         <NavContent />
       </aside>

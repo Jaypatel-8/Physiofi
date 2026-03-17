@@ -41,7 +41,7 @@ export default function DashboardLayout({ role, children }: DashboardLayoutProps
       <div className="min-h-screen bg-[#fafbfc]">
         <DashboardSidebar role={role} />
         <div className="lg:pl-64 min-h-screen flex flex-col">
-          <header className="sticky top-0 z-30 flex items-center justify-between gap-4 h-14 px-4 pl-14 lg:pl-6 bg-white/80 backdrop-blur-sm border-b border-gray-100">
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-3 sm:gap-4 h-14 px-3 sm:px-4 pl-14 sm:pl-16 lg:pl-6 bg-white/80 backdrop-blur-sm border-b border-gray-100">
             {!isDashboardIndex ? (
               <Link
                 href={dashboardHref}
@@ -74,8 +74,8 @@ export default function DashboardLayout({ role, children }: DashboardLayoutProps
               )}
             </div>
           </header>
-          <main className="flex-1 p-4 sm:p-5 md:p-6 lg:p-6">
-            <div className="max-w-6xl mx-auto w-full min-w-0">
+          <main className="flex-1 p-3 sm:p-5 md:p-6 lg:p-6 overflow-x-hidden">
+            <div className="max-w-6xl mx-auto w-full min-w-0 px-0">
               {children}
             </div>
           </main>

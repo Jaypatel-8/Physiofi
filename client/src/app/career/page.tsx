@@ -259,7 +259,7 @@ const CareerPage = () => {
       </PageHero>
 
       {/* Why Work With Us */}
-      <section className="py-20 bg-white">
+      <section className="section-py bg-white">
         <div className="container-custom">
           <div className="text-center mb-16">
             <motion.h2
@@ -306,7 +306,7 @@ const CareerPage = () => {
       </section>
 
       {/* Our Values */}
-      <section className="py-20 bg-white">
+      <section className="section-py bg-white">
         <div className="container-custom">
           <div className="text-center mb-16">
             <motion.h2
@@ -353,7 +353,7 @@ const CareerPage = () => {
       </section>
 
       {/* Open Positions */}
-      <section id="open-positions" className="py-20 bg-gradient-to-br from-gray-50 to-white">
+      <section id="open-positions" className="section-py bg-gradient-to-br from-gray-50 to-white">
         <div className="container-custom">
           <div className="text-center mb-16">
             <motion.h2
@@ -448,7 +448,7 @@ const CareerPage = () => {
       </section>
 
       {/* Application Form */}
-      <section id="application-form" className="py-20 bg-white">
+      <section id="application-form" className="section-py bg-white">
         <div className="container-custom">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
@@ -639,7 +639,7 @@ const CareerPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-accent-500">
+      <section className="section-py bg-accent-500">
         <div className="container-custom text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}

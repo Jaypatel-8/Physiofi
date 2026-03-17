@@ -44,7 +44,7 @@ export default function AdvancedTherapiesPage() {
       ]} />
 
       {/* Hero Section */}
-      <section className="py-20 bg-white">
+      <section className="section-py bg-white">
         <div className="container-custom">
           <div className="text-center mb-16">
             <motion.div
@@ -145,7 +145,7 @@ export default function AdvancedTherapiesPage() {
       </section>
 
       {/* Why Advanced Therapies Section */}
-      <section className="py-20 bg-primary-50">
+      <section className="section-py bg-primary-50">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -228,7 +228,7 @@ export default function AdvancedTherapiesPage() {
       </section>
 
       {/* How It Works Section - Curved Line Design */}
-      <section className="py-20 bg-white relative overflow-hidden">
+      <section className="section-py bg-white relative overflow-hidden">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -324,7 +324,7 @@ export default function AdvancedTherapiesPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary-300">
+      <section className="section-py bg-primary-300">
         <div className="container-custom text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

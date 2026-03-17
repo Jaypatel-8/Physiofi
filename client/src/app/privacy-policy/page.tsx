@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
       <Header />
       <div className="pt-24"></div>
       
-      <section className="py-20">
+      <section className="section-py">
         <div className="container-custom max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

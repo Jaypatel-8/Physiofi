@@ -101,7 +101,7 @@ const AboutPage = () => {
       />
 
       {/* Stats Section – pastel cards */}
-      <section className="py-20 bg-pastel-mesh">
+      <section className="section-py bg-pastel-mesh">
         <div className="container-custom">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
@@ -123,7 +123,7 @@ const AboutPage = () => {
       </section>
 
       {/* Our Story */}
-      <section className="py-20 bg-pastel-mesh">
+      <section className="section-py bg-pastel-mesh">
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div data-aos="fade-right">
@@ -175,7 +175,7 @@ const AboutPage = () => {
       </section>
 
       {/* Our Values */}
-      <section className="py-20 bg-pastel-mesh">
+      <section className="section-py bg-pastel-mesh">
         <div className="container-custom">
           <div className="text-center mb-16">
             <motion.h2
