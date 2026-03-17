@@ -52,10 +52,10 @@ const CTASection = ({
                 <React.Fragment key={index}>{word}{index < arr.length - 1 ? ' ' : ''}</React.Fragment>
               )
             })}
-          </h2>
+          </motion.h2>
           <p className="text-xl text-white/95 mb-10 font-light">
             {description}
-          </motion.p>
+          </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
