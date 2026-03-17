@@ -3,34 +3,42 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import BookingPopup from '@/components/ui/BookingPopup'
 import Breadcrumb from '@/components/conditions/Breadcrumb'
-import { 
-  HomeIcon,
-  CheckCircleIcon
-} from '@heroicons/react/24/outline'
+import { CONDITIONS } from '@/data/conditions'
+import { getConditionIconPath } from '@/data/conditionIcons'
+import { CheckCircleIcon } from '@heroicons/react/24/outline'
 
-const conditions = [
-  { name: 'Low Back Pain / Sciatica', href: '/conditions/low-back-pain', color: 'bg-primary-50', iconColor: 'text-primary-600' },
-  { name: 'Neck Pain / Cervical Spondylosis', href: '/conditions/neck-pain', color: 'bg-secondary-50', iconColor: 'text-secondary-600' },
-  { name: 'Shoulder Pain', href: '/conditions/shoulder-pain', color: 'bg-tertiary-50', iconColor: 'text-tertiary-600' },
-  { name: 'Knee Pain', href: '/conditions/knee-pain', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600' },
-  { name: 'Sports Injuries', href: '/conditions/sports-injuries', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600' },
-  { name: 'Post-Operative Rehabilitation', href: '/conditions/post-operative', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600' },
-  { name: 'Stroke Rehabilitation', href: '/conditions/stroke-rehabilitation', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600' },
-  { name: "Parkinson's Disease", href: '/conditions/parkinsons', color: 'bg-pastel-sage-50', iconColor: 'text-pastel-sage-600' },
-  { name: 'Spinal Cord Injury', href: '/conditions/spinal-cord-injury', color: 'bg-primary-50', iconColor: 'text-primary-600' },
-  { name: 'COPD / Asthma / Breathing Issues', href: '/conditions/copd-asthma', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600' },
-  { name: 'Post-COVID Recovery', href: '/conditions/post-covid', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600' },
-  { name: 'Pediatric Physiotherapy', href: '/conditions/pediatric-developmental', color: 'bg-pastel-sage-50', iconColor: 'text-pastel-sage-600' },
-  { name: 'Torticollis (Children)', href: '/conditions/torticollis', color: 'bg-primary-50', iconColor: 'text-primary-600' },
-  { name: 'Balance Problems (Geriatric)', href: '/conditions/balance-problems', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600' },
-  { name: 'Osteoporosis', href: '/conditions/osteoporosis', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600' },
-  { name: 'Pregnancy-Related Pain', href: '/conditions/pregnancy-pain', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600' },
-  { name: 'Urinary Incontinence', href: '/conditions/urinary-incontinence', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600' },
-]
+function ConditionCardIcon({
+  slug,
+  name,
+  iconColor,
+  className,
+}: {
+  slug: string
+  name: string
+  iconColor: string
+  className?: string
+}) {
+  const [imgFailed, setImgFailed] = useState(false)
+  const src = getConditionIconPath(slug)
+  if (imgFailed) {
+    return <CheckCircleIcon className={`h-12 w-12 ${iconColor} ${className ?? ''}`} />
+  }
+  return (
+    <Image
+      src={src}
+      alt={name}
+      width={96}
+      height={96}
+      className="object-contain w-full h-full"
+      onError={() => setImgFailed(true)}
+    />
+  )
+}
 
 export default function ConditionsPage() {
   const [isBookingOpen, setIsBookingOpen] = useState(false)
@@ -93,9 +101,9 @@ export default function ConditionsPage() {
       <section className="section-py bg-white">
         <div className="container-custom">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {conditions.map((condition, index) => (
+            {CONDITIONS.map((condition, index) => (
               <motion.div
-                key={index}
+                key={condition.slug}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -104,20 +112,20 @@ export default function ConditionsPage() {
               >
                 <Link href={condition.href}>
                   <div className={`site-card ${condition.color} rounded-xl p-6 h-full flex items-start gap-4 cursor-pointer group`}>
-                    <div className={`w-12 h-12 ${condition.color} rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md group-hover:scale-110 transition-transform`}>
-                      <CheckCircleIcon className={`h-6 w-6 ${condition.iconColor}`} />
+                    <div className={`w-24 h-24 ${condition.color} rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md group-hover:scale-110 transition-transform overflow-hidden`}>
+                      <ConditionCardIcon slug={condition.slug} name={condition.name} iconColor={condition.iconColor} />
                     </div>
-                    <div className="flex-grow">
-                      <h3 className="text-lg site-card-title font-display mb-2 group-hover:text-primary-600 transition-colors">
-                        {condition.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Learn more about treatment options
-                      </p>
+                      <div className="flex-grow">
+                        <h3 className="text-lg site-card-title font-display mb-2 group-hover:text-primary-600 transition-colors">
+                          {condition.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Learn more about treatment options
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
+                  </Link>
+                </motion.div>
             ))}
           </div>
         </div>
