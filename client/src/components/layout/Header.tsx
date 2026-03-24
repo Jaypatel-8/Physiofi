@@ -146,7 +146,6 @@ const Header = () => {
     
     // Redirect
     if (dashboardLink && dashboardLink !== '/login') {
-      console.log('Redirecting to:', dashboardLink)
       window.location.href = dashboardLink
     } else {
       window.location.href = '/login'

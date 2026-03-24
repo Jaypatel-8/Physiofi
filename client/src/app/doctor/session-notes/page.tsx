@@ -321,7 +321,7 @@ const SessionNotesPage = () => {
                       className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
                       aria-describedby="session-note-subjective-desc"
                     />
-                    <span id="session-note-subjective-desc" className="sr-only">Patient's reported symptoms and history</span>
+                    <span id="session-note-subjective-desc" className="sr-only">Patient&apos;s reported symptoms and history</span>
                   </div>
                   <div>
                     <label htmlFor="session-note-objective" className="block text-sm font-semibold text-gray-700 mb-2">Objective</label>

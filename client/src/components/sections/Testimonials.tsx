@@ -168,7 +168,7 @@ const Testimonials = memo(() => {
               >
                 {/* Testimonial Text */}
                 <blockquote className="text-xl md:text-2xl text-gray-700 leading-relaxed mb-8 max-w-4xl mx-auto font-medium">
-                  "{testimonials[currentIndex].text}"
+                  &ldquo;{testimonials[currentIndex].text}&rdquo;
                 </blockquote>
 
                 {/* Patient Info */}

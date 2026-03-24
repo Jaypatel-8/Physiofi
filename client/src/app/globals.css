@@ -328,15 +328,6 @@
   }
 }
 
-/* AOS animations */
-[data-aos] {
-  pointer-events: none;
-}
-
-[data-aos].aos-animate {
-  pointer-events: auto;
-}
-
 /* Custom focus styles */
 .focus-ring {
   @apply focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2;

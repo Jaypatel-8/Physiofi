@@ -32,7 +32,7 @@ export default function TermsPage() {
               </p>
               
               <p>
-                Please read these Terms of Service carefully before using PhysioFi's services. By accessing or using our services, you agree to be bound by these terms.
+                Please read these Terms of Service carefully before using PhysioFi&apos;s services. By accessing or using our services, you agree to be bound by these terms.
               </p>
               
               <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Services</h2>

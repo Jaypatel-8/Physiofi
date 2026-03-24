@@ -1,9 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import AOS from 'aos'
-import 'aos/dist/aos.css'
 
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -23,15 +20,6 @@ import {
 } from '@heroicons/react/24/outline'
 
 const AboutPage = () => {
-  useEffect(() => {
-    AOS.init({
-      duration: 1000,
-      easing: 'ease-in-out',
-      once: true,
-      offset: 100,
-    })
-  }, [])
-
   const stats = [
     { number: "70+", label: "Patients", icon: UserGroupIcon },
     { number: "2+", label: "Years Experience", icon: CalendarDaysIcon },
@@ -105,10 +93,12 @@ const AboutPage = () => {
         <div className="container-custom">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
-              <div
+              <motion.div
                 key={index}
-                data-aos="fade-up"
-                data-aos-delay={index * 100}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 className={`card-hover-premium rounded-2xl p-8 text-center ${['bg-card-1', 'bg-card-2', 'bg-card-3'][index]}`}
               >
                 <div className="icon-pastel w-16 h-16 mx-auto mb-4">
@@ -116,7 +106,7 @@ const AboutPage = () => {
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">{stat.number}</div>
                 <div className="text-sm font-medium text-primary-600/90 uppercase tracking-widest">{stat.label}</div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -126,7 +116,12 @@ const AboutPage = () => {
       <section className="section-py bg-pastel-mesh">
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div data-aos="fade-right">
+            <motion.div
+              initial={{ opacity: 0, x: -28 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            >
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -150,8 +145,14 @@ const AboutPage = () => {
                   Our vision is simple — to make expert physiotherapy accessible everywhere.
                 </p>
               </div>
-            </div>
-            <div data-aos="fade-left" className="space-y-6">
+            </motion.div>
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, x: 28 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.55, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            >
               <div className="card-hover-premium bg-card-1 rounded-2xl p-8 relative overflow-hidden">
                 <div className="relative z-10">
                   <h3 className="text-2xl font-bold text-gray-900 mb-4 font-display tracking-tight">Our Mission</h3>
@@ -169,7 +170,7 @@ const AboutPage = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -200,10 +201,12 @@ const AboutPage = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <div
+              <motion.div
                 key={index}
-                data-aos="fade-up"
-                data-aos-delay={index * 100}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 className={`card-hover-premium rounded-2xl p-8 text-center relative overflow-hidden ${['bg-card-1', 'bg-card-2', 'bg-card-3', 'bg-card-1'][index]}`}
               >
                 <div className="mb-6">
@@ -217,7 +220,7 @@ const AboutPage = () => {
                 <p className="text-gray-500 leading-relaxed text-sm">
                   {value.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

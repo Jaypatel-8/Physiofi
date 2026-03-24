@@ -54,7 +54,7 @@ const Team = () => {
             Our Team
           </span>
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 font-display">
-            Get to know the <span className="text-primary-500">Doctor's</span> who <span className="text-primary-500">inspiring</span> our team to the new heights
+            Get to know the <span className="text-primary-500">Doctor&apos;s</span> who <span className="text-primary-500">inspiring</span> our team to the new heights
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Meet our experienced and qualified team of physiotherapists dedicated to your recovery and wellness.

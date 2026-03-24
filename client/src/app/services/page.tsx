@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import AOS from 'aos'
-import 'aos/dist/aos.css'
 import { motion } from 'framer-motion'
 
 import Header from '@/components/layout/Header'
@@ -18,18 +16,13 @@ import {
   StarIcon
 } from '@heroicons/react/24/outline'
 
+const MotionLink = motion(Link)
+
 const ServicesPage = () => {
   const [isBookingOpen, setIsBookingOpen] = useState(false)
   const [bookingType, setBookingType] = useState<'home' | 'tele'>('home')
 
   useEffect(() => {
-    AOS.init({
-      duration: 1000,
-      easing: 'ease-in-out',
-      once: true,
-      offset: 100,
-    })
-
     const handleOpenBooking = (e: Event) => {
       const customEvent = e as CustomEvent
       const type = customEvent.detail?.type === 'tele' ? 'tele' : 'home'
@@ -142,11 +135,13 @@ const ServicesPage = () => {
         <div className="container-custom">
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {services.map((service, index) => (
-              <Link
+              <MotionLink
                 key={index}
                 href={service.href}
-                data-aos="fade-up"
-                data-aos-delay={index * 100}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.45, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 className={`${service.colorScheme.bg} rounded-3xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden group`}
               >
                 {/* Book Corner Effect */}
@@ -168,7 +163,7 @@ const ServicesPage = () => {
                     <span>→</span>
                   </div>
                 </div>
-              </Link>
+              </MotionLink>
             ))}
           </div>
         </div>

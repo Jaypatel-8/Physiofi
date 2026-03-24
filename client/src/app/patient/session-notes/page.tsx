@@ -77,7 +77,7 @@ const SessionNotesPage = () => {
               <h1 className="text-4xl font-black mb-2">Session Notes</h1>
               <LockClosedIcon className="h-6 w-6 text-white/80" />
             </div>
-            <p className="text-white/90">View your doctor's session notes (Read Only)</p>
+            <p className="text-white/90">View your doctor&apos;s session notes (Read Only)</p>
           </div>
         </div>
 
@@ -176,7 +176,7 @@ const SessionNotesPage = () => {
                 <DocumentTextIcon className="h-12 w-12 text-primary-600" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">No Session Notes</h3>
-              <p className="text-gray-600">Your doctor's session notes will appear here after appointments</p>
+              <p className="text-gray-600">Your doctor&apos;s session notes will appear here after appointments</p>
             </div>
           )}
         </div>

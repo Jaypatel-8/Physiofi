@@ -238,7 +238,7 @@ export default function TeleConsultationPage() {
               transition={{ duration: 0.5 }}
               className="text-4xl font-black text-gray-900 mb-8 font-display text-center"
             >
-              What You'll <span className="text-primary-500">Need</span>
+              What You&apos;ll <span className="text-primary-500">Need</span>
             </motion.h2>
             <div className="grid md:grid-cols-2 gap-4">
               {requirements.map((requirement, index) => (

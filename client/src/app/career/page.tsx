@@ -1,8 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import AOS from 'aos'
-import 'aos/dist/aos.css'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 
 import Header from '@/components/layout/Header'
@@ -32,15 +30,6 @@ const CareerPage = () => {
     resume: null as File | null,
     coverLetter: ''
   })
-
-  useEffect(() => {
-    AOS.init({
-      duration: 1000,
-      easing: 'ease-in-out',
-      once: true,
-      offset: 100,
-    })
-  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -284,10 +273,12 @@ const CareerPage = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
-              <div
+              <motion.div
                 key={index}
-                data-aos="fade-up"
-                data-aos-delay={index * 100}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 text-center"
               >
                 <div className="text-accent-400 mb-6">
@@ -299,7 +290,7 @@ const CareerPage = () => {
                 <p className="text-gray-600 leading-relaxed">
                   {benefit.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -331,10 +322,12 @@ const CareerPage = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <div
+              <motion.div
                 key={index}
-                data-aos="fade-up"
-                data-aos-delay={index * 100}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 className={`${value.color} rounded-2xl p-8 text-center border-2 border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2`}
               >
                 <div className="text-accent-400 mb-6">
@@ -346,7 +339,7 @@ const CareerPage = () => {
                 <p className="text-gray-700 leading-relaxed">
                   {value.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -378,10 +371,12 @@ const CareerPage = () => {
 
           <div className="grid lg:grid-cols-2 gap-8">
             {openPositions.map((position, index) => (
-              <div
+              <motion.div
                 key={index}
-                data-aos="fade-up"
-                data-aos-delay={index * 100}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 className={`${position.color} rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border-2 border-gray-200`}
               >
                 <div className="flex items-start justify-between mb-6">
@@ -441,7 +436,7 @@ const CareerPage = () => {
                 <button className={`w-full ${position.textColor} bg-white hover:opacity-80 font-semibold py-3 px-6 rounded-xl transition-opacity duration-300`}>
                   Apply Now
                 </button>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

@@ -399,7 +399,7 @@ const DoctorAvailability = () => {
               <div className="text-center py-8 text-gray-500">
                 <CalendarIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                 <p>No specific dates added yet</p>
-                <p className="text-sm">Click "Add Date" to set availability for specific dates</p>
+                <p className="text-sm">Click &quot;Add Date&quot; to set availability for specific dates</p>
               </div>
             )}
           </motion.div>

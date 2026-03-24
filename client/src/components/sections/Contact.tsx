@@ -112,7 +112,7 @@ const Contact = () => {
             transition={{ delay: 0.1 }}
             className="text-gray-500 max-w-xl mx-auto text-base sm:text-lg px-1"
           >
-            We're here to help with appointments and questions
+            We&apos;re here to help with appointments and questions
           </motion.p>
         </div>
 
@@ -284,7 +284,7 @@ const Contact = () => {
 
             <div className="mt-8 text-center relative z-10">
               <p className="text-sm text-gray-500 font-medium">
-                We'll get back to you within 24 hours
+                We&apos;ll get back to you within 24 hours
               </p>
             </div>
           </motion.div>

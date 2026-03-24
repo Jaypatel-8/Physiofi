@@ -232,7 +232,7 @@ const About = memo(() => {
             </h3>
             <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed text-sm">
               By serving patients we are building happy families which will contribute in spreading awareness
-              in society & by uplifting society's attitude towards physiotherapy we are opening new windows
+              in society & by uplifting society&apos;s attitude towards physiotherapy we are opening new windows
               for inclusion which will contribute in nation building
             </p>
           </div>

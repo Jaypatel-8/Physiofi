@@ -761,7 +761,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
               transition={{ delay: 0.4 }}
               className="text-lg text-gray-600 mb-2"
             >
-              We'll contact you shortly!
+              We&apos;ll contact you shortly!
             </motion.p>
             <motion.p
               initial={{ opacity: 0 }}
