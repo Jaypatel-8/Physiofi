@@ -1,11 +1,9 @@
 'use client'
 
-import { useEffect, useState, memo } from 'react'
+import { useEffect, useState, memo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/app/providers'
 import { useRouter } from 'next/navigation'
-
-// AOS CSS will be loaded dynamically in useEffect
 
 import Header from '@/components/layout/Header'
 import Hero from '@/components/sections/Hero'
@@ -30,6 +28,7 @@ const FloatingActionButton = dynamic(() => import('@/components/ui/FloatingActio
 const BookingPopup = dynamic(() => import('@/components/ui/BookingPopup'))
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { HOME_CONDITIONS } from '@/data/homeConditions'
 // Tree-shake icon imports - only import what's needed
 import { 
   ArrowRightIcon,
@@ -38,11 +37,12 @@ import {
   HomeIcon,
   SparklesIcon,
   ClockIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline'
 
 // Memoize component to prevent unnecessary re-renders
 const Home = memo(function Home() {
-  const { user, loading } = useAuth()
+  const { user } = useAuth()
   const router = useRouter()
   const [isBookingOpen, setIsBookingOpen] = useState(false)
   const [bookingType, setBookingType] = useState<'home' | 'tele'>('home')
@@ -63,53 +63,6 @@ const Home = memo(function Home() {
   }
 
   useEffect(() => {
-    // Initialize AOS after page load for better performance
-    const initAOS = async () => {
-      try {
-        if (typeof window !== 'undefined' && !document.body.hasAttribute('data-aos-initialized')) {
-          // Check if user prefers reduced motion
-          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          
-          // Only load AOS if user doesn't prefer reduced motion
-          if (!prefersReducedMotion) {
-            // Dynamically import AOS only when needed and after initial render
-            const AOS = (await import('aos')).default
-            AOS.init({
-              duration: 600, // Reduced from 800
-              easing: 'ease-in-out',
-              once: true,
-              offset: 50, // Reduced from 100 for faster triggering
-              delay: 0,
-              disable: false,
-            })
-            document.body.setAttribute('data-aos-initialized', 'true')
-          } else {
-            // Skip AOS for users who prefer reduced motion
-            document.body.setAttribute('data-aos-initialized', 'true')
-          }
-        }
-      } catch (error) {
-        console.warn('AOS initialization failed:', error)
-      }
-    }
-
-    // Initialize AOS after page load with requestIdleCallback for better performance
-    const loadHandler = () => {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(initAOS, { timeout: 2000 })
-      } else {
-        setTimeout(initAOS, 200)
-      }
-    }
-    
-    if (typeof window !== 'undefined') {
-      if (document.readyState === 'complete') {
-        loadHandler()
-      } else {
-        window.addEventListener('load', loadHandler, { once: true })
-      }
-    }
-
     const handleOpenBooking = (e: Event) => {
       const customEvent = e as CustomEvent
       const type = customEvent.detail?.type === 'tele' ? 'tele' : 'home'
@@ -124,24 +77,23 @@ const Home = memo(function Home() {
     return () => {
       if (typeof window !== 'undefined') {
         window.removeEventListener('openBooking', handleOpenBooking)
-        window.removeEventListener('load', loadHandler)
       }
     }
   }, [])
 
-  const handleBookHomeVisit = () => {
+  const handleBookHomeVisit = useCallback(() => {
     setBookingType('home')
     setIsBookingOpen(true)
-  }
+  }, [])
 
-  const handleBookTeleConsultation = () => {
+  const handleBookTeleConsultation = useCallback(() => {
     setBookingType('tele')
     setIsBookingOpen(true)
-  }
+  }, [])
 
-  const handleCloseBooking = () => {
+  const handleCloseBooking = useCallback(() => {
     setIsBookingOpen(false)
-  }
+  }, [])
 
   const conditionCardPalette = [
     { bg: 'bg-primary-50', iconBg: 'bg-primary-100', iconColor: 'text-primary-600' },
@@ -160,6 +112,12 @@ const Home = memo(function Home() {
     { icon: SparklesIcon, title: "Evidence-based advanced therapies", description: "Cutting-edge techniques including cupping, taping, and strength training" },
     { icon: ClockIcon, title: "Affordable and accessible care", description: "Transparent pricing making quality physiotherapy accessible to all" },
   ]
+
+  const [iconLoadErrors, setIconLoadErrors] = useState<Record<string, boolean>>({})
+
+  const handleIconError = (slug: string) => {
+    setIconLoadErrors((prev) => ({ ...prev, [slug]: true }))
+  }
 
   return (
     <main className="min-h-screen overflow-x-hidden">
@@ -236,16 +194,16 @@ const Home = memo(function Home() {
       <Services />
       
       {/* Diseases Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="section-py bg-white">
         <div className="container-custom">
-          <div className="text-center mb-10 sm:mb-14 lg:mb-16">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-14">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               className="inline-block mb-4"
             >
-              <span className="bg-accent-100 text-accent-800 px-5 py-2 rounded-full text-sm font-semibold">
+              <span className="bg-accent-100 text-accent-800 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold">
                 Conditions We Treat
               </span>
             </motion.div>
@@ -254,7 +212,7 @@ const Home = memo(function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 sm:mb-6 font-display leading-tight"
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-3 sm:mb-5 font-display leading-tight"
             >
               <span className="text-primary-500">Expert</span> <span className="text-primary-500">Treatment</span> For
               <span className="block">Various Conditions</span>
@@ -264,34 +222,16 @@ const Home = memo(function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.45, delay: 0.1 }}
-              className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto font-light"
+              className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto font-light px-1"
             >
               Comprehensive physiotherapy care for a wide range of conditions and injuries
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-            {[
-              { name: 'Low Back Pain / Sciatica', href: '/conditions/low-back-pain', color: 'bg-primary-50', iconColor: 'text-primary-600', iconSrc: '/icons/conditions/back-pain-icon.png' },
-              { name: 'Neck Pain / Cervical Spondylosis', href: '/conditions/neck-pain', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600', iconSrc: '/icons/conditions/neck-pain-icon.png' },
-              { name: 'Shoulder Pain', href: '/conditions/shoulder-pain', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600', iconSrc: '/icons/conditions/shoulder-pain-icon.png' },
-              { name: 'Knee Pain', href: '/conditions/knee-pain', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600', iconSrc: '/icons/conditions/knee-pain-icon.png' },
-              { name: 'Sports Injuries', href: '/conditions/sports-injuries', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600', iconSrc: '/icons/conditions/sports-injuries-icon.png' },
-              { name: 'Post-Operative Rehabilitation', href: '/conditions/post-operative', color: 'bg-pastel-sage-50', iconColor: 'text-pastel-sage-600', iconSrc: '/icons/conditions/post-operative-icon.png' },
-              { name: 'Stroke Rehabilitation', href: '/conditions/stroke-rehabilitation', color: 'bg-primary-50', iconColor: 'text-primary-600', iconSrc: '/icons/conditions/stroke-rehabilitation-icon.png' },
-              { name: "Parkinson's Disease", href: '/conditions/parkinsons', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600', iconSrc: '/icons/conditions/parkinsons-icon.png' },
-              { name: 'Spinal Cord Injury', href: '/conditions/spinal-cord-injury', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600', iconSrc: '/icons/conditions/spinal-cord-injury-icon.png' },
-              { name: 'COPD / Asthma / Breathing Issues', href: '/conditions/copd-asthma', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600', iconSrc: '/icons/conditions/copd-asthma-icon.png' },
-              { name: 'Post-COVID Recovery', href: '/conditions/post-covid', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600', iconSrc: '/icons/conditions/post-covid-icon.png' },
-              { name: 'Pediatric Physiotherapy', href: '/conditions/pediatric-developmental', color: 'bg-pastel-sage-50', iconColor: 'text-pastel-sage-600', iconSrc: '/icons/conditions/pediatric-developmental-icon.png' },
-              { name: 'Torticollis (Children)', href: '/conditions/torticollis', color: 'bg-primary-50', iconColor: 'text-primary-600', iconSrc: '/icons/conditions/torticollis-icon.png' },
-              { name: 'Balance Problems (Geriatric)', href: '/conditions/balance-problems', color: 'bg-pastel-blue-50', iconColor: 'text-pastel-blue-600', iconSrc: '/icons/conditions/balance-problems-icon.png' },
-              { name: 'Osteoporosis', href: '/conditions/osteoporosis', color: 'bg-pastel-mint-50', iconColor: 'text-pastel-mint-600', iconSrc: '/icons/conditions/osteoporosis-icon.png' },
-              { name: 'Pregnancy-Related Pain', href: '/conditions/pregnancy-pain', color: 'bg-pastel-lavender-50', iconColor: 'text-pastel-lavender-600', iconSrc: '/icons/conditions/pregnancy-pain-icon.png' },
-              { name: 'Urinary Incontinence', href: '/conditions/urinary-incontinence', color: 'bg-pastel-peach-50', iconColor: 'text-pastel-peach-600', iconSrc: '/icons/conditions/urinary-incontinence-icon.png' },
-            ].map((condition, index) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+            {HOME_CONDITIONS.map((condition, index) => (
               <motion.div
-                key={index}
+                key={condition.slug}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
@@ -300,18 +240,28 @@ const Home = memo(function Home() {
               >
                 <Link
                   href={condition.href}
-                  className={`${condition.color} rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 group block`}
+                  className={`${condition.color} card-hover-premium rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-md transition-all duration-300 group block`}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4">
                     <div className="flex-grow">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">{condition.name}</h3>
-                      <p className="text-sm text-gray-600 flex items-center gap-2">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2 leading-snug">{condition.name}</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 flex items-center gap-1.5">
                         Learn More
                         <ArrowRightIcon className="h-4 w-4" />
                       </p>
                     </div>
-                    <div className={`w-12 h-12 ${condition.color.replace('-50', '-100')} rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:scale-110 transition-transform duration-300 ${condition.iconColor}`}>
-                      <img src={condition.iconSrc} alt={condition.name} className="h-7 w-7 object-contain" />
+                    <div className={`w-10 h-10 sm:w-11 sm:h-11 ${condition.color.replace('-50', '-100')} rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:scale-110 transition-transform duration-300 ${condition.iconColor}`}>
+                      {iconLoadErrors[condition.slug] ? (
+                        <CheckCircleIcon className={`h-6 w-6 ${condition.iconColor}`} />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={condition.iconSrc}
+                          alt={condition.name}
+                          className="h-6 w-6 object-contain"
+                          onError={() => handleIconError(condition.slug)}
+                        />
+                      )}
                     </div>
                   </div>
                 </Link>
