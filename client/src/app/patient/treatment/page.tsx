@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -26,6 +26,21 @@ const PatientTreatment = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'Active' | 'Completed' | 'Paused'>('all')
 
+  const loadTreatmentPlans = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const params = filter !== 'all' ? { status: filter } : {}
+      const response = await patientAPI.getTreatmentPlans(params)
+      if (response.data.success) {
+        setTreatmentPlans(response.data.data.treatmentPlans || [])
+      }
+    } catch (error) {
+      console.error('Error loading treatment plans:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [filter])
+
   useEffect(() => {
     if (!loading) {
       if (!user) {
@@ -41,22 +56,7 @@ const PatientTreatment = () => {
         loadTreatmentPlans()
       }
     }
-  }, [user, loading, filter])
-
-  const loadTreatmentPlans = async () => {
-    try {
-      setIsLoading(true)
-      const params = filter !== 'all' ? { status: filter } : {}
-      const response = await patientAPI.getTreatmentPlans(params)
-      if (response.data.success) {
-        setTreatmentPlans(response.data.data.treatmentPlans || [])
-      }
-    } catch (error) {
-      console.error('Error loading treatment plans:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [user, loading, loadTreatmentPlans])
 
   if (loading || isLoading) {
     return (

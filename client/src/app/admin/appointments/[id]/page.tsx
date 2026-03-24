@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -30,17 +30,7 @@ const AdminAppointmentDetail = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [sendingReminder, setSendingReminder] = useState(false)
 
-  useEffect(() => {
-    if (!loading) {
-      if (!user || user.role !== 'admin') {
-        router.replace('/admin/login')
-        return
-      }
-      loadAppointment()
-    }
-  }, [user, loading, appointmentId, router])
-
-  const loadAppointment = async () => {
+  const loadAppointment = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await adminAPI.getAppointment(appointmentId)
@@ -57,7 +47,17 @@ const AdminAppointmentDetail = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [appointmentId, router])
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user || user.role !== 'admin') {
+        router.replace('/admin/login')
+        return
+      }
+      loadAppointment()
+    }
+  }, [user, loading, router, loadAppointment])
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {

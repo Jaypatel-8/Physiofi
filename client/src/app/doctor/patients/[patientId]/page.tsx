@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -65,21 +65,7 @@ const PatientDetail = () => {
     medications: [] as any[]
   })
 
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
-        return
-      }
-      if (user.role !== 'doctor') {
-        window.location.href = '/'
-        return
-      }
-      loadPatient()
-    }
-  }, [user, loading, patientId])
-
-  const loadPatient = async () => {
+  const loadPatient = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await doctorAPI.getPatient(patientId)
@@ -93,7 +79,21 @@ const PatientDetail = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [patientId])
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        window.location.href = '/login'
+        return
+      }
+      if (user.role !== 'doctor') {
+        window.location.href = '/'
+        return
+      }
+      loadPatient()
+    }
+  }, [user, loading, loadPatient])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target

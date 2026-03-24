@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -29,21 +29,7 @@ export default function PatientTreatmentDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
-        return
-      }
-      if (user.role !== 'patient') {
-        window.location.href = '/'
-        return
-      }
-      if (id) loadPlan()
-    }
-  }, [user, loading, id])
-
-  const loadPlan = async () => {
+  const loadPlan = useCallback(async () => {
     try {
       setIsLoading(true)
       setError('')
@@ -58,7 +44,21 @@ export default function PatientTreatmentDetailPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [id])
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        window.location.href = '/login'
+        return
+      }
+      if (user.role !== 'patient') {
+        window.location.href = '/'
+        return
+      }
+      if (id) loadPlan()
+    }
+  }, [user, loading, id, loadPlan])
 
   if (loading || isLoading) {
     return (

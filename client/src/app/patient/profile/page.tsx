@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { UserCircleIcon, PencilIcon } from '@heroicons/react/24/outline'
@@ -8,6 +8,22 @@ import { useAuth } from '@/app/providers'
 import { patientAPI } from '@/lib/api'
 import DashboardSubPageHeader from '@/components/dashboard/DashboardSubPageHeader'
 import toast from 'react-hot-toast'
+
+function formatProfileAddress(address: any): string {
+  if (!address) return 'N/A'
+  if (typeof address === 'string') return address
+  if (typeof address === 'object') {
+    const parts = [
+      address.street,
+      address.city,
+      address.state,
+      address.pincode,
+      address.country
+    ].filter(Boolean)
+    return parts.length > 0 ? parts.join(', ') : 'N/A'
+  }
+  return 'N/A'
+}
 
 const PatientProfile = () => {
   const router = useRouter()
@@ -24,34 +40,7 @@ const PatientProfile = () => {
   })
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        window.location.href = '/login'
-        return
-      }
-      loadProfile()
-    }
-  }, [user, loading])
-
-  // Helper function to format address (string or object)
-  const formatAddress = (address: any): string => {
-    if (!address) return 'N/A'
-    if (typeof address === 'string') return address
-    if (typeof address === 'object') {
-      const parts = [
-        address.street,
-        address.city,
-        address.state,
-        address.pincode,
-        address.country
-      ].filter(Boolean)
-      return parts.length > 0 ? parts.join(', ') : 'N/A'
-    }
-    return 'N/A'
-  }
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await patientAPI.getProfile()
@@ -60,7 +49,7 @@ const PatientProfile = () => {
         setProfile(data)
         
         // Handle address - could be string or object
-        const addressString = formatAddress(data.address)
+        const addressString = formatProfileAddress(data.address)
         
         setFormData({
           name: data.name || '',
@@ -76,7 +65,17 @@ const PatientProfile = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        window.location.href = '/login'
+        return
+      }
+      loadProfile()
+    }
+  }, [user, loading, loadProfile])
 
   const handleSave = async () => {
     try {
@@ -213,7 +212,7 @@ const PatientProfile = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg">{formatAddress(profile?.address)}</p>
+                <p className="px-4 py-3 bg-gray-50 rounded-lg">{formatProfileAddress(profile?.address)}</p>
               )}
             </div>
           </div>

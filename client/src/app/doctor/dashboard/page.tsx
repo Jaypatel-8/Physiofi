@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -56,6 +56,51 @@ const DoctorDashboard = () => {
     } catch { /* ignore */ }
   }, [user])
   const doctorStatus = (user as { status?: string } | null)?.status ?? cachedStatus
+
+  const loadDashboardData = useCallback(async () => {
+    // Prevent duplicate calls using ref
+    if (loadingRef.current) return
+    loadingRef.current = true
+    
+    try {
+      setIsLoading(true)
+      
+      const [statsRes, appointmentsRes, patientsRes, notificationsRes] = await Promise.all([
+        doctorAPI.getStats().catch(() => ({ data: { success: false } })),
+        doctorAPI.getAppointments({ limit: 10, sort: 'date' }).catch(() => ({ data: { success: false } })),
+        doctorAPI.getPatients({ limit: 5 }).catch(() => ({ data: { success: false } })),
+        doctorAPI.getNotifications({ limit: 5 }).catch(() => ({ data: { success: false } }))
+      ])
+
+      if (statsRes.data.success) {
+        setStats((prev) => statsRes.data.data.stats || statsRes.data.data || prev)
+      }
+
+      if (appointmentsRes.data.success) {
+        const allAppointments = appointmentsRes.data.data.appointments || appointmentsRes.data.data || []
+        setRecentAppointments(allAppointments)
+        const todayList = allAppointments.filter((apt: any) => {
+          const aptDate = new Date(apt.appointmentDate).toISOString().split('T')[0]
+          return aptDate === new Date().toISOString().split('T')[0]
+        })
+        setTodayAppointments(todayList)
+      }
+
+      if (patientsRes.data.success) {
+        setRecentPatients(patientsRes.data.data.patients || patientsRes.data.data || [])
+      }
+
+      if (notificationsRes.data.success) {
+        setNotifications((prev) => notificationsRes.data.data.notifications || notificationsRes.data.data || prev)
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error)
+      toast.error('Failed to load dashboard data')
+    } finally {
+      setIsLoading(false)
+      loadingRef.current = false
+    }
+  }, [])
 
   useEffect(() => {
     // Wait for auth context to initialize first
@@ -114,53 +159,7 @@ const DoctorDashboard = () => {
     return () => {
       mounted = false
     }
-  }, [user, loading, router])
-
-  const loadDashboardData = async () => {
-    // Prevent duplicate calls using ref
-    if (loadingRef.current) return
-    loadingRef.current = true
-    
-    try {
-      setIsLoading(true)
-      const today = new Date().toISOString().split('T')[0]
-      
-      const [statsRes, appointmentsRes, patientsRes, notificationsRes] = await Promise.all([
-        doctorAPI.getStats().catch(() => ({ data: { success: false } })),
-        doctorAPI.getAppointments({ limit: 10, sort: 'date' }).catch(() => ({ data: { success: false } })),
-        doctorAPI.getPatients({ limit: 5 }).catch(() => ({ data: { success: false } })),
-        doctorAPI.getNotifications({ limit: 5 }).catch(() => ({ data: { success: false } }))
-      ])
-
-      if (statsRes.data.success) {
-        setStats(statsRes.data.data.stats || statsRes.data.data || stats)
-      }
-
-      if (appointmentsRes.data.success) {
-        const allAppointments = appointmentsRes.data.data.appointments || appointmentsRes.data.data || []
-        setRecentAppointments(allAppointments)
-        const today = allAppointments.filter((apt: any) => {
-          const aptDate = new Date(apt.appointmentDate).toISOString().split('T')[0]
-          return aptDate === new Date().toISOString().split('T')[0]
-        })
-        setTodayAppointments(today)
-      }
-
-      if (patientsRes.data.success) {
-        setRecentPatients(patientsRes.data.data.patients || patientsRes.data.data || [])
-      }
-
-      if (notificationsRes.data.success) {
-        setNotifications(notificationsRes.data.data.notifications || notificationsRes.data.data || [])
-      }
-    } catch (error) {
-      console.error('Error loading dashboard data:', error)
-      toast.error('Failed to load dashboard data')
-    } finally {
-      setIsLoading(false)
-      loadingRef.current = false
-    }
-  }
+  }, [user, loading, router, loadDashboardData])
 
   if (loading || isLoading) {
     return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { AuthContextType, User } from '@/types/auth'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import NotificationContainer from '@/components/ui/NotificationContainer'
@@ -16,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false)
 
   // Logout function - defined early to avoid circular dependency
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null)
     setToken(null)
     if (typeof window !== 'undefined') {
@@ -25,10 +25,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setIsInitialized(false)
     setLoading(true)
-  }
+  }, [])
 
   // Validate token with server
-  const validateToken = async (authToken: string) => {
+  const validateToken = useCallback(async (authToken: string) => {
     try {
       const response = await authAPI.getCurrentUser()
       if (response.data.success && response.data.data) {
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return false
     }
-  }
+  }, [logout])
 
   useEffect(() => {
     // Only run once on mount
@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     initializeAuth()
-  }, [isInitialized])
+  }, [isInitialized, validateToken, logout])
 
   // Removed aggressive token validation on visibility/focus changes
   // This was causing users to be logged out automatically

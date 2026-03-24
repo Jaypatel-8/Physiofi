@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { BellIcon, CheckIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '@/app/providers'
@@ -16,15 +16,15 @@ export default function NotificationBell() {
   const [loading, setLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const getAPI = () => {
+  const getAPI = useCallback(() => {
     if (!user?.role) return null
     if (user.role === 'patient') return patientAPI
     if (user.role === 'doctor') return doctorAPI
     if (user.role === 'admin') return adminAPI
     return null
-  }
+  }, [user?.role])
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const api = getAPI()
     if (!api) return
     try {
@@ -44,18 +44,18 @@ export default function NotificationBell() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [getAPI])
 
   useEffect(() => {
     if (!user?.role) return
     fetchData()
     const t = setInterval(fetchData, 60000)
     return () => clearInterval(t)
-  }, [user?.role])
+  }, [user?.role, fetchData])
 
   useEffect(() => {
     if (open) fetchData()
-  }, [open])
+  }, [open, fetchData])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { XMarkIcon, CheckCircleIcon, QuestionMarkCircleIcon, SparklesIcon, HomeIcon, VideoCameraIcon, CalendarIcon, ClockIcon, CurrencyDollarIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { 
@@ -51,29 +51,7 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
   const [isLoadingConditions, setIsLoadingConditions] = useState(false)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
-  useEffect(() => {
-    if (isOpen) {
-      setFormData(prev => ({ ...prev, serviceType: defaultServiceType }))
-      setShowSuccess(false)
-      setShowHelper(false)
-      setIsCalendarOpen(false)
-      setAvailableTimeSlots([])
-      setFormData(prev => ({ ...prev, appointmentTime: '' }))
-      loadDoctors()
-    }
-  }, [isOpen, defaultServiceType])
-
-  // Fetch availability slots when doctor, date, and service type are selected
-  useEffect(() => {
-    if (formData.doctorId && formData.appointmentDate && formData.serviceType) {
-      loadAvailabilitySlots()
-    } else {
-      setAvailableTimeSlots([])
-      setFormData(prev => ({ ...prev, appointmentTime: '' }))
-    }
-  }, [formData.doctorId, formData.appointmentDate, formData.serviceType])
-
-  const loadDoctors = async () => {
+  const loadDoctors = useCallback(async () => {
     try {
       setIsLoadingDoctors(true)
       const response = await doctorAPI.getAllDoctors({ status: 'Active', limit: 50 })
@@ -87,7 +65,68 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
     } finally {
       setIsLoadingDoctors(false)
     }
-  }
+  }, [])
+
+  const loadAvailabilitySlots = useCallback(async () => {
+    const doctorId = formData.doctorId
+    const appointmentDate = formData.appointmentDate
+    const serviceType = formData.serviceType
+    const appointmentTime = formData.appointmentTime
+    if (!doctorId || !appointmentDate || !serviceType) {
+      return
+    }
+
+    try {
+      setIsLoadingSlots(true)
+      const response = await doctorAPI.getAvailabilitySlots(
+        doctorId,
+        appointmentDate,
+        serviceType
+      )
+      
+      if (response.data.success) {
+        const slots = response.data.data.availableSlots || []
+        setAvailableTimeSlots(slots)
+        
+        // Clear selected time if it's no longer available
+        if (appointmentTime && !slots.includes(appointmentTime)) {
+          setFormData(prev => ({ ...prev, appointmentTime: '' }))
+        }
+      } else {
+        setAvailableTimeSlots([])
+      }
+    } catch (error: any) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading availability slots:', error)
+      }
+      setAvailableTimeSlots([])
+      // Don't show error toast - just show no slots available
+    } finally {
+      setIsLoadingSlots(false)
+    }
+  }, [formData.doctorId, formData.appointmentDate, formData.serviceType, formData.appointmentTime])
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({ ...prev, serviceType: defaultServiceType }))
+      setShowSuccess(false)
+      setShowHelper(false)
+      setIsCalendarOpen(false)
+      setAvailableTimeSlots([])
+      setFormData(prev => ({ ...prev, appointmentTime: '' }))
+      loadDoctors()
+    }
+  }, [isOpen, defaultServiceType, loadDoctors])
+
+  // Fetch availability slots when doctor, date, and service type are selected
+  useEffect(() => {
+    if (formData.doctorId && formData.appointmentDate && formData.serviceType) {
+      loadAvailabilitySlots()
+    } else {
+      setAvailableTimeSlots([])
+      setFormData(prev => ({ ...prev, appointmentTime: '' }))
+    }
+  }, [formData.doctorId, formData.appointmentDate, formData.serviceType, loadAvailabilitySlots])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -117,41 +156,6 @@ const BookingPopup = ({ isOpen, onClose, defaultServiceType = 'home', onBookingS
       }
     } finally {
       setIsLoadingConditions(false)
-    }
-  }
-
-  const loadAvailabilitySlots = async () => {
-    if (!formData.doctorId || !formData.appointmentDate || !formData.serviceType) {
-      return
-    }
-
-    try {
-      setIsLoadingSlots(true)
-      const response = await doctorAPI.getAvailabilitySlots(
-        formData.doctorId,
-        formData.appointmentDate,
-        formData.serviceType
-      )
-      
-      if (response.data.success) {
-        const slots = response.data.data.availableSlots || []
-        setAvailableTimeSlots(slots)
-        
-        // Clear selected time if it's no longer available
-        if (formData.appointmentTime && !slots.includes(formData.appointmentTime)) {
-          setFormData(prev => ({ ...prev, appointmentTime: '' }))
-        }
-      } else {
-        setAvailableTimeSlots([])
-      }
-    } catch (error: any) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error loading availability slots:', error)
-      }
-      setAvailableTimeSlots([])
-      // Don't show error toast - just show no slots available
-    } finally {
-      setIsLoadingSlots(false)
     }
   }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { CalendarDaysIcon } from '@heroicons/react/24/outline'
@@ -17,17 +17,7 @@ const AdminAppointments = () => {
   const [appointments, setAppointments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    if (!loading) {
-      if (!user || user.role !== 'admin') {
-        router.replace('/admin/login')
-        return
-      }
-      loadAppointments()
-    }
-  }, [user, loading, filter, router])
-
-  const loadAppointments = async () => {
+  const loadAppointments = useCallback(async () => {
     try {
       setIsLoading(true)
       const params: any = { limit: 100, sort: 'date' }
@@ -46,7 +36,17 @@ const AdminAppointments = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [filter])
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user || user.role !== 'admin') {
+        router.replace('/admin/login')
+        return
+      }
+      loadAppointments()
+    }
+  }, [user, loading, router, loadAppointments])
 
   if (loading || isLoading) {
     return (

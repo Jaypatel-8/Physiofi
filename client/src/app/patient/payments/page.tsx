@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -36,21 +36,7 @@ const PaymentsPage = () => {
   const [payTxnId, setPayTxnId] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (!loading) {
-      if (!user || user.role !== 'patient') {
-        router.replace('/login')
-        return
-      }
-      loadData()
-    }
-  }, [user, loading, router])
-
-  const loadData = async () => {
-    await Promise.all([loadPayments(), loadAppointments()])
-  }
-
-  const loadAppointments = async () => {
+  const loadAppointments = useCallback(async () => {
     try {
       const res = await patientAPI.getAppointments()
       if (res.data.success) {
@@ -60,9 +46,9 @@ const PaymentsPage = () => {
     } catch (e) {
       console.error('Load appointments error:', e)
     }
-  }
+  }, [])
 
-  const loadPayments = async () => {
+  const loadPayments = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await patientAPI.getMyPayments()
@@ -82,7 +68,21 @@ const PaymentsPage = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  const loadData = useCallback(async () => {
+    await Promise.all([loadPayments(), loadAppointments()])
+  }, [loadPayments, loadAppointments])
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user || user.role !== 'patient') {
+        router.replace('/login')
+        return
+      }
+      loadData()
+    }
+  }, [user, loading, router, loadData])
 
   const getStatusIcon = (status: string) => {
     switch (status) {

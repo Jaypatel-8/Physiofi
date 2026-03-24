@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -38,20 +38,7 @@ const DoctorAppointmentDetail = () => {
     reason: ''
   })
 
-  useEffect(() => {
-    if (!loading && user) {
-      if (user.role !== 'doctor') {
-        window.location.href = '/'
-        return
-      }
-      loadAppointment()
-    } else if (!loading && !user) {
-      window.location.href = '/login'
-    }
-  }, [user, loading, appointmentId])
-
-  const loadAppointment = async () => {
-    if (isLoading) return // Prevent multiple loads
+  const loadAppointment = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await doctorAPI.getAppointment(appointmentId)
@@ -68,7 +55,19 @@ const DoctorAppointmentDetail = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [appointmentId, router])
+
+  useEffect(() => {
+    if (!loading && user) {
+      if (user.role !== 'doctor') {
+        window.location.href = '/'
+        return
+      }
+      loadAppointment()
+    } else if (!loading && !user) {
+      window.location.href = '/login'
+    }
+  }, [user, loading, loadAppointment])
 
   const handleStatusUpdate = async (status: string) => {
     try {
